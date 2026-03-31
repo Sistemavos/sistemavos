@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SistemaVOS — Gestión para tu negocio argentino</title>
+<meta name="description" content="El sistema de gestión más accesible de Argentina. Facturación electrónica AFIP, inventario, ventas, clientes. 14 días gratis.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--primary:#6C3AE1;--primary-light:#8B5CF6;--primary-dark:#5521C4;--accent:#F43F5E;--accent2:#06B6D4;--dark:#0F172A;--gray:#64748B;--light:#F8FAFC;--card:#FFFFFF;--gradient:linear-gradient(135deg,#6C3AE1,#06B6D4);--gradient2:linear-gradient(135deg,#F43F5E,#FB923C);--radius:16px;--shadow:0 4px 32px rgba(15,23,42,.08)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;color:var(--dark);overflow-x:hidden;background:#fff}
+a{text-decoration:none;color:inherit}
+img{max-width:100%}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 0;transition:.3s}
+.nav.scrolled{background:rgba(255,255,255,.95);backdrop-filter:blur(12px);box-shadow:0 2px 20px rgba(0,0,0,.06);padding:10px 0}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:24px;font-weight:800;display:flex;align-items:center;gap:10px}
+.nav-logo .icon{width:38px;height:38px;background:var(--gradient);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:900}
+.nav-logo span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{font-size:14px;font-weight:500;color:var(--gray);transition:.2s}
+.nav-links a:hover{color:var(--primary)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:.2s}
+.btn-primary{background:var(--gradient);color:#fff;box-shadow:0 4px 15px rgba(108,58,225,.25)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(108,58,225,.35)}
+.btn-outline{border:2px solid #E2E8F0;color:var(--dark);background:#fff}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-lg{padding:16px 36px;font-size:16px;border-radius:14px}
+.btn-white{background:#fff;color:var(--primary);font-weight:700}
+.btn-accent{background:var(--gradient2);color:#fff;box-shadow:0 4px 15px rgba(244,63,94,.25)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;background:linear-gradient(160deg,#F8FAFC 0%,#EDE9FE 50%,#CFFAFE 100%)}
+.hero::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:rgba(108,58,225,.06);top:-100px;right:-100px}
+.hero::after{content:'';position:absolute;width:350px;height:350px;border-radius:50%;background:rgba(6,182,212,.06);bottom:-50px;left:-50px}
+.hero-inner{max-width:1200px;margin:0 auto;padding:120px 24px 80px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:2}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E2E8F0;padding:6px 16px 6px 8px;border-radius:50px;font-size:13px;font-weight:500;color:var(--gray);margin-bottom:20px}
+.hero-badge .dot{width:8px;height:8px;background:#10B981;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:52px;font-weight:900;line-height:1.1;margin-bottom:20px;letter-spacing:-.02em}
+.hero h1 .highlight{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:18px;color:var(--gray);line-height:1.7;margin-bottom:32px;max-width:500px}
+.hero-buttons{display:flex;gap:16px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:40px;margin-top:40px}
+.hero-stat h4{font-size:28px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-stat p{font-size:13px;color:var(--gray)}
+.hero-visual{position:relative}
+.hero-mockup{width:100%;border-radius:20px;box-shadow:0 40px 80px rgba(15,23,42,.12);border:1px solid #E2E8F0;background:#fff;overflow:hidden}
+.hero-mockup-header{background:var(--dark);padding:12px 20px;display:flex;align-items:center;gap:8px}
+.hero-mockup-header span{width:10px;height:10px;border-radius:50%}
+.hero-mockup-body{padding:24px;background:linear-gradient(135deg,#F8FAFC,#EDE9FE);min-height:320px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mock-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.mock-card h5{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.mock-card .value{font-size:24px;font-weight:800}
+.mock-chart{grid-column:span 2;background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);height:120px;display:flex;align-items:end;gap:6px;padding-bottom:16px}
+.mock-bar{flex:1;border-radius:6px 6px 0 0;background:var(--gradient);transition:.3s}
+.float-badge{position:absolute;background:#fff;border-radius:12px;padding:12px 18px;box-shadow:0 8px 30px rgba(0,0,0,.1);display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600}
+.float-badge.pos1{top:20px;right:-30px;animation:float 3s ease-in-out infinite}
+.float-badge.pos2{bottom:40px;left:-20px;animation:float 3s ease-in-out infinite .5s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* SECTIONS */
+.section{padding:100px 0}.section-inner{max-width:1200px;margin:0 auto;padding:0 24px}
+.section-header{text-align:center;max-width:700px;margin:0 auto 60px}
+.section-header .tag{display:inline-block;background:linear-gradient(135deg,rgba(108,58,225,.08),rgba(6,182,212,.08));color:var(--primary);font-size:13px;font-weight:700;padding:6px 18px;border-radius:50px;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
+.section-header h2{font-size:40px;font-weight:800;margin-bottom:16px;letter-spacing:-.01em}
+.section-header p{font-size:17px;color:var(--gray);line-height:1.7}
+.bg-light{background:var(--light)}
+
+/* RUBROS */
+.rubros-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.rubro-card{background:var(--card);border:2px solid #F1F5F9;border-radius:var(--radius);padding:32px 24px;text-align:center;transition:.25s;cursor:pointer;position:relative;overflow:hidden}
+.rubro-card:hover{border-color:var(--primary);transform:translateY(-4px);box-shadow:0 12px 40px rgba(108,58,225,.1)}
+.rubro-card .rubro-icon{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px}
+.rubro-card h4{font-size:16px;font-weight:700;margin-bottom:6px}
+.rubro-card p{font-size:13px;color:var(--gray);line-height:1.5}
+.ri-purple{background:rgba(108,58,225,.08);color:var(--primary)}
+.ri-red{background:rgba(244,63,94,.08);color:var(--accent)}
+.ri-cyan{background:rgba(6,182,212,.08);color:var(--accent2)}
+.ri-amber{background:rgba(245,158,11,.08);color:#D97706}
+.ri-green{background:rgba(16,185,129,.08);color:#059669}
+.ri-blue{background:rgba(59,130,246,.08);color:#2563EB}
+.ri-pink{background:rgba(236,72,153,.08);color:#DB2777}
+.ri-slate{background:rgba(100,116,139,.08);color:var(--gray)}
+
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.feature-card{background:var(--card);border-radius:var(--radius);padding:32px;border:1px solid #F1F5F9;transition:.2s}
+.feature-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+.feature-card .f-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+.feature-card h4{font-size:16px;font-weight:700;margin-bottom:8px}
+.feature-card p{font-size:14px;color:var(--gray);line-height:1.6}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:start}
+.price-card{background:var(--card);border-radius:20px;padding:40px 32px;border:2px solid #F1F5F9;position:relative;transition:.2s}
+.price-card:hover{box-shadow:0 20px 60px rgba(15,23,42,.08)}
+.price-card.popular{border-color:var(--primary);box-shadow:0 20px 60px rgba(108,58,225,.12)}
+.price-card.popular::before{content:'Más elegido';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--gradient);color:#fff;font-size:12px;font-weight:700;padding:5px 18px;border-radius:50px}
+.price-card .plan-name{font-size:14px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.price-card .price{font-size:42px;font-weight:900;margin-bottom:4px}
+.price-card .price span{font-size:16px;font-weight:500;color:var(--gray)}
+.price-card .price-sub{font-size:13px;color:var(--gray);margin-bottom:24px}
+.price-card ul{list-style:none;margin-bottom:32px}
+.price-card li{padding:8px 0;font-size:14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #F8FAFC}
+.price-card li i{color:#10B981;font-size:14px;width:20px}
+.price-card li.disabled{color:#CBD5E1}
+.price-card li.disabled i{color:#CBD5E1}
+.price-card .btn{width:100%}
+
+/* AFIP SECTION */
+.afip-section{background:var(--dark);color:#fff;border-radius:24px;padding:60px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.afip-section h3{font-size:32px;font-weight:800;margin-bottom:16px}
+.afip-section p{color:rgba(255,255,255,.7);font-size:15px;line-height:1.7;margin-bottom:24px}
+.afip-features{display:flex;flex-direction:column;gap:16px}
+.afip-feat{display:flex;align-items:start;gap:14px}
+.afip-feat .af-icon{width:40px;height:40px;border-radius:10px;background:rgba(108,58,225,.2);display:flex;align-items:center;justify-content:center;color:var(--primary-light);flex-shrink:0}
+.afip-feat h5{font-size:14px;font-weight:600;margin-bottom:2px}
+.afip-feat p{font-size:13px;color:rgba(255,255,255,.5);margin:0}
+
+/* CTA */
+.cta-section{background:var(--gradient);border-radius:24px;padding:80px 60px;text-align:center;color:#fff;position:relative;overflow:hidden}
+.cta-section::before{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,.05);top:-200px;right:-100px}
+.cta-section h2{font-size:36px;font-weight:800;margin-bottom:16px}
+.cta-section p{font-size:17px;opacity:.85;margin-bottom:36px;max-width:550px;margin-left:auto;margin-right:auto}
+
+/* FOOTER */
+.footer{background:var(--dark);color:rgba(255,255,255,.6);padding:60px 0 30px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer h5{color:#fff;font-size:14px;font-weight:700;margin-bottom:16px}
+.footer p,.footer a{font-size:13px;line-height:2}
+.footer a:hover{color:#fff}
+.footer-brand{font-size:20px;font-weight:800;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:24px;text-align:center;font-size:12px}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.hero-inner{grid-template-columns:1fr;text-align:center}.hero p{margin:0 auto 32px}.hero-buttons,.hero-stats{justify-content:center}.hero-visual{max-width:600px;margin:0 auto}.rubros-grid{grid-template-columns:repeat(2,1fr)}.features-grid{grid-template-columns:repeat(2,1fr)}.pricing-grid{grid-template-columns:1fr;max-width:420px;margin:0 auto}.afip-section{grid-template-columns:1fr}.footer-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.hero h1{font-size:34px}.section-header h2{font-size:28px}.rubros-grid{grid-template-columns:1fr 1fr}.features-grid{grid-template-columns:1fr}.nav-links{display:none}.afip-section{padding:40px 24px}.cta-section{padding:48px 24px}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo"><div class="icon">V</div><span>SistemaVOS</span></a>
+    <div class="nav-links">
+      <a href="#rubros">Rubros</a>
+      <a href="#funciones">Funciones</a>
+      <a href="#precios">Precios</a>
+      <a href="#facturacion">Facturación</a>
+      <a href="app.html" class="btn btn-primary">Probar Gratis</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge"><span class="dot"></span> Hecho en Argentina para negocios argentinos</div>
+      <h1>Tu negocio merece un sistema que <span class="highlight">hable tu idioma</span></h1>
+      <p>Gestión completa para cualquier rubro. Facturación electrónica AFIP, MercadoPago, inventario, clientes y más. <strong>14 días gratis</strong>, sin tarjeta.</p>
+      <div class="hero-buttons">
+        <a href="app.html" class="btn btn-primary btn-lg"><i class="fas fa-rocket"></i> Empezar Gratis</a>
+        <a href="#rubros" class="btn btn-outline btn-lg"><i class="fas fa-play"></i> Ver demo</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><h4>8+</h4><p>Rubros disponibles</p></div>
+        <div class="hero-stat"><h4>100%</h4><p>AFIP integrado</p></div>
+        <div class="hero-stat"><h4>$0</h4><p>Para arrancar</p></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-mockup">
+        <div class="hero-mockup-header"><span style="background:#EF4444"></span><span style="background:#F59E0B"></span><span style="background:#10B981"></span></div>
+        <div class="hero-mockup-body">
+          <div class="mock-card"><h5>Ventas hoy</h5><div class="value" style="color:var(--primary)">$284.500</div></div>
+          <div class="mock-card"><h5>Clientes activos</h5><div class="value" style="color:#059669">1.247</div></div>
+          <div class="mock-chart" id="mock-chart"></div>
+        </div>
+      </div>
+      <div class="float-badge pos1"><i class="fas fa-check-circle" style="color:#10B981;font-size:18px"></i> Factura emitida AFIP</div>
+      <div class="float-badge pos2"><i class="fab fa-whatsapp" style="color:#25D366;font-size:18px"></i> Comprobante enviado</div>
+    </div>
+  </div>
+</section>
+
+<!-- RUBROS -->
+<section class="section bg-light" id="rubros">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="tag">Rubros</div>
+      <h2>Un sistema, tu rubro</h2>
+      <p>Elegí tu industria y el sistema se configura solo. Categorías, terminología, campos y flujos adaptados a lo que hacés.</p>
+    </div>
+    <div class="rubros-grid">
+      <div class="rubro-card"><div class="rubro-icon ri-purple"><i class="fas fa-shirt"></i></div><h4>Indumentaria & Retail</h4><p>Talles, colores, temporadas, devoluciones, proveedores textiles</p></div>
+      <div class="rubro-card"><div class="rubro-icon ri-red"><i class="fas fa-heartbeat"></i></div><h4>Medicina & Salud</h4><p>Pacientes, turnos, historia clínica, obras sociales, recetas</p></div>
+      <div class="rubro-card"><div class="rubro-icon ri-cyan"><i class="fas fa-wrench"></i></div><h4>Talleres & Automotriz</h4><p>Vehículos, órdenes de trabajo, repuestos, seguimiento</p></div>
+      <div class="rubro-card"><div class="rubro-icon ri-amber"><i class="fas fa-utensils"></i></div><h4>Gastronomía</h4><p>Mesas, pedidos, menú digital, delivery, costos por plato</p></div>
+      <div class="rubro-card"><div class="rubro-icon ri-pink"><i class="fas fa-spa"></i></div><h4>Belleza & Estética</h4><p>Turnos, servicios, productos, ficha de clientes, promos</p></div>
+      <div class="rubro-card"><div class="rubro-icon ri-green"><i class="fas fa-store"></i></div><h4>Kioscos & Almacenes</h4><p>Stock por código de barras, proveedores, caja rápida</p></div>
+      <div class="rubro-card"><div class="rubro-icon ri-blue"><i class="fas fa-car-side"></i></div><h4>Lavaderos de Autos</h4><p>Turnos, servicios por tipo, abonos, fidelización</p></div>
+      <div class="rubro-card"><div class="rubro-icon ri-slate"><i class="fas fa-building"></i></div><h4>Inmobiliarias</h4><p>Propiedades, contratos, inquilinos, cobros, vencimientos</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FUNCIONES -->
+<section class="section" id="funciones">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="tag">Funciones</div>
+      <h2>Todo lo que necesitás, nada que sobre</h2>
+      <p>Cada módulo pensado para PyMEs argentinas. Simple de usar, potente de verdad.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="f-icon ri-purple"><i class="fas fa-file-invoice-dollar"></i></div><h4>Factura Electrónica AFIP</h4><p>Facturas A, B y C válidas. Conexión directa con AFIP. Notas de crédito y débito.</p></div>
+      <div class="feature-card"><div class="f-icon ri-green"><i class="fas fa-boxes-stacked"></i></div><h4>Inventario Inteligente</h4><p>Stock en tiempo real, alertas automáticas, códigos de barras, múltiples depósitos.</p></div>
+      <div class="feature-card"><div class="f-icon ri-cyan"><i class="fas fa-shopping-cart"></i></div><h4>Punto de Venta</h4><p>Carrito rápido, múltiples medios de pago, descuentos, cierre de caja automático.</p></div>
+      <div class="feature-card"><div class="f-icon ri-amber"><i class="fas fa-users"></i></div><h4>Clientes & CRM</h4><p>Historial de compras, segmentación, WhatsApp directo, programa de puntos.</p></div>
+      <div class="feature-card"><div class="f-icon ri-red"><i class="fas fa-credit-card"></i></div><h4>MercadoPago & Cobros</h4><p>Cobrá con QR, link de pago, efectivo, tarjetas. Todo integrado al sistema.</p></div>
+      <div class="feature-card"><div class="f-icon ri-blue"><i class="fas fa-chart-line"></i></div><h4>Reportes & Dashboard</h4><p>Métricas en tiempo real. Ventas, rentabilidad, productos estrella, tendencias.</p></div>
+      <div class="feature-card"><div class="f-icon ri-pink"><i class="fas fa-id-badge"></i></div><h4>Empleados & Nóminas</h4><p>Gestión de personal, cálculo de sueldos, fichaje, legajos digitales.</p></div>
+      <div class="feature-card"><div class="f-icon ri-green"><i class="fas fa-envelope"></i></div><h4>Email & Marketing</h4><p>Campañas, promos por WhatsApp y email, seguimiento de apertura.</p></div>
+      <div class="feature-card"><div class="f-icon ri-slate"><i class="fas fa-robot"></i></div><h4>Asistente IA</h4><p>Preguntale al sistema: "¿cuánto vendí hoy?", "¿qué me falta reponer?", y más.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- AFIP -->
+<section class="section bg-light" id="facturacion">
+  <div class="section-inner">
+    <div class="afip-section">
+      <div>
+        <div style="display:inline-block;background:rgba(108,58,225,.2);color:var(--primary-light);font-size:12px;font-weight:700;padding:6px 16px;border-radius:50px;margin-bottom:20px">INTEGRACIÓN OFICIAL</div>
+        <h3>Facturación electrónica AFIP al toque</h3>
+        <p>Emití facturas legales desde el sistema, sin entrar a la página de AFIP. Todo automático, todo válido.</p>
+        <a href="app.html" class="btn btn-primary"><i class="fas fa-bolt"></i> Probalo gratis</a>
+      </div>
+      <div class="afip-features">
+        <div class="afip-feat"><div class="af-icon"><i class="fas fa-file-invoice"></i></div><div><h5>Facturas A, B y C</h5><p>Monotributo y Responsable Inscripto</p></div></div>
+        <div class="afip-feat"><div class="af-icon"><i class="fas fa-qrcode"></i></div><div><h5>QR fiscal obligatorio</h5><p>Generado automáticamente en cada comprobante</p></div></div>
+        <div class="afip-feat"><div class="af-icon"><i class="fas fa-file-circle-minus"></i></div><div><h5>Notas de Crédito / Débito</h5><p>Devoluciones y ajustes con un clic</p></div></div>
+        <div class="afip-feat"><div class="af-icon"><i class="fab fa-whatsapp"></i></div><div><h5>Envío por WhatsApp / Email</h5><p>Comprobante directo al cliente</p></div></div>
+        <div class="afip-feat"><div class="af-icon"><i class="fas fa-download"></i></div><div><h5>Exportar PDF</h5><p>Descargá o imprimí cualquier comprobante</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRECIOS -->
+<section class="section" id="precios">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="tag">Precios</div>
+      <h2>Planes accesibles para toda Latinoamérica</h2>
+      <p>Precios en dólares, sin sorpresas. Arrancá gratis y crecé a tu ritmo.</p>
+    </div>
+    <div class="pricing-grid">
+      <!-- EMPRENDEDOR -->
+      <div class="price-card">
+        <div class="plan-name">Emprendedor</div>
+        <div class="price">US$9.99<span>/mes</span></div>
+        <div class="price-sub">Ideal para arrancar. 14 días gratis.</div>
+        <ul>
+          <li><i class="fas fa-check"></i> 1 usuario</li>
+          <li><i class="fas fa-check"></i> 1 sucursal</li>
+          <li><i class="fas fa-check"></i> Ventas e inventario</li>
+          <li><i class="fas fa-check"></i> Clientes y proveedores</li>
+          <li><i class="fas fa-check"></i> Dashboard y reportes</li>
+          <li><i class="fas fa-check"></i> Asistente IA básico</li>
+          <li><i class="fas fa-check"></i> <strong>Factura electrónica AFIP</strong></li>
+          <li class="disabled"><i class="fas fa-times"></i> Integraciones (WhatsApp IA, MercadoPago)</li>
+        </ul>
+        <a href="app.html?plan=emprendedor" class="btn btn-outline">Empezar Gratis</a>
+      </div>
+      <!-- NEGOCIO -->
+      <div class="price-card popular">
+        <div class="plan-name">Negocio</div>
+        <div class="price">US$16.99<span>/mes</span></div>
+        <div class="price-sub">Para negocios en crecimiento.</div>
+        <ul>
+          <li><i class="fas fa-check"></i> Hasta 5 usuarios</li>
+          <li><i class="fas fa-check"></i> 3 sucursales</li>
+          <li><i class="fas fa-check"></i> Todo del plan Emprendedor</li>
+          <li><i class="fas fa-check"></i> <strong>MercadoPago integrado</strong></li>
+          <li><i class="fas fa-check"></i> <strong>WhatsApp Business + IA</strong></li>
+          <li><i class="fas fa-check"></i> Nóminas, RRHH y email marketing</li>
+          <li><i class="fas fa-check"></i> Sincronización web</li>
+          <li><i class="fas fa-check"></i> Soporte prioritario</li>
+        </ul>
+        <a href="app.html?plan=negocio" class="btn btn-primary">Empezar Gratis</a>
+      </div>
+      <!-- PREMIUM -->
+      <div class="price-card">
+        <div class="plan-name">Premium</div>
+        <div class="price">US$19.99<span>/mes</span></div>
+        <div class="price-sub">Control total, sin límites.</div>
+        <ul>
+          <li><i class="fas fa-check"></i> Usuarios ilimitados</li>
+          <li><i class="fas fa-check"></i> Sucursales ilimitadas</li>
+          <li><i class="fas fa-check"></i> Todo del plan Negocio</li>
+          <li><i class="fas fa-check"></i> API para tu web/ecommerce</li>
+          <li><i class="fas fa-check"></i> WhatsApp IA ilimitado + bots</li>
+          <li><i class="fas fa-check"></i> Marca blanca (tu logo)</li>
+          <li><i class="fas fa-check"></i> Soporte 24/7 WhatsApp</li>
+          <li><i class="fas fa-check"></i> Capacitación incluida</li>
+        </ul>
+        <a href="app.html?plan=premium" class="btn btn-accent">Empezar Gratis</a>
+      </div>
+    </div>
+    <p style="text-align:center;color:var(--gray);font-size:14px;margin-top:32px">Todos los planes incluyen 14 días de prueba gratis sin tarjeta de crédito. Precios en USD + impuestos locales. Cancelá cuando quieras.</p>
+    <div style="max-width:480px;margin:32px auto 0;background:linear-gradient(135deg,#f0ecfc,#e0f2fe);border-radius:16px;padding:24px;text-align:center;">
+      <h4 style="margin:0 0 8px;font-size:16px;">Datos para suscripcion via MercadoPago</h4>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:12px;">
+        <div style="background:white;border-radius:10px;padding:12px 20px;flex:1;min-width:180px;">
+          <div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;">CVU</div>
+          <div style="font-weight:700;font-size:14px;margin-top:4px;word-break:break-all;">0000003100078388058922</div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:12px 20px;flex:1;min-width:180px;">
+          <div style="font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;">Alias</div>
+          <div style="font-weight:700;font-size:14px;margin-top:4px;">SistemaVOS</div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--gray);margin:12px 0 0;">Tambien podes pagar desde la app con MercadoPago integrado</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="section">
+  <div class="section-inner">
+    <div class="cta-section">
+      <h2>Arrancá hoy, pagá cuando quieras</h2>
+      <p>14 días gratis, todas las funciones. Sin tarjeta, sin compromiso. Tu negocio se lo merece.</p>
+      <a href="app.html" class="btn btn-white btn-lg"><i class="fas fa-rocket"></i> Crear Mi Cuenta Gratis</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="section-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><div style="width:32px;height:32px;background:var(--gradient);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:900">V</div> SistemaVOS</div>
+        <p style="max-width:300px;line-height:1.8">El sistema de gestión más accesible de Argentina. Hecho con amor para PyMEs que quieren crecer.</p>
+      </div>
+      <div><h5>Producto</h5><a href="#funciones">Funciones</a><br><a href="#rubros">Rubros</a><br><a href="#precios">Precios</a><br><a href="#facturacion">Facturación AFIP</a></div>
+      <div><h5>Soporte</h5><a href="#">Centro de ayuda</a><br><a href="#">WhatsApp</a><br><a href="#">Tutoriales</a><br><a href="#">Estado del servicio</a></div>
+      <div><h5>Legal</h5><a href="#">Términos de uso</a><br><a href="#">Privacidad</a><br><a href="#">Política de datos</a></div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 SistemaVOS. Hecho en Argentina. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Navbar scroll
+window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50)});
+
+// Mock chart bars
+const chart=document.getElementById('mock-chart');
+if(chart){const heights=[40,65,55,80,70,90,60,85,75,95,50,78];heights.forEach(h=>{const bar=document.createElement('div');bar.className='mock-bar';bar.style.height=h+'%';chart.appendChild(bar)})}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
+</script>
+</body>
+</html>
