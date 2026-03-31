@@ -139,7 +139,8 @@ img{max-width:100%}
 
 /* RESPONSIVE */
 @media(max-width:1024px){.hero-inner{grid-template-columns:1fr;text-align:center}.hero p{margin:0 auto 32px}.hero-buttons,.hero-stats{justify-content:center}.hero-visual{max-width:600px;margin:0 auto}.rubros-grid{grid-template-columns:repeat(2,1fr)}.features-grid{grid-template-columns:repeat(2,1fr)}.pricing-grid{grid-template-columns:1fr;max-width:420px;margin:0 auto}.afip-section{grid-template-columns:1fr}.footer-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){.hero h1{font-size:34px}.section-header h2{font-size:28px}.rubros-grid{grid-template-columns:1fr 1fr}.features-grid{grid-template-columns:1fr}.nav-links{display:none}.afip-section{padding:40px 24px}.cta-section{padding:48px 24px}}
+@media(max-width:640px){.hero h1{font-size:34px}.section-header h2{font-size:28px}.rubros-grid{grid-template-columns:1fr 1fr}.features-grid{grid-template-columns:1fr}.nav-links{display:none}.nav-mobile-btns{display:flex!important;gap:10px;align-items:center}.afip-section{padding:40px 24px}.cta-section{padding:48px 24px}}
+.nav-mobile-btns{display:none}
 </style>
 </head>
 <body>
@@ -153,7 +154,12 @@ img{max-width:100%}
       <a href="#funciones">Funciones</a>
       <a href="#precios">Precios</a>
       <a href="#facturacion">Facturación</a>
+      <a href="app.html?login=1" class="btn btn-outline" style="padding:10px 22px;">Iniciar Sesión</a>
       <a href="app.html" class="btn btn-primary">Probar Gratis</a>
+    </div>
+    <div class="nav-mobile-btns">
+      <a href="app.html?login=1" class="btn btn-outline" style="padding:8px 16px;font-size:13px;">Ingresar</a>
+      <a href="app.html" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Registrar</a>
     </div>
   </div>
 </nav>
