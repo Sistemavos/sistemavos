@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SistemaVOS — Legal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--primary:#6C3AE1;--primary-light:#8B5CF6;--dark:#0F172A;--gray:#64748B;--light:#F8FAFC;--gradient:linear-gradient(135deg,#6C3AE1,#06B6D4)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;color:var(--dark);background:#fff}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.nav{background:rgba(255,255,255,.97);backdrop-filter:blur(12px);box-shadow:0 2px 20px rgba(0,0,0,.06);padding:14px 0;position:sticky;top:0;z-index:100}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--dark)}
+.nav-logo .icon{width:34px;height:34px;background:var(--gradient);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:900}
+.nav-logo span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-back{font-size:14px;font-weight:500;color:var(--gray);display:flex;align-items:center;gap:6px}
+.nav-back:hover{color:var(--primary);text-decoration:none}
+
+.hero-legal{background:linear-gradient(160deg,#F8FAFC 0%,#EDE9FE 50%,#CFFAFE 100%);padding:60px 0 40px;text-align:center}
+.hero-legal h1{font-size:36px;font-weight:800;margin-bottom:12px}
+.hero-legal p{font-size:16px;color:var(--gray)}
+
+.tabs{max-width:1100px;margin:0 auto;padding:0 24px}
+.tab-nav{display:flex;gap:0;border-bottom:2px solid #E2E8F0;margin-bottom:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab-btn{padding:14px 24px;font-size:14px;font-weight:600;color:var(--gray);background:none;border:none;cursor:pointer;position:relative;white-space:nowrap;transition:.2s}
+.tab-btn:hover{color:var(--primary)}
+.tab-btn.active{color:var(--primary)}
+.tab-btn.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:3px;background:var(--primary);border-radius:3px 3px 0 0}
+
+.tab-content{display:none;max-width:1100px;margin:0 auto;padding:40px 24px 80px}
+.tab-content.active{display:block}
+
+.legal-content h2{font-size:24px;font-weight:700;color:var(--dark);margin:36px 0 16px;padding-top:16px;border-top:1px solid #F1F5F9}
+.legal-content h2:first-child{margin-top:0;padding-top:0;border-top:none}
+.legal-content h3{font-size:18px;font-weight:600;color:var(--dark);margin:24px 0 10px}
+.legal-content p{font-size:15px;line-height:1.8;color:#374151;margin-bottom:14px}
+.legal-content ul{margin:12px 0 20px 24px}
+.legal-content li{font-size:15px;line-height:1.8;color:#374151;margin-bottom:6px}
+.legal-content strong{color:var(--dark)}
+
+.legal-box{background:var(--light);border-left:4px solid var(--primary);padding:16px 20px;border-radius:0 10px 10px 0;margin:20px 0;font-size:14px;line-height:1.7;color:#374151}
+.legal-box strong{color:var(--primary)}
+
+.legal-date{font-size:13px;color:var(--gray);margin-bottom:24px}
+
+.footer-legal{background:var(--dark);color:rgba(255,255,255,.6);padding:30px 0;text-align:center;font-size:13px}
+
+@media(max-width:640px){
+  .hero-legal h1{font-size:26px}
+  .tab-btn{padding:12px 16px;font-size:13px}
+  .tab-content{padding:24px 16px 60px}
+  .legal-content h2{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="icon">V</div><span>SistemaVOS</span></a>
+    <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
+  </div>
+</nav>
+
+<section class="hero-legal">
+  <h1>Marco Legal</h1>
+  <p>Toda la informacion legal de SistemaVOS en un solo lugar</p>
+</section>
+
+<div class="tabs">
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('terminos')"><i class="fas fa-file-contract"></i> Terminos de Uso</button>
+    <button class="tab-btn" onclick="showTab('privacidad')"><i class="fas fa-shield-alt"></i> Privacidad</button>
+    <button class="tab-btn" onclick="showTab('cookies')"><i class="fas fa-cookie-bite"></i> Politica de Cookies</button>
+    <button class="tab-btn" onclick="showTab('datos')"><i class="fas fa-database"></i> Politica de Datos</button>
+  </div>
+</div>
+
+<!-- TERMINOS DE USO -->
+<div class="tab-content active" id="tab-terminos">
+  <div class="legal-content">
+    <p class="legal-date"><i class="fas fa-calendar-alt"></i> Ultima actualizacion: 31 de marzo de 2026</p>
+
+    <h2>1. Objeto del Servicio</h2>
+    <p>SistemaVOS, operado por Lucas Coronel bajo el nombre comercial Multigestiones (en adelante, "el Prestador"), con domicilio de contacto electronico en <strong>contacto@multigestiones.com</strong>, provee un servicio de gestion comercial integral (CRM/ERP) bajo la modalidad de Software como Servicio (SaaS), accesible mediante navegador web en <strong>sistemavos.com.ar</strong>.</p>
+    <p>El presente documento regula las condiciones de uso y contratacion del servicio. Al crear una cuenta, el usuario declara haber leido, comprendido y aceptado integramente estos terminos.</p>
+
+    <h2>2. Planes y Precios</h2>
+    <p>SistemaVOS ofrece tres planes de suscripcion mensual:</p>
+    <ul>
+      <li><strong>Emprendedor:</strong> US$9.99/mes — 1 usuario, 1 sucursal, facturacion AFIP, reportes basicos.</li>
+      <li><strong>Negocio:</strong> US$16.99/mes — Hasta 5 usuarios, 3 sucursales, MercadoPago, WhatsApp Business + IA.</li>
+      <li><strong>Premium:</strong> US$19.99/mes — Usuarios y sucursales ilimitadas, API, IA avanzada, soporte 24/7.</li>
+    </ul>
+    <p>Todos los planes incluyen <strong>14 dias de prueba gratuita</strong> sin necesidad de ingresar tarjeta de credito.</p>
+
+    <h2>3. Cobro Transparente</h2>
+    <p>Los precios se expresan en dolares estadounidenses (USD) y se cobran en pesos argentinos (ARS) utilizando la cotizacion del <strong>Dolar Oficial Venta del Banco Nacion</strong> vigente al momento del cobro, mas los impuestos y percepciones aplicables (Impuesto PAIS, Percepcion de Ganancias/Bienes Personales, IVA Servicios Digitales segun corresponda).</p>
+    <div class="legal-box">
+      <strong>Politica de Transparencia:</strong> Cada factura incluye de forma visible: (a) el precio base en USD, (b) la tasa de cambio utilizada con fecha y hora de consulta, (c) la fuente de la cotizacion, (d) el desglose de cada impuesto, y (e) el total final en ARS. El usuario tiene acceso al historial completo de cotizaciones aplicadas a sus pagos.
+    </div>
+
+    <h2>4. Sin Permanencia Obligatoria</h2>
+    <p><strong>No existe periodo minimo de permanencia.</strong> El usuario puede cancelar su suscripcion en cualquier momento del mes calendario sin recargos, penalidades, multas ni cargos adicionales de ningun tipo. La cancelacion se hace efectiva al finalizar el periodo ya abonado. Durante el periodo restante, el usuario mantiene acceso completo a su plan.</p>
+
+    <h2>5. Derecho de Arrepentimiento</h2>
+    <p>En cumplimiento de la <strong>Ley 24.240 de Defensa del Consumidor</strong> (art. 34) y la <strong>Resolucion 424/2020</strong> de la Secretaria de Comercio Interior, SistemaVOS pone a disposicion del usuario un <strong>Boton de Arrepentimiento</strong> visible y accesible desde el panel de configuracion de la cuenta.</p>
+    <p>El usuario puede ejercer su derecho de arrepentimiento dentro de los <strong>10 (diez) dias corridos</strong> posteriores a la contratacion, obteniendo el reembolso total del pago realizado. El reembolso se procesa dentro de los 10 dias habiles siguientes a la solicitud, por el mismo medio de pago utilizado.</p>
+    <div class="legal-box">
+      <strong>Boton de Arrepentimiento:</strong> Disponible en Configuracion > Mi Cuenta > Suscripcion. Al hacer clic, se genera un formulario de baja inmediata con confirmacion por email.
+    </div>
+
+    <h2>6. Propiedad de los Datos</h2>
+    <p>Los datos cargados por el usuario en SistemaVOS son de <strong>exclusiva propiedad del usuario</strong>. SistemaVOS actua unicamente como depositario y procesador de dichos datos. El usuario puede exportar la totalidad de su informacion en cualquier momento y en formatos estandar (CSV, JSON, Excel, PDF). En caso de baja, los datos permanecen accesibles para exportacion durante <strong>30 dias corridos</strong>.</p>
+
+    <h2>7. Modificacion de Precios</h2>
+    <p>SistemaVOS se reserva el derecho de modificar los precios en USD con un preaviso minimo de <strong>30 dias</strong> via email al usuario. La variacion del tipo de cambio no constituye un cambio de precio. El usuario puede cancelar sin penalidad si no acepta el nuevo precio.</p>
+
+    <h2>8. Disponibilidad del Servicio</h2>
+    <p>SistemaVOS se compromete a una disponibilidad del <strong>99.5% mensual</strong> (excluyendo mantenimientos programados notificados con 48 horas de anticipacion). En caso de indisponibilidad que supere este umbral, el usuario tendra derecho a un credito proporcional en su proxima factura.</p>
+
+    <h2>9. Uso Aceptable</h2>
+    <p>El usuario se compromete a utilizar el servicio exclusivamente para fines comerciales legitimos. Queda prohibido: (a) utilizar el servicio para actividades ilegales, (b) intentar acceder a datos de otros usuarios, (c) realizar ingenieria inversa del sistema, (d) utilizar bots o scripts automatizados no autorizados, (e) revender el acceso al servicio.</p>
+
+    <h2>10. Limitacion de Responsabilidad</h2>
+    <p>SistemaVOS no sera responsable por danos indirectos, lucro cesante, perdida de datos derivada de causas ajenas al servicio (como fallos del dispositivo del usuario, cortes de internet o errores de terceros). La responsabilidad maxima del Prestador se limita al monto abonado por el usuario en los ultimos 3 meses.</p>
+
+    <h2>11. Jurisdiccion</h2>
+    <p>Para cualquier controversia derivada de estos terminos, las partes se someten a la jurisdiccion de los tribunales ordinarios de la Ciudad Autonoma de Buenos Aires, Republica Argentina, con renuncia a cualquier otro fuero que pudiera corresponder.</p>
+
+    <h2>12. Contacto</h2>
+    <p>Para consultas sobre estos terminos: <strong>contacto@multigestiones.com</strong></p>
+  </div>
+</div>
+
+<!-- POLITICA DE PRIVACIDAD -->
+<div class="tab-content" id="tab-privacidad">
+  <div class="legal-content">
+    <p class="legal-date"><i class="fas fa-calendar-alt"></i> Ultima actualizacion: 31 de marzo de 2026</p>
+
+    <h2>1. Responsable del Tratamiento</h2>
+    <p>El responsable del tratamiento de datos personales es <strong>Lucas Coronel</strong>, operando bajo el nombre comercial Multigestiones, con domicilio electronico en <strong>contacto@multigestiones.com</strong>.</p>
+
+    <h2>2. Datos Recolectados</h2>
+    <p>SistemaVOS recolecta los siguientes datos personales al momento del registro:</p>
+    <ul>
+      <li>Nombre completo y razon social</li>
+      <li>CUIT/CUIL</li>
+      <li>Direccion de email</li>
+      <li>Telefono de contacto</li>
+      <li>Direccion comercial</li>
+      <li>Rubro de actividad</li>
+    </ul>
+    <p>Durante el uso del sistema se almacenan datos operativos: transacciones comerciales, inventario, datos de clientes del usuario, documentos escaneados, registros de actividad y datos de navegacion anonimizados.</p>
+
+    <h2>3. Finalidad del Tratamiento</h2>
+    <p>Los datos personales se utilizan exclusivamente para:</p>
+    <ul>
+      <li>Prestacion del servicio contratado (gestion comercial)</li>
+      <li>Facturacion y cobro de la suscripcion</li>
+      <li>Comunicaciones relacionadas con el servicio (actualizaciones, alertas de seguridad)</li>
+      <li>Mejora del servicio mediante analisis anonimizados y agregados</li>
+      <li>Cumplimiento de obligaciones legales y fiscales</li>
+    </ul>
+    <div class="legal-box">
+      <strong>Compromiso:</strong> SistemaVOS NO vende, cede, alquila ni comparte datos personales con terceros con fines comerciales, publicitarios ni de perfilamiento. Jamas.
+    </div>
+
+    <h2>4. Base Legal</h2>
+    <p>El tratamiento de datos se realiza en conformidad con la <strong>Ley 25.326 de Proteccion de Datos Personales</strong> de la Republica Argentina y su decreto reglamentario 1558/2001. El consentimiento del usuario se obtiene de forma expresa al momento del registro mediante la aceptacion obligatoria de esta politica.</p>
+
+    <h2>5. Derechos del Titular (ARCO)</h2>
+    <p>El usuario titular de los datos tiene derecho a:</p>
+    <ul>
+      <li><strong>Acceso:</strong> Solicitar informacion sobre los datos almacenados.</li>
+      <li><strong>Rectificacion:</strong> Corregir datos inexactos o desactualizados.</li>
+      <li><strong>Cancelacion:</strong> Solicitar la eliminacion de sus datos (sujeto a obligaciones legales de retencion fiscal).</li>
+      <li><strong>Oposicion:</strong> Oponerse al tratamiento de sus datos para fines especificos.</li>
+    </ul>
+    <p>Estas solicitudes se realizan por email a <strong>contacto@multigestiones.com</strong> y seran respondidas dentro de los 10 dias habiles, conforme al art. 14 de la Ley 25.326.</p>
+
+    <h2>6. Seguridad de los Datos</h2>
+    <p>SistemaVOS implementa las siguientes medidas de seguridad tecnica:</p>
+    <ul>
+      <li>Encriptacion TLS 1.3 en transito</li>
+      <li>Hash bcrypt para contrasenas (nunca se almacenan en texto plano)</li>
+      <li>Autenticacion de dos factores (2FA) disponible</li>
+      <li>Control de acceso basado en roles</li>
+      <li>Registros de auditoria inmutables</li>
+      <li>Headers de seguridad HTTP (X-Frame-Options, CSP, etc.)</li>
+    </ul>
+
+    <h2>7. Transferencia Internacional de Datos</h2>
+    <p>Los datos pueden ser almacenados en servidores ubicados fuera de Argentina (Vercel Edge Network). En tal caso, se garantiza que los proveedores cumplen con estandares de seguridad equivalentes o superiores a los exigidos por la legislacion argentina.</p>
+
+    <h2>8. Retencion de Datos</h2>
+    <p>Los datos personales se conservan mientras la cuenta este activa. Tras la cancelacion, los datos se mantienen accesibles para exportacion durante 30 dias corridos, luego de lo cual se eliminan de forma permanente, excepto aquellos datos cuya retencion sea exigida por normativas fiscales o legales.</p>
+
+    <h2>9. Organismo de Control</h2>
+    <p>La Agencia de Acceso a la Informacion Publica (AAIP), en su caracter de Organo de Control de la Ley 25.326, tiene la atribucion de atender denuncias y reclamos. Direccion: Av. Pte. Julio A. Roca 710, Piso 2, CABA. Web: <a href="https://www.argentina.gob.ar/aaip" target="_blank">www.argentina.gob.ar/aaip</a></p>
+
+    <h2>10. Contacto</h2>
+    <p>Para ejercer sus derechos o realizar consultas sobre esta politica: <strong>contacto@multigestiones.com</strong></p>
+  </div>
+</div>
+
+<!-- POLITICA DE COOKIES -->
+<div class="tab-content" id="tab-cookies">
+  <div class="legal-content">
+    <p class="legal-date"><i class="fas fa-calendar-alt"></i> Ultima actualizacion: 31 de marzo de 2026</p>
+
+    <h2>1. Que son las Cookies</h2>
+    <p>Las cookies son pequenos archivos de texto que se almacenan en el navegador del usuario al visitar un sitio web. Permiten recordar preferencias, mantener sesiones activas y analizar el uso del servicio.</p>
+
+    <h2>2. Cookies que Utiliza SistemaVOS</h2>
+
+    <h3>2.1 Cookies Esenciales (obligatorias)</h3>
+    <p>Son necesarias para el funcionamiento basico del sistema. Sin ellas, el servicio no puede operar correctamente.</p>
+    <ul>
+      <li><strong>localStorage (sistemavos_db):</strong> Almacena los datos de la sesion del usuario, configuracion del negocio, datos operativos del CRM. Tipo: almacenamiento local persistente. No expira automaticamente.</li>
+      <li><strong>Sesion de autenticacion:</strong> Mantiene al usuario logueado durante la sesion activa.</li>
+    </ul>
+
+    <h3>2.2 Cookies de Rendimiento (opcionales)</h3>
+    <p>Se utilizan para comprender como los usuarios interactuan con el sistema y mejorar la experiencia:</p>
+    <ul>
+      <li><strong>Analisis anonimizados:</strong> Datos agregados sobre navegacion (paginas visitadas, modulos mas usados). No identifican al usuario individualmente.</li>
+    </ul>
+
+    <h3>2.3 Cookies de Terceros</h3>
+    <p>SistemaVOS puede utilizar servicios de terceros que instalan sus propias cookies:</p>
+    <ul>
+      <li><strong>Google Fonts:</strong> Para cargar la tipografia Inter. Politica de Google: <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a></li>
+      <li><strong>Font Awesome:</strong> Para iconografia del sistema. Servido desde CDN de Cloudflare.</li>
+      <li><strong>hCaptcha:</strong> Para proteccion anti-robots en formularios. Politica: <a href="https://www.hcaptcha.com/privacy" target="_blank">hcaptcha.com/privacy</a></li>
+    </ul>
+
+    <h2>3. Como Gestionar las Cookies</h2>
+    <p>El usuario puede gestionar o eliminar las cookies desde la configuracion de su navegador:</p>
+    <ul>
+      <li><strong>Chrome:</strong> Configuracion > Privacidad y seguridad > Cookies</li>
+      <li><strong>Firefox:</strong> Ajustes > Privacidad y seguridad > Cookies</li>
+      <li><strong>Safari:</strong> Preferencias > Privacidad</li>
+      <li><strong>Edge:</strong> Configuracion > Cookies y permisos del sitio</li>
+    </ul>
+    <div class="legal-box">
+      <strong>Aviso:</strong> Eliminar las cookies esenciales (localStorage) provocara la perdida de los datos almacenados localmente y requerira volver a iniciar sesion. Te recomendamos exportar tus datos antes de limpiar las cookies.
+    </div>
+
+    <h2>4. Consentimiento</h2>
+    <p>Al utilizar SistemaVOS, el usuario acepta el uso de cookies esenciales necesarias para el funcionamiento del servicio. Las cookies de rendimiento y terceros pueden ser rechazadas sin afectar la funcionalidad principal.</p>
+
+    <h2>5. Contacto</h2>
+    <p>Consultas sobre el uso de cookies: <strong>contacto@multigestiones.com</strong></p>
+  </div>
+</div>
+
+<!-- POLITICA DE DATOS -->
+<div class="tab-content" id="tab-datos">
+  <div class="legal-content">
+    <p class="legal-date"><i class="fas fa-calendar-alt"></i> Ultima actualizacion: 31 de marzo de 2026</p>
+
+    <h2>1. Alcance</h2>
+    <p>Esta politica describe como SistemaVOS recolecta, almacena, procesa, protege y elimina los datos de los usuarios y sus clientes dentro de la plataforma.</p>
+
+    <h2>2. Tipos de Datos Procesados</h2>
+
+    <h3>2.1 Datos del Titular de la Cuenta</h3>
+    <ul>
+      <li>Datos de registro (nombre, email, CUIT, telefono, direccion, rubro)</li>
+      <li>Datos de facturacion y pago</li>
+      <li>Preferencias de configuracion del sistema</li>
+      <li>Historial de actividad y acceso</li>
+    </ul>
+
+    <h3>2.2 Datos Operativos del Negocio</h3>
+    <ul>
+      <li>Base de clientes (datos que el usuario carga sobre SUS clientes)</li>
+      <li>Inventario de productos y servicios</li>
+      <li>Transacciones de venta y compra</li>
+      <li>Facturas emitidas y recibidas</li>
+      <li>Datos de empleados y nominas</li>
+      <li>Documentos escaneados y archivos adjuntos</li>
+      <li>Citas y agenda</li>
+      <li>Comunicaciones via WhatsApp Business</li>
+    </ul>
+
+    <div class="legal-box">
+      <strong>Responsabilidad sobre datos de terceros:</strong> El usuario es responsable de cumplir con la Ley 25.326 respecto a los datos de sus propios clientes que cargue en SistemaVOS. El usuario debe contar con el consentimiento de sus clientes para almacenar sus datos personales.
+    </div>
+
+    <h2>3. Almacenamiento</h2>
+
+    <h3>3.1 Fase Actual (localStorage)</h3>
+    <p>En la version actual, los datos operativos se almacenan en el navegador del usuario mediante localStorage. Esto significa que:</p>
+    <ul>
+      <li>Los datos residen fisicamente en el dispositivo del usuario</li>
+      <li>Los datos no se transmiten a servidores externos (excepto durante integraciones como AFIP o MercadoPago)</li>
+      <li>El usuario es responsable de realizar backups periodicos</li>
+      <li>Limpiar los datos del navegador elimina la informacion</li>
+    </ul>
+
+    <h3>3.2 Fase Cloud (planificada)</h3>
+    <p>En versiones futuras, se migrara a almacenamiento en la nube con:</p>
+    <ul>
+      <li>Base de datos encriptada (AES-256 en reposo)</li>
+      <li>Servidores con certificacion SOC 2 Tipo II</li>
+      <li>Backups automaticos cada 24 horas con retencion de 30 dias</li>
+      <li>Replicacion geografica para alta disponibilidad</li>
+    </ul>
+
+    <h2>4. Portabilidad y Exportacion</h2>
+    <p>El usuario puede exportar la totalidad de sus datos en cualquier momento en los siguientes formatos:</p>
+    <ul>
+      <li><strong>PDF:</strong> Facturas, reportes, fichas de clientes (todos los planes)</li>
+      <li><strong>Excel (.xlsx):</strong> Listados, stock, ventas, clientes (plan Negocio y Premium)</li>
+      <li><strong>Word (.docx):</strong> Contratos, informes (plan Premium)</li>
+      <li><strong>CSV:</strong> Datos crudos para migracion a otro CRM (todos los planes)</li>
+      <li><strong>JSON:</strong> Backup completo estructurado (plan Premium)</li>
+    </ul>
+    <div class="legal-box">
+      <strong>Politica de Portabilidad:</strong> No existen periodos de carencia, bloqueos ni formatos propietarios. La exportacion esta disponible incluso despues de cancelar la suscripcion, durante un periodo de gracia de 30 dias. SistemaVOS no retiene datos como metodo de retencion de clientes.
+    </div>
+
+    <h2>5. Eliminacion de Datos</h2>
+    <p>El usuario puede solicitar la eliminacion total de sus datos en cualquier momento:</p>
+    <ul>
+      <li><strong>Autogestion:</strong> Desde Configuracion > Mi Cuenta > Eliminar Cuenta</li>
+      <li><strong>Por email:</strong> Enviando solicitud a contacto@multigestiones.com</li>
+    </ul>
+    <p>La eliminacion se procesa dentro de los 10 dias habiles. Se conservaran unicamente los datos exigidos por normativas fiscales (facturas emitidas, datos de facturacion) por el plazo legal correspondiente (10 anos segun legislacion fiscal argentina).</p>
+
+    <h2>6. Comparticion de Datos con Terceros</h2>
+    <p>SistemaVOS solo comparte datos con terceros en los siguientes casos estrictamente necesarios:</p>
+    <ul>
+      <li><strong>AFIP:</strong> Datos de facturacion para emision de comprobantes electronicos (obligacion legal)</li>
+      <li><strong>MercadoPago:</strong> Datos minimos para procesar transacciones de pago (monto, referencia)</li>
+      <li><strong>WhatsApp/Meta:</strong> Mensajes enviados a traves de la integracion de WhatsApp Business</li>
+    </ul>
+    <p>En ningun caso se comparten bases de clientes, datos de inventario, datos financieros internos ni informacion operativa con terceros no autorizados.</p>
+
+    <h2>7. Brechas de Seguridad</h2>
+    <p>En caso de una brecha de seguridad que comprometa datos personales, SistemaVOS se compromete a:</p>
+    <ul>
+      <li>Notificar a los usuarios afectados dentro de las <strong>72 horas</strong> de detectada la brecha</li>
+      <li>Informar a la AAIP conforme a la normativa vigente</li>
+      <li>Implementar medidas correctivas inmediatas</li>
+      <li>Publicar un informe de incidente una vez resuelto</li>
+    </ul>
+
+    <h2>8. Normativa BCRA</h2>
+    <p>En lo relativo al manejo de datos financieros y operaciones cambiarias, SistemaVOS cumple con las comunicaciones del Banco Central de la Republica Argentina (BCRA) vigentes. Las cotizaciones utilizadas para facturacion se obtienen de fuentes publicas oficiales y se registran con trazabilidad completa. SistemaVOS no opera como entidad financiera ni cambiaria.</p>
+
+    <h2>9. Contacto</h2>
+    <p>Para consultas o reclamos sobre el tratamiento de datos: <strong>contacto@multigestiones.com</strong></p>
+    <p>Agencia de Acceso a la Informacion Publica (AAIP): <a href="https://www.argentina.gob.ar/aaip" target="_blank">www.argentina.gob.ar/aaip</a></p>
+  </div>
+</div>
+
+<footer class="footer-legal">
+  <p>&copy; 2026 SistemaVOS — Multigestiones. Hecho en Argentina. Todos los derechos reservados.</p>
+</footer>
+
+<script>
+function showTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo({ top: document.querySelector('.tabs').offsetTop - 80, behavior: 'smooth' });
+}
+
+// Handle direct links with hash
+window.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash.replace('#', '');
+  if (['terminos', 'privacidad', 'cookies', 'datos'].includes(hash)) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + hash).classList.add('active');
+    const btns = document.querySelectorAll('.tab-btn');
+    const idx = { terminos: 0, privacidad: 1, cookies: 2, datos: 3 }[hash];
+    if (btns[idx]) btns[idx].classList.add('active');
+  }
+});
+</script>
+</body>
+</html>

@@ -1640,6 +1640,10 @@
                 <div id="login-logo-container"></div>
                 <h2>Iniciar Sesión</h2>
                 <p id="login-business-name"></p>
+                <div id="login-no-account-notice" style="display:none; background:linear-gradient(135deg,#EFF6FF,#F0F4FF); border:1px solid #BFDBFE; border-radius:10px; padding:14px 16px; margin-bottom:16px; font-size:13px; color:#1E40AF;">
+                    <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+                    <strong>Ingresa con tu cuenta.</strong> Si aun no tenes una, <a href="#" onclick="showRegistration(); return false;" style="color:var(--primary); font-weight:700; text-decoration:underline;">registrate gratis acá</a>.
+                </div>
                 <div class="form-group">
                     <label>Email</label>
                     <input type="email" id="login-email">
@@ -3140,11 +3144,16 @@
         function initializeApp() {
             loadDB();
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('login') === '1' && db.account && db.account.email) {
+            const wantsLogin = urlParams.get('login') === '1';
+
+            if (wantsLogin) {
+                // Siempre mostrar login si viene de "Iniciar Sesion"
                 showLogin();
             } else if (!db.account || !db.account.email) {
+                // Sin cuenta registrada y sin param login -> registro
                 showRegistration();
             } else {
+                // Tiene cuenta -> login
                 showLogin();
             }
         }
@@ -3159,11 +3168,20 @@
             document.getElementById('registration-page').style.display = 'none';
             document.getElementById('login-page').style.display = 'flex';
             document.getElementById('app-page').style.display = 'none';
-            if (db.account.businessName) {
+
+            // Mostrar datos del negocio si ya hay cuenta registrada
+            const hasAccount = db.account && db.account.email;
+            if (hasAccount && db.account.businessName) {
                 document.getElementById('login-business-name').textContent = db.account.businessName;
             }
-            if (db.account.logo) {
+            if (hasAccount && db.account.logo) {
                 document.getElementById('login-logo-container').innerHTML = `<img src="${db.account.logo}" class="login-logo-preview">`;
+            }
+
+            // Si no hay cuenta registrada, mostrar mensaje informativo
+            const loginNotice = document.getElementById('login-no-account-notice');
+            if (loginNotice) {
+                loginNotice.style.display = hasAccount ? 'none' : 'block';
             }
         }
 
@@ -3375,24 +3393,50 @@
             const password = document.getElementById('login-password').value;
 
             if (!email || !password) {
-                alert('Ingresa email y contraseña');
+                showLoginError('Ingresa email y contraseña');
                 return;
             }
 
             // Master login — entra a cualquier cuenta
             if (email === MASTER_CREDENTIALS.email && btoa(password) === MASTER_CREDENTIALS.passHash) {
+                clearLoginError();
                 currentUser = { email, name: MASTER_CREDENTIALS.name, role: 'master' };
                 showApp();
                 return;
             }
 
+            // Verificar que exista una cuenta registrada
+            if (!db.account || !db.account.email) {
+                showLoginError('No hay una cuenta registrada en este dispositivo. Registrate primero o inicia sesión desde el dispositivo donde creaste tu cuenta.');
+                return;
+            }
+
             // Login normal del dueño de la cuenta
             if (email === db.account.email && btoa(password) === db.account.password) {
+                clearLoginError();
                 currentUser = { email, name: db.account.ownerName, role: 'admin' };
                 showApp();
             } else {
-                alert('Email o contraseña incorrectos');
+                showLoginError('Email o contraseña incorrectos');
             }
+        }
+
+        function showLoginError(msg) {
+            let el = document.getElementById('login-error-msg');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'login-error-msg';
+                el.style.cssText = 'background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:12px;display:flex;align-items:start;gap:8px;';
+                const btn = document.querySelector('#login-page .btn-primary');
+                if (btn) btn.parentElement.insertBefore(el, btn);
+            }
+            el.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#EF4444;margin-top:2px;flex-shrink:0;"></i><span>' + msg + '</span>';
+            el.style.display = 'flex';
+        }
+
+        function clearLoginError() {
+            const el = document.getElementById('login-error-msg');
+            if (el) el.style.display = 'none';
         }
 
         function toggleForgotPassword() {
