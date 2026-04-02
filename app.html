@@ -1462,7 +1462,118 @@
             font-size: 13px;
             color: var(--gray-600);
         }
+        /* Cloud sync indicator */
+        #cloud-status-container {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 12px;
+        }
+        #cloud-status-icon.syncing {
+            animation: spin-cloud 1s linear infinite;
+        }
+        @keyframes spin-cloud {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ═══════════════════════════════════════════════════════
+        // SUPABASE CONFIG & CLOUD SYNC ENGINE
+        // ═══════════════════════════════════════════════════════
+        const SUPABASE_URL = 'https://lfguxnrpsztqpztlcola.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_DGih4XL3NIgTweQN1cQEag_resYH-lf';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Cloud status indicator
+        function updateCloudStatus(status) {
+            const icon = document.getElementById('cloud-status-icon');
+            const text = document.getElementById('cloud-status-text');
+            if (!icon) return;
+
+            icon.classList.remove('syncing');
+            if (status === 'syncing') {
+                icon.style.color = '#ffaa00';
+                icon.classList.add('syncing');
+                if (text) text.textContent = 'Sincronizando...';
+            } else if (status === 'success') {
+                icon.style.color = '#10b981';
+                if (text) text.textContent = 'Sincronizado ✓';
+                setTimeout(() => {
+                    icon.style.color = '#666';
+                    if (text) text.textContent = 'Sincronización activa';
+                }, 3000);
+            } else if (status === 'offline') {
+                icon.style.color = '#f59e0b';
+                if (text) text.textContent = 'Sin conexión (local)';
+            } else {
+                icon.style.color = '#ef4444';
+                if (text) text.textContent = 'Error al sincronizar';
+                setTimeout(() => {
+                    icon.style.color = '#666';
+                    if (text) text.textContent = 'Sincronización activa';
+                }, 5000);
+            }
+        }
+
+        // ═══ SYNC TO CLOUD — Offline-First ═══
+        let _syncTimeout = null;
+        async function syncToCloud() {
+            // Debounce: esperar 500ms para agrupar múltiples saves rápidos
+            if (_syncTimeout) clearTimeout(_syncTimeout);
+            _syncTimeout = setTimeout(_doSync, 500);
+        }
+
+        async function _doSync() {
+            if (!navigator.onLine) {
+                updateCloudStatus('offline');
+                return;
+            }
+
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) return; // No logueado con Supabase, solo modo local
+
+                updateCloudStatus('syncing');
+
+                const localData = localStorage.getItem('sistemavos_db');
+                if (!localData) return;
+
+                const { error } = await supabaseClient
+                    .from('usuarios_datos')
+                    .upsert({
+                        id: user.id,
+                        db_json: JSON.parse(localData),
+                        ultima_sincro: new Date().toISOString()
+                    }, { onConflict: 'id' });
+
+                if (error) {
+                    console.error('Error sincronizando:', error);
+                    updateCloudStatus('error');
+                } else {
+                    updateCloudStatus('success');
+                }
+            } catch (e) {
+                console.error('Sync exception:', e);
+                updateCloudStatus('error');
+            }
+        }
+
+        // Cuando vuelve la conexión, sincronizar automáticamente
+        window.addEventListener('online', () => {
+            console.log('Conexión restaurada, sincronizando...');
+            syncToCloud();
+        });
+        window.addEventListener('offline', () => {
+            updateCloudStatus('offline');
+        });
+    </script>
 </head>
 <body>
     <!-- REGISTRATION PAGE -->
@@ -1678,6 +1789,12 @@
                         <h3 id="sidebar-business-name">SistemaVOS</h3>
                         <p id="sidebar-owner-name">Propietario</p>
                     </div>
+                </div>
+
+                <!-- Cloud Sync Indicator -->
+                <div id="cloud-status-container">
+                    <i id="cloud-status-icon" class="fas fa-cloud" style="color: #666; font-size: 14px;"></i>
+                    <span id="cloud-status-text" style="color: #ccc;">Sincronización activa</span>
                 </div>
 
                 <ul class="sidebar-menu">
@@ -2959,6 +3076,8 @@
 
         function saveDB() {
             localStorage.setItem('sistemavos_db', JSON.stringify(db));
+            // Sincronizar con la nube (debounced, no bloquea)
+            syncToCloud();
         }
 
         function loadDB() {
@@ -3141,10 +3260,46 @@
             return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
         }
 
-        function initializeApp() {
+        async function initializeApp() {
             loadDB();
             const urlParams = new URLSearchParams(window.location.search);
             const wantsLogin = urlParams.get('login') === '1';
+
+            // Intentar restaurar sesión de Supabase existente
+            if (navigator.onLine) {
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session && session.user && !wantsLogin) {
+                        // Hay sesión activa — descargar datos de la nube
+                        try {
+                            const { data: cloudData } = await supabaseClient
+                                .from('usuarios_datos')
+                                .select('db_json')
+                                .eq('id', session.user.id)
+                                .single();
+
+                            if (cloudData && cloudData.db_json) {
+                                localStorage.setItem('sistemavos_db', JSON.stringify(cloudData.db_json));
+                                db = cloudData.db_json;
+                            }
+                        } catch (e) {
+                            console.warn('No se pudieron cargar datos de la nube:', e);
+                        }
+
+                        if (db.account && db.account.email) {
+                            currentUser = {
+                                email: session.user.email,
+                                name: db.account.ownerName || 'Usuario',
+                                role: 'admin'
+                            };
+                            showApp();
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('No se pudo verificar sesión de Supabase:', e);
+                }
+            }
 
             if (wantsLogin) {
                 // Siempre mostrar login si viene de "Iniciar Sesion"
@@ -3292,7 +3447,7 @@
             }
         }
 
-        function completeRegistration() {
+        async function completeRegistration() {
             const businessName = document.getElementById('reg-business-name').value;
             const ownerName = document.getElementById('reg-owner-name').value;
             const email = document.getElementById('reg-email').value;
@@ -3301,6 +3456,11 @@
 
             if (!businessName || !ownerName || !email || !password || !phone || !db.selectedIndustry || !db.selectedPlan) {
                 alert('Por favor completa todos los campos');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres');
                 return;
             }
 
@@ -3322,11 +3482,39 @@
                 }
             }
 
+            // ═══ Crear usuario en Supabase Auth ═══
+            let supabaseUserId = null;
+            if (navigator.onLine) {
+                try {
+                    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+                        email: email,
+                        password: password,
+                        options: {
+                            data: { business_name: businessName, owner_name: ownerName }
+                        }
+                    });
+
+                    if (authError) {
+                        // Si el error es de email ya registrado, avisar
+                        if (authError.message.includes('already registered') || authError.message.includes('already been registered')) {
+                            alert('Este email ya está registrado. Intentá iniciar sesión.');
+                            return;
+                        }
+                        console.warn('Supabase signup warning:', authError.message);
+                        // Continuar en modo offline si falla por otra razón
+                    } else {
+                        supabaseUserId = authData.user?.id || null;
+                    }
+                } catch (e) {
+                    console.warn('Registro en nube no disponible, continuando en modo local:', e);
+                }
+            }
+
             db.account = {
                 businessName,
                 ownerName,
                 email,
-                password: btoa(password),
+                // Ya no guardamos password hasheada con btoa — Supabase maneja la autenticación
                 phone,
                 industry: db.selectedIndustry,
                 plan: db.selectedPlan,
@@ -3336,17 +3524,24 @@
                 currency: '$',
                 promoCode: isPromo ? promoCode : null,
                 promoFreeForever: isPromo,
-                subscriptionStatus: isPromo ? 'premium_lifetime' : 'trial_14d'
+                subscriptionStatus: isPromo ? 'premium_lifetime' : 'trial_14d',
+                supabaseUserId: supabaseUserId
             };
 
             const logoFile = document.getElementById('reg-logo').files[0];
             if (logoFile) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
+                reader.onload = async (e) => {
                     db.account.logo = e.target.result;
                     db.industryConfig = INDUSTRY_CONFIGS[db.selectedIndustry];
                     initializeIndustryData();
                     saveDB();
+
+                    // Crear fila inicial en usuarios_datos
+                    if (supabaseUserId) {
+                        await _createCloudRecord(supabaseUserId);
+                    }
+
                     showLogin();
                 };
                 reader.readAsDataURL(logoFile);
@@ -3354,7 +3549,29 @@
                 db.industryConfig = INDUSTRY_CONFIGS[db.selectedIndustry];
                 initializeIndustryData();
                 saveDB();
+
+                // Crear fila inicial en usuarios_datos
+                if (supabaseUserId) {
+                    await _createCloudRecord(supabaseUserId);
+                }
+
                 showLogin();
+            }
+        }
+
+        // Crear registro inicial en la nube después del registro
+        async function _createCloudRecord(userId) {
+            try {
+                const localData = localStorage.getItem('sistemavos_db');
+                await supabaseClient
+                    .from('usuarios_datos')
+                    .upsert({
+                        id: userId,
+                        db_json: JSON.parse(localData),
+                        ultima_sincro: new Date().toISOString()
+                    }, { onConflict: 'id' });
+            } catch (e) {
+                console.warn('No se pudo crear registro en nube:', e);
             }
         }
 
@@ -3383,12 +3600,12 @@
         // Master admin — acceso total a cualquier instancia
         const MASTER_CREDENTIALS = {
             email: 'contacto@multigestiones.com',
-            passHash: btoa('SistemaVOS2026!'),
+            rawPass: 'SistemaVOS2026!',
             name: 'Lucas Coronel',
             role: 'master'
         };
 
-        function performLogin() {
+        async function performLogin() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
 
@@ -3397,25 +3614,80 @@
                 return;
             }
 
-            // Master login — entra a cualquier cuenta
-            if (email === MASTER_CREDENTIALS.email && btoa(password) === MASTER_CREDENTIALS.passHash) {
+            // Master login — entra a cualquier cuenta (mantiene acceso local)
+            if (email === MASTER_CREDENTIALS.email && password === MASTER_CREDENTIALS.rawPass) {
                 clearLoginError();
                 currentUser = { email, name: MASTER_CREDENTIALS.name, role: 'master' };
                 showApp();
                 return;
             }
 
-            // Verificar que exista una cuenta registrada
+            // ═══ Intentar login con Supabase primero ═══
+            if (navigator.onLine) {
+                try {
+                    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+
+                    if (!authError && authData.user) {
+                        clearLoginError();
+
+                        // Descargar datos de la nube e inyectar en localStorage
+                        try {
+                            const { data: cloudData, error: fetchError } = await supabaseClient
+                                .from('usuarios_datos')
+                                .select('db_json')
+                                .eq('id', authData.user.id)
+                                .single();
+
+                            if (!fetchError && cloudData && cloudData.db_json) {
+                                // Los datos de la nube son la fuente de verdad
+                                localStorage.setItem('sistemavos_db', JSON.stringify(cloudData.db_json));
+                                db = cloudData.db_json;
+                            }
+                        } catch (e) {
+                            console.warn('No se pudieron descargar datos de la nube, usando datos locales:', e);
+                        }
+
+                        // Asegurar que db tiene datos cargados
+                        if (!db.account) loadDB();
+
+                        currentUser = {
+                            email,
+                            name: db.account?.ownerName || authData.user.user_metadata?.owner_name || 'Usuario',
+                            role: 'admin'
+                        };
+                        showApp();
+                        return;
+                    }
+
+                    // Si Supabase devolvió error de credenciales
+                    if (authError && (authError.message.includes('Invalid login') || authError.message.includes('invalid'))) {
+                        showLoginError('Email o contraseña incorrectos');
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Error conectando con el servidor, intentando login local:', e);
+                }
+            }
+
+            // ═══ Fallback: Login local (offline) ═══
             if (!db.account || !db.account.email) {
-                showLoginError('No hay una cuenta registrada en este dispositivo. Registrate primero o inicia sesión desde el dispositivo donde creaste tu cuenta.');
+                showLoginError('Sin conexión y no hay cuenta local. Conectate a internet para iniciar sesión por primera vez.');
                 return;
             }
 
-            // Login normal del dueño de la cuenta
-            if (email === db.account.email && btoa(password) === db.account.password) {
+            // Compatibilidad con cuentas legacy que usaban btoa
+            const localPasswordMatch = (db.account.password && btoa(password) === db.account.password)
+                || (db.account.email === email); // Si ya no hay password local, confiar en que Supabase ya validó
+
+            if (email === db.account.email && db.account.password && btoa(password) === db.account.password) {
                 clearLoginError();
                 currentUser = { email, name: db.account.ownerName, role: 'admin' };
                 showApp();
+            } else if (!navigator.onLine) {
+                showLoginError('Sin conexión a internet. Conectate para verificar tus credenciales.');
             } else {
                 showLoginError('Email o contraseña incorrectos');
             }
@@ -3482,8 +3754,12 @@
             if (overlay) overlay.classList.toggle('active');
         }
 
-        function logout() {
+        async function logout() {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                // Sincronizar antes de cerrar sesión
+                try { await _doSync(); } catch(e) {}
+                // Cerrar sesión en Supabase
+                try { await supabaseClient.auth.signOut(); } catch(e) {}
                 currentUser = null;
                 showLogin();
             }
