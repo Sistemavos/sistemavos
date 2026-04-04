@@ -7509,5 +7509,285 @@
             const vencimiento = db.account.fechaVencimiento ? new Date(db.account.fechaVencimiento) : null;
             const ahora = new Date();
 
+            // Demo / lifetime
+            if (db.account.plan_status === 'lifetime' || currentUser?.role === 'demo') {
+                return { activo: true, plan: 'premium', tipo: 'lifetime' };
+            }
+
             // Plan activo pagado
-            if (status === 'active' && vencimiento && vencim
+            if (status === 'active' && vencimiento && vencimiento > ahora) {
+                return { activo: true, plan: 'pro', tipo: 'pagado', vencimiento };
+            }
+
+            // Trial
+            const fechaRegistro = db.account.fechaRegistro ? new Date(db.account.fechaRegistro) : new Date();
+            const diasTrial = 14;
+            const finesTrial = new Date(fechaRegistro.getTime() + diasTrial * 86400000);
+            const diasRestantes = Math.ceil((finesTrial - ahora) / 86400000);
+
+            if (diasRestantes > 0) {
+                return { activo: true, plan: 'trial', tipo: 'trial', diasRestantes, finesTrial };
+            }
+
+            return { activo: false, razon: 'expirado', diasRestantes: 0 };
+        }
+
+        // ── Banner de suscripción ──────────────────────────────────────────────
+        function renderBannerSuscripcion() {
+            const contenedor = document.getElementById('banner-suscripcion');
+            if (!contenedor) return;
+
+            const estado = verificarEstadoPlan();
+            if (estado.tipo === 'lifetime' || estado.tipo === 'master') {
+                contenedor.style.display = 'none';
+                return;
+            }
+
+            contenedor.style.display = '';
+            if (!estado.activo) {
+                contenedor.innerHTML = `
+                  <div style="background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;padding:10px 16px;border-radius:8px;margin:8px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <i class="fas fa-lock"></i>
+                    <span><strong>Tu período de prueba ha vencido.</strong> Activa tu plan para continuar usando SistemaVOS.</span>
+                    <button onclick="abrirPanelPago()" style="margin-left:auto;background:#dc2626;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-weight:600;">Ver planes</button>
+                  </div>`;
+            } else if (estado.tipo === 'trial' && estado.diasRestantes <= 5) {
+                contenedor.innerHTML = `
+                  <div style="background:#fef3c7;border:1px solid #fbbf24;color:#92400e;padding:10px 16px;border-radius:8px;margin:8px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <i class="fas fa-clock"></i>
+                    <span>Te quedan <strong>${estado.diasRestantes} día${estado.diasRestantes !== 1 ? 's' : ''}</strong> de prueba gratuita.</span>
+                    <button onclick="abrirPanelPago()" style="margin-left:auto;background:#d97706;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-weight:600;">Activar plan</button>
+                  </div>`;
+            } else {
+                contenedor.innerHTML = `
+                  <div style="background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46;padding:8px 16px;border-radius:8px;margin:8px 0;display:flex;align-items:center;gap:10px;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Período de prueba activo — ${estado.diasRestantes} día${estado.diasRestantes !== 1 ? 's' : ''} restantes.</span>
+                  </div>`;
+            }
+        }
+
+        // ── Paywall ───────────────────────────────────────────────────────────
+        function requierePlan(accion) {
+            const estado = verificarEstadoPlan();
+            if (estado.activo) return true;
+            _mostrarPaywallModal(accion);
+            return false;
+        }
+
+        function _mostrarPaywallModal(accion) {
+            const existing = document.getElementById('paywall-modal');
+            if (existing) existing.remove();
+            const modal = document.createElement('div');
+            modal.id = 'paywall-modal';
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;';
+            modal.innerHTML = `
+              <div style="background:#fff;border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <div style="font-size:48px;margin-bottom:12px;">🔒</div>
+                <h2 style="margin:0 0 8px;color:#1e293b;">Función bloqueada</h2>
+                <p style="color:#64748b;margin:0 0 24px;">${accion ? `"${accion}" requiere un plan activo.` : 'Esta función requiere un plan activo.'} Activa tu suscripción para continuar.</p>
+                <button onclick="abrirPanelPago();document.getElementById('paywall-modal').remove();" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:12px 28px;font-size:1rem;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;">Ver planes y precios</button>
+                <button onclick="document.getElementById('paywall-modal').remove();" style="background:#f1f5f9;color:#64748b;border:none;border-radius:8px;padding:10px 28px;font-size:0.9rem;cursor:pointer;width:100%;">Cancelar</button>
+              </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+        }
+
+        // ── Modo lectura (plan vencido) ───────────────────────────────────────
+        function aplicarModoLectura() {
+            const estado = verificarEstadoPlan();
+            if (estado.activo) {
+                document.querySelectorAll('.locked-btn').forEach(b => b.classList.remove('locked-btn'));
+                return;
+            }
+            const selectores = [
+                'button[onclick*="guardar"]', 'button[onclick*="Guardar"]',
+                'button[onclick*="agregar"]', 'button[onclick*="Agregar"]',
+                'button[onclick*="eliminar"]', 'button[onclick*="crear"]',
+                'button[onclick*="registrar"]', 'button[onclick*="facturar"]',
+                'button[onclick*="pagar"]', 'button[onclick*="generarNomina"]',
+                'button[onclick*="abrirModalProducto"]', 'button[onclick*="abrirModalCliente"]'
+            ];
+            document.querySelectorAll(selectores.join(',')).forEach(btn => {
+                if (btn.closest('#login-page') || btn.closest('#plan-modal') || btn.closest('#paywall-modal')) return;
+                btn.classList.add('locked-btn');
+                if (!btn.dataset.lockBound) {
+                    btn.dataset.lockBound = '1';
+                    btn.addEventListener('click', e => {
+                        if (!verificarEstadoPlan().activo) { e.stopImmediatePropagation(); _mostrarPaywallModal(); }
+                    }, true);
+                }
+            });
+        }
+
+        // ── Panel de pago / planes ────────────────────────────────────────────
+        function abrirPanelPago() {
+            const existing = document.getElementById('plan-modal');
+            if (existing) existing.remove();
+
+            const referidosActivos = Array.isArray(db.account?.referidosActivos) ? db.account.referidosActivos.length : 0;
+            const descuento = Math.min(referidosActivos * 5, 30);
+            const precioBase = { mensual: 8990, semestral: 44900, anual: 79900 };
+            const aplicarDesc = p => Math.round(p * (1 - descuento / 100));
+
+            const modal = document.createElement('div');
+            modal.id = 'plan-modal';
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;overflow-y:auto;';
+            modal.innerHTML = `
+              <div style="background:#fff;border-radius:16px;padding:32px;max-width:680px;width:95%;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                  <h2 style="margin:0;color:#1e293b;">Elige tu plan</h2>
+                  <button onclick="document.getElementById('plan-modal').remove()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#94a3b8;">✕</button>
+                </div>
+                ${descuento > 0 ? `<div style="background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46;padding:10px 16px;border-radius:8px;margin-bottom:16px;"><i class="fas fa-gift"></i> Tienes <strong>${descuento}% de descuento</strong> por tus ${referidosActivos} referido${referidosActivos !== 1 ? 's' : ''} activos.</div>` : ''}
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;">
+                  ${[
+                    { periodo: 'mensual', label: 'Mensual', precio: aplicarDesc(precioBase.mensual), original: precioBase.mensual, badge: '' },
+                    { periodo: 'semestral', label: 'Semestral', precio: aplicarDesc(precioBase.semestral), original: precioBase.semestral, badge: 'Ahorrás 17%' },
+                    { periodo: 'anual', label: 'Anual', precio: aplicarDesc(precioBase.anual), original: precioBase.anual, badge: '⭐ Mejor valor' }
+                  ].map(p => `
+                    <div style="border:2px solid #e2e8f0;border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:border-color 0.2s;" onclick="iniciarPagoMercadoPago('${p.periodo}',${p.precio})" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#e2e8f0'">
+                      ${p.badge ? `<div style="background:var(--primary);color:#fff;border-radius:20px;padding:3px 12px;font-size:0.75rem;font-weight:700;margin-bottom:10px;display:inline-block;">${p.badge}</div>` : '<div style="height:28px;"></div>'}
+                      <div style="font-size:1.1rem;font-weight:700;color:#1e293b;margin-bottom:4px;">${p.label}</div>
+                      <div style="font-size:1.8rem;font-weight:800;color:var(--primary);">$${p.precio.toLocaleString('es-AR')}</div>
+                      <div style="font-size:0.75rem;color:#94a3b8;">ARS / ${p.periodo}</div>
+                      ${descuento > 0 ? `<div style="font-size:0.75rem;color:#94a3b8;text-decoration:line-through;">$${p.original.toLocaleString('es-AR')}</div>` : ''}
+                      <button style="margin-top:14px;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:10px 0;width:100%;font-weight:700;cursor:pointer;font-size:0.95rem;">Contratar</button>
+                    </div>`).join('')}
+                </div>
+                <p style="text-align:center;color:#94a3b8;font-size:0.8rem;margin-top:16px;">Pagos procesados de forma segura a través de MercadoPago. Podés cancelar en cualquier momento.</p>
+              </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+        }
+
+        // ── Iniciar pago MercadoPago vía Make ────────────────────────────────
+        async function iniciarPagoMercadoPago(periodo, monto) {
+            if (!MAKE_WEBHOOK_PAGO) { alert('Sistema de pagos no configurado.'); return; }
+            const userId = currentUser?.id || db.account?.email || 'anonimo';
+            _mostrarEsperandoPago();
+            try {
+                const res = await fetch(MAKE_WEBHOOK_PAGO, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        evento: 'iniciar_pago',
+                        periodo, monto,
+                        userId,
+                        email: db.account?.email,
+                        businessName: db.account?.businessName,
+                        external_reference: userId,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (data.init_point || data.checkout_url) {
+                    window.open(data.init_point || data.checkout_url, '_blank');
+                } else {
+                    alert('Redirigiendo al sistema de pago... Si no abre, revisá tu bloqueador de pop-ups.');
+                }
+            } catch (err) {
+                console.error('Error al iniciar pago:', err);
+                alert('No se pudo conectar con el sistema de pago. Intentá nuevamente.');
+            } finally {
+                const esp = document.getElementById('esperando-pago-modal');
+                if (esp) esp.remove();
+            }
+        }
+
+        function _mostrarEsperandoPago() {
+            const existing = document.getElementById('esperando-pago-modal');
+            if (existing) existing.remove();
+            const modal = document.createElement('div');
+            modal.id = 'esperando-pago-modal';
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;';
+            modal.innerHTML = `
+              <div style="background:#fff;border-radius:16px;padding:32px;text-align:center;max-width:320px;">
+                <div style="font-size:2rem;margin-bottom:12px;animation:spin 1s linear infinite;display:inline-block;">⏳</div>
+                <h3 style="margin:0 0 8px;">Procesando...</h3>
+                <p style="color:#64748b;margin:0;">Conectando con MercadoPago, aguardá un momento.</p>
+              </div>`;
+            document.body.appendChild(modal);
+        }
+
+        // ── Polling plan status ──────────────────────────────────────────────
+        let _planPollInterval = null;
+        function escucharCambiosDePlan() {
+            if (_planPollInterval) clearInterval(_planPollInterval);
+            if (!supabaseClient || !db.account?.email) return;
+
+            _planPollInterval = setInterval(async () => {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('accounts')
+                        .select('plan_status, fecha_vencimiento, subscription_status')
+                        .eq('email', db.account.email)
+                        .single();
+                    if (error || !data) return;
+
+                    const cambio = data.plan_status !== db.account.planStatus
+                        || data.subscription_status !== db.account.subscriptionStatus;
+
+                    if (cambio) {
+                        db.account.planStatus = data.plan_status;
+                        db.account.subscriptionStatus = data.subscription_status;
+                        db.account.fechaVencimiento = data.fecha_vencimiento;
+                        guardarDB();
+                        renderBannerSuscripcion();
+                        aplicarModoLectura();
+                        if (data.plan_status === 'active') {
+                            mostrarToast('✅ ¡Tu plan fue activado! Bienvenido a SistemaVOS Pro.', 'success');
+                            const pm = document.getElementById('plan-modal');
+                            if (pm) pm.remove();
+                        }
+                    }
+                } catch (e) { /* silencioso */ }
+            }, 15000);
+        }
+
+        // ── pageRenderHooks ──────────────────────────────────────────────────
+        const pageRenderHooks = {
+            'dashboard':    () => { renderDashboard(); renderBannerSuscripcion(); },
+            'clientes':     () => { renderVentasSelects(); renderClientes(); actualizarPanelOdontologico(); actualizarPanelInmobiliario(); },
+            'productos':    () => { renderProductos(); },
+            'ventas':       () => { renderVentasSelects(); renderVentas(); },
+            'facturas':     () => { renderFacturas(); },
+            'gastos':       () => { renderGastos(); },
+            'empleados':    () => { renderEmpleados(); },
+            'nominas':      () => { renderNominas(); },
+            'sucursales':   () => { renderSucursales(); },
+            'proveedores':  () => { renderProveedores(); },
+            'arqueo':       () => { renderArqueo(); },
+            'reportes':     () => { renderReportes(); },
+            'config':       () => { cargarConfiguracion(); renderRubroSelector(); }
+        };
+
+        // ── Override showPage para aplicar modo lectura ──────────────────────
+        const _showPageOriginal = showPage;
+        function showPage(page) {
+            _showPageOriginal(page);
+            if (pageRenderHooks[page]) {
+                try { pageRenderHooks[page](); } catch(e) { console.warn('pageRenderHook error:', page, e); }
+            }
+            setTimeout(aplicarModoLectura, 200);
+        }
+
+        // ── Init ─────────────────────────────────────────────────────────────
+        (function init() {
+            try {
+                const saved = localStorage.getItem('sistemavos_db');
+                if (saved) db = JSON.parse(saved);
+            } catch(e) { db = {}; }
+
+            if (db.account && db.currentUser) {
+                currentUser = db.currentUser;
+                showApp();
+                escucharCambiosDePlan();
+            } else {
+                showLogin();
+            }
+        })();
+
+    </script>
+</body>
+</html>
