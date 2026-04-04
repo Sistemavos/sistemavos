@@ -3068,6 +3068,24 @@
 
                                 <button class="btn-primary" onclick="guardarConfigGeneral()">Guardar Cambios</button>
                             </div>
+
+                            <!-- PANEL CAMBIAR RUBRO -->
+                            <div class="card" style="margin-top:16px;border:2px dashed var(--primary);background:linear-gradient(135deg,#f5f3ff,#fff);">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                                    <i class="fas fa-exchange-alt" style="font-size:20px;color:var(--primary);"></i>
+                                    <div>
+                                        <h3 style="margin:0;font-size:15px;">Cambiar Rubro</h3>
+                                        <p style="margin:0;font-size:12px;color:var(--gray-500);">Rubro actual: <strong id="rubro-actual-label">—</strong></p>
+                                    </div>
+                                </div>
+                                <p style="font-size:12px;color:var(--gray-600);margin-bottom:14px;">
+                                    Seleccioná el rubro para activar los módulos específicos (Odontograma, Fichas Inmobiliarias, etc.). Los datos de clientes y ventas se conservan.
+                                </p>
+                                <div id="rubro-selector-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px;"></div>
+                                <button class="btn-primary" onclick="confirmarCambioRubro()" id="btn-confirmar-rubro" style="display:none;">
+                                    <i class="fas fa-check" style="margin-right:6px;"></i>Aplicar Rubro
+                                </button>
+                            </div>
                         </div>
 
                         <!-- BRANDING CONFIG -->
@@ -4112,6 +4130,52 @@
             role: 'master'
         };
 
+        // ═══ USUARIO DEMO — acceso total sin Supabase ═══
+        const DEMO_CREDENTIALS = {
+            email: 'demo@sistemavos.com',
+            rawPass: 'Demo2026!',
+            name: 'Usuario Demo'
+        };
+
+        function _cargarDBDemo(industria) {
+            const cfg = INDUSTRY_CONFIGS[industria] || INDUSTRY_CONFIGS['general'] || Object.values(INDUSTRY_CONFIGS)[0];
+            return {
+                account: {
+                    businessName: 'Demo SistemaVOS',
+                    ownerName: 'Usuario Demo',
+                    email: 'demo@sistemavos.com',
+                    phone: '1100000000',
+                    industry: industria,
+                    currency: '$',
+                    iva: 21,
+                    instagram: '',
+                    whatsapp: '',
+                    color: '#6C3AE1',
+                    plan_status: 'lifetime',
+                    puntoVenta: 1,
+                    nroFacturaInicio: 1,
+                    codigoReferido: 'VOS-DEMO-0001',
+                    referidosActivos: []
+                },
+                selectedIndustry: industria,
+                selectedPlan: 'pro',
+                industryConfig: cfg,
+                clientes: [],
+                productos: [],
+                ventas: [],
+                facturas: [],
+                gastos: [],
+                empleados: [],
+                nominas: [],
+                sucursales: [],
+                proveedores: [],
+                usuarios: [{ id: 1, name: 'Usuario Demo', email: 'demo@sistemavos.com', role: 'admin', pin: '1234' }],
+                arqueo: [],
+                odontologia: {},
+                inmobiliaria: { propiedades: [], visitas: {} }
+            };
+        }
+
         async function performLogin() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
@@ -4125,6 +4189,17 @@
             if (email === MASTER_CREDENTIALS.email && password === MASTER_CREDENTIALS.rawPass) {
                 clearLoginError();
                 currentUser = { email, name: MASTER_CREDENTIALS.name, role: 'master' };
+                showApp();
+                return;
+            }
+
+            // Demo login — acceso total sin Supabase, todos los rubros disponibles
+            if (email === DEMO_CREDENTIALS.email && password === DEMO_CREDENTIALS.rawPass) {
+                clearLoginError();
+                const industriaActual = db.account?.industry || 'general';
+                db = _cargarDBDemo(industriaActual);
+                localStorage.setItem('sistemavos_db', JSON.stringify(db));
+                currentUser = { email, name: DEMO_CREDENTIALS.name, role: 'demo' };
                 showApp();
                 return;
             }
@@ -4342,6 +4417,7 @@
             event.target.closest('button').classList.add('active');
             updatePageTitle(page);
             if (page === 'citas') renderCitas();
+            if (page === 'config') { cargarConfiguracion(); renderRubroSelector(); }
         }
 
         function updatePageTitle(page) {
@@ -7261,6 +7337,112 @@
         // ═══ FIN MÓDULO INMOBILIARIA ═══
 
         // ══════════════════════════════════════════════════════════
+        // CAMBIAR RUBRO — Selector dinámico en Configuración
+        // ══════════════════════════════════════════════════════════
+
+        const RUBRO_ICONOS = {
+            general:        { icon: 'fa-store', label: 'General' },
+            restaurantes:   { icon: 'fa-utensils', label: 'Restaurantes' },
+            peluquerias:    { icon: 'fa-cut', label: 'Peluquerías' },
+            clinicas:       { icon: 'fa-heartbeat', label: 'Clínicas' },
+            gimnasios:      { icon: 'fa-dumbbell', label: 'Gimnasios' },
+            tiendas:        { icon: 'fa-shopping-bag', label: 'Tiendas' },
+            talleres:       { icon: 'fa-wrench', label: 'Talleres' },
+            lavaderos:      { icon: 'fa-car-side', label: 'Lavaderos' },
+            kioscos:        { icon: 'fa-store-alt', label: 'Kioscos' },
+            inmobiliarias:  { icon: 'fa-building', label: 'Inmobiliaria' },
+            odontologia:    { icon: 'fa-tooth', label: 'Odontología' }
+        };
+
+        let _rubroSeleccionadoTemp = null;
+
+        function renderRubroSelector() {
+            const grid = document.getElementById('rubro-selector-grid');
+            const label = document.getElementById('rubro-actual-label');
+            if (!grid) return;
+
+            const rubroActual = db.account?.industry || db.selectedIndustry || 'general';
+            if (label) {
+                const conf = RUBRO_ICONOS[rubroActual];
+                label.textContent = conf ? conf.label : rubroActual;
+            }
+
+            _rubroSeleccionadoTemp = null;
+            const btnConfirmar = document.getElementById('btn-confirmar-rubro');
+            if (btnConfirmar) btnConfirmar.style.display = 'none';
+
+            const rubros = Object.keys(INDUSTRY_CONFIGS);
+            grid.innerHTML = rubros.map(r => {
+                const conf = RUBRO_ICONOS[r] || { icon: 'fa-briefcase', label: r };
+                const esActual = r === rubroActual;
+                return `<div onclick="seleccionarRubroTemp('${r}')" id="rubro-card-${r}"
+                    style="cursor:pointer;border-radius:10px;padding:12px 8px;text-align:center;border:2px solid ${esActual ? 'var(--primary)' : 'var(--gray-200)'};
+                    background:${esActual ? '#f0ecfc' : '#fff'};transition:all .2s;">
+                    <i class="fas ${conf.icon}" style="font-size:20px;color:${esActual ? 'var(--primary)' : 'var(--gray-500)'};margin-bottom:6px;display:block;"></i>
+                    <span style="font-size:11px;font-weight:${esActual ? '700' : '500'};color:${esActual ? 'var(--primary)' : 'var(--gray-700)'};">${conf.label}</span>
+                    ${esActual ? '<div style="font-size:9px;color:var(--primary);margin-top:2px;">ACTIVO</div>' : ''}
+                </div>`;
+            }).join('');
+        }
+
+        function seleccionarRubroTemp(rubro) {
+            _rubroSeleccionadoTemp = rubro;
+            // Resetear todos los cards
+            Object.keys(INDUSTRY_CONFIGS).forEach(r => {
+                const card = document.getElementById(`rubro-card-${r}`);
+                if (!card) return;
+                const conf = RUBRO_ICONOS[r] || { icon: 'fa-briefcase', label: r };
+                const esActual = r === (db.account?.industry || 'general');
+                const esSeleccionado = r === rubro;
+                card.style.border = esSeleccionado ? '2px solid #f59e0b' : esActual ? '2px solid var(--primary)' : '2px solid var(--gray-200)';
+                card.style.background = esSeleccionado ? '#fef3c7' : esActual ? '#f0ecfc' : '#fff';
+            });
+            const btnConfirmar = document.getElementById('btn-confirmar-rubro');
+            if (btnConfirmar) {
+                const conf = RUBRO_ICONOS[rubro] || { label: rubro };
+                btnConfirmar.style.display = 'inline-flex';
+                btnConfirmar.innerHTML = `<i class="fas fa-check" style="margin-right:6px;"></i>Aplicar: ${conf.label}`;
+            }
+        }
+
+        function confirmarCambioRubro() {
+            if (!_rubroSeleccionadoTemp) return;
+            const rubro = _rubroSeleccionadoTemp;
+            const conf = RUBRO_ICONOS[rubro] || { label: rubro };
+
+            if (!confirm(`¿Cambiar el rubro a "${conf.label}"? Los módulos específicos del rubro se activarán. Los datos de clientes y ventas se conservan.`)) return;
+
+            // Aplicar el cambio de rubro
+            db.account.industry = rubro;
+            db.selectedIndustry = rubro;
+            db.industryConfig = INDUSTRY_CONFIGS[rubro];
+
+            // Si es demo, también recargar configuración base del rubro
+            if (currentUser?.role === 'demo') {
+                const demoBase = _cargarDBDemo(rubro);
+                db.account = { ...demoBase.account, ...db.account, industry: rubro };
+                db.industryConfig = demoBase.industryConfig;
+            }
+
+            saveDB();
+
+            // Actualizar sidebar labels
+            updateSidebarBrand();
+
+            // Re-renderizar panel actual
+            renderRubroSelector();
+
+            // Refrescar paneles de rubro
+            actualizarPanelOdontologico();
+            actualizarPanelInmobiliario();
+
+            // Feedback visual
+            const btn = document.getElementById('btn-confirmar-rubro');
+            if (btn) { btn.innerHTML = '<i class="fas fa-check-circle" style="margin-right:6px;"></i>¡Rubro aplicado!'; btn.style.background = '#16a34a'; }
+            setTimeout(() => renderRubroSelector(), 1500);
+        }
+
+        // ══════════════════════════════════════════════════════════
         // BLOQUEO POR FALTA DE PAGO + MERCADO PAGO + MAKE WEBHOOKS
         // ══════════════════════════════════════════════════════════
 
@@ -7328,386 +7510,4 @@
             const ahora = new Date();
 
             // Plan activo pagado
-            if (status === 'active' && vencimiento && vencimiento > ahora) {
-                const diasRestantes = Math.ceil((vencimiento - ahora) / (1000*60*60*24));
-                return { activo: true, plan: db.account.plan, tipo: 'pagado', diasRestantes };
-            }
-
-            // Trial 14 días
-            if (status === 'trial_14d' || status === 'trial') {
-                const createdAt = new Date(db.account.createdAt);
-                const diasDesdeCreacion = Math.floor((ahora - createdAt) / (1000*60*60*24));
-                const diasRestantes = 14 - diasDesdeCreacion;
-                if (diasRestantes > 0) {
-                    return { activo: true, plan: db.account.plan, tipo: 'trial', diasRestantes };
-                } else {
-                    return { activo: false, plan: db.account.plan, tipo: 'trial_expirado', razon: 'Trial de 14 días vencido' };
-                }
-            }
-
-            // Expired
-            if (status === 'expired' || (vencimiento && vencimiento <= ahora)) {
-                return { activo: false, plan: db.account.plan, tipo: 'expirado', razon: 'Suscripción vencida' };
-            }
-
-            // Fallback: permitir acceso
-            return { activo: true, plan: db.account.plan || 'emprendedor', tipo: 'desconocido' };
-        }
-
-        // Mostrar banner de estado de suscripción
-        function renderBannerSuscripcion() {
-            let banner = document.getElementById('suscripcion-banner');
-            if (!banner) {
-                banner = document.createElement('div');
-                banner.id = 'suscripcion-banner';
-                const header = document.querySelector('.header');
-                if (header) header.parentElement.insertBefore(banner, header.nextSibling);
-            }
-
-            const estado = verificarEstadoPlan();
-
-            if (!estado.activo) {
-                // BLOQUEADO
-                banner.style.cssText = 'background:linear-gradient(135deg,#fef2f2,#fff1f2);border-bottom:2px solid #fecaca;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;';
-                banner.innerHTML = `
-                    <div>
-                        <strong style="color:#991b1b;font-size:14px;"><i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>${estado.razon}</strong>
-                        <p style="font-size:12px;color:#7f1d1d;margin-top:4px;">Algunas funciones están bloqueadas. Suscribite para seguir usando SistemaVOS sin límites.</p>
-                    </div>
-                    <button onclick="abrirPanelPago()" style="padding:10px 24px;background:linear-gradient(135deg,#6C3AE1,#06B6D4);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;">
-                        <i class="fas fa-credit-card" style="margin-right:6px;"></i>Suscribirme Ahora
-                    </button>`;
-                return;
-            }
-
-            if (estado.tipo === 'trial' && estado.diasRestantes <= 5) {
-                // Trial por vencer
-                banner.style.cssText = 'background:linear-gradient(135deg,#fffbeb,#fef9c3);border-bottom:2px solid #fde68a;padding:12px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;';
-                banner.innerHTML = `
-                    <div>
-                        <strong style="color:#92400e;font-size:13px;"><i class="fas fa-clock" style="margin-right:6px;"></i>Tu prueba gratuita vence en ${estado.diasRestantes} día${estado.diasRestantes !== 1 ? 's' : ''}</strong>
-                        <p style="font-size:12px;color:#78350f;margin-top:2px;">Suscribite ahora para no perder tus datos.</p>
-                    </div>
-                    <button onclick="abrirPanelPago()" style="padding:8px 20px;background:#f59e0b;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">
-                        <i class="fas fa-crown" style="margin-right:4px;"></i>Elegir Plan
-                    </button>`;
-                return;
-            }
-
-            if (estado.tipo === 'pagado') {
-                banner.style.cssText = 'display:none;';
-                return;
-            }
-
-            if (estado.tipo === 'lifetime') {
-                banner.style.cssText = 'display:none;';
-                return;
-            }
-
-            if (estado.tipo === 'trial' && estado.diasRestantes > 5) {
-                banner.style.cssText = 'background:linear-gradient(135deg,#eff6ff,#f0f9ff);border-bottom:1px solid #bfdbfe;padding:8px 32px;display:flex;justify-content:space-between;align-items:center;';
-                banner.innerHTML = `<span style="font-size:12px;color:#1e40af;"><i class="fas fa-info-circle" style="margin-right:4px;"></i>Prueba gratuita: ${estado.diasRestantes} días restantes</span>
-                    <button onclick="abrirPanelPago()" style="padding:6px 14px;background:#3b82f6;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Mejorar plan</button>`;
-                return;
-            }
-
-            banner.style.cssText = 'display:none;';
-        }
-
-        // Función para bloquear funciones premium (llamar antes de acciones)
-        function requierePlan(funcionNombre) {
-            const estado = verificarEstadoPlan();
-            if (estado.activo) return true;
-
-            // Mostrar modal de paywall en vez de un alert
-            _mostrarPaywallModal(funcionNombre, estado.razon);
-            return false;
-        }
-
-        function _mostrarPaywallModal(funcionNombre, razon) {
-            let modal = document.getElementById('paywall-modal');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'paywall-modal';
-                modal.className = 'modal';
-                modal.innerHTML = `<div class="modal-overlay" onclick="closeModal('paywall-modal')"></div>
-                    <div class="modal-content" style="max-width:440px;">
-                        <div class="modal-body" id="paywall-modal-body" style="padding:32px;text-align:center;"></div>
-                    </div>`;
-                document.body.appendChild(modal);
-            }
-            document.getElementById('paywall-modal-body').innerHTML = `
-                <div style="font-size:56px;margin-bottom:16px;">🔒</div>
-                <h2 style="font-size:20px;margin-bottom:8px;color:#1e293b;">Función Bloqueada</h2>
-                <p style="color:var(--gray-600);font-size:14px;margin-bottom:8px;">${razon || 'Tu plan expiró'}</p>
-                <p style="color:var(--gray-500);font-size:13px;margin-bottom:20px;">Para usar <strong>"${funcionNombre}"</strong> y todas las funciones de SistemaVOS, activá tu suscripción.</p>
-                <button onclick="closeModal('paywall-modal');abrirPanelPago();" style="width:100%;padding:14px;background:linear-gradient(135deg,#6C3AE1,#06B6D4);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;">
-                    <i class="fas fa-crown" style="margin-right:6px;"></i>Activar Plan Ahora
-                </button>
-                <button onclick="closeModal('paywall-modal')" style="width:100%;padding:10px;background:none;color:var(--gray-500);border:1px solid var(--gray-300);border-radius:8px;cursor:pointer;font-size:13px;">Solo ver datos (modo lectura)</button>
-            `;
-            modal.style.display = 'flex';
-        }
-
-        // ═══ MODO LECTURA: deshabilitar botones si plan no activo ═══
-        function aplicarModoLectura() {
-            const estado = verificarEstadoPlan();
-            if (estado.activo) {
-                // Restaurar botones
-                document.querySelectorAll('[data-paywall-disabled]').forEach(btn => {
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                    btn.style.pointerEvents = 'auto';
-                    btn.removeAttribute('data-paywall-disabled');
-                });
-                return;
-            }
-
-            // Deshabilitar botones de acción (guardar, editar, eliminar, nuevo)
-            const selectores = [
-                'button[onclick*="guardar"]',
-                'button[onclick*="Guardar"]',
-                'button[onclick*="completar"]',
-                'button[onclick*="emitir"]',
-                'button[onclick*="eliminar"]',
-                'button[onclick*="Eliminar"]',
-                'button[onclick*="openModal"]',
-                'button[onclick*="Modal"]',
-                'button[onclick*="Nuevo"]',
-                'button[onclick*="nuevo"]',
-                'button[onclick*="agregar"]',
-                'button[onclick*="conectar"]',
-                'button[onclick*="generar"]',
-                'button[onclick*="limpiar"]',
-                'button[onclick*="reset"]'
-            ];
-
-            // Solo deshabilitar dentro de app-page, no en login/registro
-            const appPage = document.getElementById('app-page');
-            if (!appPage) return;
-
-            selectores.forEach(sel => {
-                appPage.querySelectorAll(sel).forEach(btn => {
-                    // No deshabilitar botones de navegación o pago
-                    if (btn.closest('#suscripcion-banner') || btn.closest('#pago-modal') || btn.closest('#paywall-modal')) return;
-                    if (btn.getAttribute('onclick')?.includes('showPage') || btn.getAttribute('onclick')?.includes('abrirPanelPago')) return;
-
-                    btn.setAttribute('data-paywall-disabled', 'true');
-                    btn.disabled = true;
-                    btn.style.opacity = '0.5';
-                    btn.style.pointerEvents = 'none';
-                });
-            });
-        }
-
-        // ═══ PANEL DE PAGO CON MERCADO PAGO ═══
-        function abrirPanelPago() {
-            const plan = db.account?.plan || 'emprendedor';
-            const referidos = db.account?.referidosActivos?.length || 0;
-            const descuento = Math.min(referidos * 20, 100);
-
-            let html = '<div style="text-align:center;margin-bottom:20px;">';
-            html += '<h2 style="font-size:22px;margin-bottom:8px;">Elegí tu plan</h2>';
-            html += '<p style="color:var(--gray-600);font-size:13px;">Pagá con Mercado Pago de forma segura</p>';
-            if (descuento > 0) {
-                html += `<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:8px 16px;display:inline-block;margin-top:8px;font-size:13px;color:#15803d;"><i class="fas fa-gift" style="margin-right:4px;"></i>¡Tenés un <strong>${descuento}%</strong> de descuento por ${referidos} referido${referidos>1?'s':''}!</div>`;
-            }
-            html += '</div>';
-
-            html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">';
-            Object.entries(PLAN_PRICES).forEach(([key, p]) => {
-                const precioFinal = descuento > 0 ? (p.price * (1 - descuento/100)).toFixed(2) : p.price;
-                const selected = key === plan;
-                html += `<div onclick="seleccionarPlanPago('${key}')" id="plan-pago-${key}" style="border:2px solid ${selected ? 'var(--primary)' : '#e2e8f0'};border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;${selected ? 'background:#f0ecfc;' : ''}">
-                    <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${p.name}</div>
-                    ${descuento > 0 ? `<div style="text-decoration:line-through;color:var(--gray-400);font-size:12px;">US$${p.price}</div>` : ''}
-                    <div style="font-size:22px;font-weight:700;color:var(--primary);">US$${precioFinal}</div>
-                    <div style="font-size:11px;color:var(--gray-500);">/mes</div>
-                </div>`;
-            });
-            html += '</div>';
-
-            html += `<button onclick="iniciarPagoMercadoPago()" style="width:100%;padding:14px;background:linear-gradient(135deg,#00b1ea,#009ee3);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-                <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/6.6.92/mercadopago/logo__large@2x.png" style="height:22px;filter:brightness(10);" alt="MP">
-                Pagar con Mercado Pago
-            </button>`;
-            html += '<p style="text-align:center;font-size:11px;color:var(--gray-500);margin-top:10px;">Pago seguro procesado por Mercado Pago. Tu plan se activa automáticamente.</p>';
-
-            // Abrir en un "modal" reutilizando la lógica existente
-            let modal = document.getElementById('pago-modal');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'pago-modal';
-                modal.className = 'modal';
-                modal.innerHTML = `<div class="modal-overlay" onclick="closeModal('pago-modal')"></div>
-                    <div class="modal-content" style="max-width:520px;">
-                        <div class="modal-header"><h3><i class="fas fa-credit-card" style="margin-right:8px;"></i>Suscripción</h3><button class="modal-close" onclick="closeModal('pago-modal')">×</button></div>
-                        <div class="modal-body" id="pago-modal-body" style="padding:24px;"></div>
-                    </div>`;
-                document.body.appendChild(modal);
-            }
-            document.getElementById('pago-modal-body').innerHTML = html;
-            modal.style.display = 'flex';
-        }
-
-        let _planPagoSeleccionado = null;
-        function seleccionarPlanPago(plan) {
-            _planPagoSeleccionado = plan;
-            Object.keys(PLAN_PRICES).forEach(k => {
-                const el = document.getElementById('plan-pago-' + k);
-                if (el) {
-                    el.style.borderColor = k === plan ? 'var(--primary)' : '#e2e8f0';
-                    el.style.background = k === plan ? '#f0ecfc' : '#fff';
-                }
-            });
-        }
-
-        async function iniciarPagoMercadoPago() {
-            const plan = _planPagoSeleccionado || db.account?.plan || 'emprendedor';
-            const planInfo = PLAN_PRICES[plan] || PLAN_PRICES.emprendedor;
-            const referidos = db.account?.referidosActivos?.length || 0;
-            const descuento = Math.min(referidos * 20, 100);
-            const precioFinal = parseFloat((planInfo.price * (1 - descuento/100)).toFixed(2));
-
-            // Obtener user.id de Supabase (VITAL para external_reference)
-            let userId = null;
-            try {
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                userId = user?.id;
-            } catch(e) {}
-
-            if (!userId) {
-                alert('Necesitás estar logueado con tu cuenta para realizar el pago. Intentá cerrar sesión e iniciar de nuevo.');
-                return;
-            }
-
-            if (precioFinal <= 0) {
-                alert('¡Tu plan es gratis gracias a tus referidos! No necesitás pagar.');
-                db.account.planStatus = 'active';
-                db.account.fechaVencimiento = new Date(Date.now() + 30*24*60*60*1000).toISOString();
-                saveDB();
-                syncSupabaseColumns();
-                closeModal('pago-modal');
-                renderBannerSuscripcion();
-                return;
-            }
-
-            // Cambiar botón a loading
-            const btn = document.querySelector('#pago-modal-body button[onclick="iniciarPagoMercadoPago()"]');
-            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando link de pago...'; }
-
-            // Enviar al webhook de Make que genera la preferencia de Checkout Pro
-            // CLAVE: external_reference = userId para que Make sepa a quién activar
-            try {
-                const response = await fetch(MAKE_WEBHOOK_PAGO, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        accion: 'crear_preferencia',
-                        external_reference: userId,
-                        user_id: userId,
-                        email: db.account.email,
-                        nombre_negocio: db.account.businessName,
-                        plan: plan,
-                        plan_nombre: planInfo.name,
-                        precio: precioFinal,
-                        currency: planInfo.currency,
-                        descuento_referidos: descuento
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.init_point || data.checkout_url || data.url) {
-                    // Make devolvió la URL de Checkout Pro de Mercado Pago
-                    window.open(data.init_point || data.checkout_url || data.url, '_blank');
-                    closeModal('pago-modal');
-
-                    // Mostrar modal de esperando confirmación
-                    _mostrarEsperandoPago();
-                } else {
-                    if (btn) { btn.disabled = false; btn.innerHTML = '<img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/6.6.92/mercadopago/logo__large@2x.png" style="height:22px;filter:brightness(10);" alt="MP"> Pagar con Mercado Pago'; }
-                    alert('No se pudo generar el link de pago.\nContactá a contacto@multigestiones.com para activar tu plan.');
-                }
-            } catch(e) {
-                console.error('Error al iniciar pago:', e);
-                if (btn) { btn.disabled = false; btn.innerHTML = 'Reintentar pago'; }
-                alert('Error de conexión. Verificá tu internet e intentá de nuevo.');
-            }
-        }
-
-        function _mostrarEsperandoPago() {
-            let modal = document.getElementById('pago-modal');
-            if (!modal) return;
-            document.getElementById('pago-modal-body').innerHTML = `
-                <div style="text-align:center;padding:24px;">
-                    <div style="font-size:48px;margin-bottom:16px;"><i class="fas fa-clock" style="color:#f59e0b;"></i></div>
-                    <h3 style="margin-bottom:12px;">Esperando confirmación de pago</h3>
-                    <p style="color:var(--gray-600);font-size:13px;margin-bottom:16px;">Completá el pago en la ventana de Mercado Pago que se abrió.<br>Tu plan se activará automáticamente en unos segundos después de pagar.</p>
-                    <div style="background:var(--gray-100);border-radius:8px;padding:12px;font-size:12px;color:var(--gray-600);">
-                        <i class="fas fa-info-circle" style="margin-right:4px;"></i>Si la ventana no se abrió, <a href="#" onclick="abrirPanelPago();return false;" style="color:var(--primary);text-decoration:underline;">hacé clic acá</a> para reintentar.
-                    </div>
-                    <button onclick="closeModal('pago-modal')" style="margin-top:16px;padding:10px 24px;background:var(--gray-200);color:var(--gray-700);border:none;border-radius:8px;cursor:pointer;font-size:13px;">Cerrar</button>
-                </div>`;
-            modal.style.display = 'flex';
-        }
-
-        // Escuchar cambios de plan_status desde Supabase (real-time)
-        async function escucharCambiosDePlan() {
-            try {
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                if (!user) return;
-
-                // Polling cada 15 segundos para detectar activación de pago por Make
-                setInterval(async () => {
-                    try {
-                        const { data } = await supabaseClient
-                            .from('usuarios_datos')
-                            .select('plan_status, fecha_vencimiento')
-                            .eq('id', user.id)
-                            .single();
-
-                        if (data?.plan_status === 'active' && db.account.planStatus !== 'active') {
-                            // ¡PAGO DETECTADO! Make actualizó la columna
-                            db.account.planStatus = 'active';
-                            db.account.fechaVencimiento = data.fecha_vencimiento;
-                            localStorage.setItem('sistemavos_db', JSON.stringify(db));
-                            renderBannerSuscripcion();
-                            aplicarModoLectura(); // Restaurar botones
-                            closeModal('paywall-modal');
-                            closeModal('pago-modal');
-                            alert('🎉 ¡Tu plan fue activado exitosamente!\nGracias por elegir SistemaVOS. Ya tenés acceso completo.');
-                        }
-                    } catch(e) {}
-                }, 15000);
-            } catch(e) {}
-        }
-
-        // PAGE RENDER HOOKS
-        const pageRenderHooks = {
-            'clientes': () => { renderVentasSelects(); renderClientes(); actualizarPanelOdontologico(); actualizarPanelInmobiliario(); },
-            'inventario': () => { renderProductos(); },
-            'ventas': () => { renderVentasSelects(); renderVentas(); renderCarrito(); },
-            'facturacion': () => { renderVentasSelects(); renderFacturas(); renderFacturaItems(); initFacturaDocZone(); },
-            'arqueo': () => { renderArqueo(); },
-            'gastos': () => { renderGastos(); },
-            'empleados': () => { renderEmpleados(); },
-            'nominas': () => { renderNominas(); },
-            'sucursales': () => { renderSucursales(); },
-            'proveedores': () => { renderProveedores(); },
-            'usuarios': () => { renderUsuarios(); },
-            'config': () => { cargarConfiguracion(); }
-        };
-
-        const originalShowPage = showPage;
-        showPage = function(page) {
-            originalShowPage(page);
-            if (pageRenderHooks[page]) {
-                pageRenderHooks[page]();
-            }
-            // Reaplicar modo lectura tras renderizar la página
-            setTimeout(aplicarModoLectura, 200);
-        };
-    </script>
-</body>
-</html>
+            if (status === 'active' && vencimiento && vencim
