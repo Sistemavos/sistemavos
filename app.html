@@ -1491,6 +1491,20 @@
         const SUPABASE_KEY = 'sb_publishable_DGih4XL3NIgTweQN1cQEag_resYH-lf';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // ═══ MAKE.COM WEBHOOKS ═══
+        const MAKE_WEBHOOK_REGISTRO = 'https://hook.eu1.make.com/xj5mdcchad8vqrx1en7886necbc8mbbg';
+        const MAKE_WEBHOOK_PAGO    = 'https://hook.eu1.make.com/95dm1nhq1t6tnj1dzjg5h8qatrvf4o96';
+
+        // ═══ MERCADO PAGO ═══
+        const MP_PUBLIC_KEY = 'APP_USR-fa598dc5-3127-471b-bb59-52e0a205da67';
+
+        // ═══ PLANES Y PRECIOS ═══
+        const PLAN_PRICES = {
+            emprendedor: { name: 'Emprendedor', price: 9.99, currency: 'USD' },
+            profesional: { name: 'Profesional', price: 14.99, currency: 'USD' },
+            premium:     { name: 'Premium', price: 19.99, currency: 'USD' }
+        };
+
         // Cloud status indicator
         function updateCloudStatus(status) {
             const icon = document.getElementById('cloud-status-icon');
@@ -1653,6 +1667,10 @@
                         <div class="industry-card" onclick="selectIndustry('inmobiliarias', this)">
                             <i class="fas fa-building"></i>
                             <p>Inmobiliarias</p>
+                        </div>
+                        <div class="industry-card" onclick="selectIndustry('odontologia', this)">
+                            <i class="fas fa-tooth"></i>
+                            <p>Odontología & Salud</p>
                         </div>
                     </div>
                     <div class="form-buttons">
@@ -1899,6 +1917,148 @@
                                     </thead>
                                     <tbody></tbody>
                                 </table>
+                            </div>
+                        </div>
+
+                        <!-- PANEL ODONTOLÓGICO (solo visible si rubro = odontologia) -->
+                        <div id="panel-odontologico" style="display:none; margin-top:20px;">
+
+                            <!-- Selector de paciente -->
+                            <div class="card" style="margin-bottom:16px;">
+                                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                                    <i class="fas fa-tooth" style="font-size:24px;color:var(--primary);"></i>
+                                    <div style="flex:1;">
+                                        <h2 style="margin:0;">Ficha Odontológica</h2>
+                                        <p style="font-size:13px;color:var(--gray-600);margin:0;">Seleccioná un paciente para ver su odontograma y ficha clínica</p>
+                                    </div>
+                                    <select id="odonto-paciente-select" onchange="cargarFichaOdontologica()" style="min-width:220px;padding:10px 14px;border-radius:8px;border:1px solid var(--gray-300);font-size:13px;">
+                                        <option value="">-- Seleccionar Paciente --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Contenido de la ficha (oculto hasta seleccionar paciente) -->
+                            <div id="odonto-ficha-content" style="display:none;">
+
+                                <!-- ODONTOGRAMA -->
+                                <div class="card" style="margin-bottom:16px;">
+                                    <h3 style="margin-bottom:16px;display:flex;align-items:center;gap:8px;"><i class="fas fa-teeth" style="color:var(--primary);"></i> Odontograma Interactivo</h3>
+                                    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;">
+                                        <span><span style="display:inline-block;width:14px;height:14px;background:#10b981;border-radius:3px;margin-right:4px;"></span>Sano</span>
+                                        <span><span style="display:inline-block;width:14px;height:14px;background:#f59e0b;border-radius:3px;margin-right:4px;"></span>Empaste</span>
+                                        <span><span style="display:inline-block;width:14px;height:14px;background:#6C3AE1;border-radius:3px;margin-right:4px;"></span>Corona</span>
+                                        <span><span style="display:inline-block;width:14px;height:14px;background:#ef4444;border-radius:3px;margin-right:4px;"></span>Extracción</span>
+                                        <span><span style="display:inline-block;width:14px;height:14px;background:#06B6D4;border-radius:3px;margin-right:4px;"></span>Endodoncia</span>
+                                        <span><span style="display:inline-block;width:14px;height:14px;background:#F43F5E;border-radius:3px;margin-right:4px;"></span>Caries</span>
+                                        <span><span style="display:inline-block;width:14px;height:14px;background:#94a3b8;border-radius:3px;margin-right:4px;"></span>Implante</span>
+                                        <span><span style="display:inline-block;width:14px;height:14px;background:#fff;border:2px solid #cbd5e1;border-radius:3px;margin-right:4px;"></span>Ausente</span>
+                                    </div>
+                                    <div id="odontograma-svg-container" style="overflow-x:auto;padding:8px 0;"></div>
+                                </div>
+
+                                <!-- FICHAS CLÍNICAS -->
+                                <div class="card" style="margin-bottom:16px;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                        <h3 style="display:flex;align-items:center;gap:8px;"><i class="fas fa-notes-medical" style="color:var(--primary);"></i> Fichas Clínicas</h3>
+                                        <button class="btn-primary" onclick="abrirModalFichaClinica()">+ Nueva Ficha</button>
+                                    </div>
+                                    <div id="fichas-clinicas-lista" style="display:flex;flex-direction:column;gap:12px;"></div>
+                                </div>
+
+                                <!-- HISTORIAL POR PIEZA -->
+                                <div class="card">
+                                    <h3 style="margin-bottom:16px;display:flex;align-items:center;gap:8px;"><i class="fas fa-history" style="color:var(--primary);"></i> Historial por Pieza Dental</h3>
+                                    <div style="margin-bottom:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                                        <label style="font-size:13px;font-weight:500;">Filtrar pieza:</label>
+                                        <select id="historial-pieza-select" onchange="renderHistorialPieza()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--gray-300);font-size:13px;">
+                                            <option value="">Todas las piezas</option>
+                                        </select>
+                                    </div>
+                                    <div id="historial-pieza-content"></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODAL TRATAMIENTO DENTAL -->
+                    <div id="diente-modal" class="modal" style="display:none;">
+                        <div class="modal-overlay" onclick="closeModal('diente-modal')"></div>
+                        <div class="modal-content" style="max-width:420px;">
+                            <div class="modal-header">
+                                <h3 id="diente-modal-title">Diente #11</h3>
+                                <button class="modal-close" onclick="closeModal('diente-modal')">×</button>
+                            </div>
+                            <div class="modal-body" style="padding:20px;">
+                                <div class="form-group">
+                                    <label>Tratamiento</label>
+                                    <select id="diente-tratamiento" style="width:100%;">
+                                        <option value="sano">Sano</option>
+                                        <option value="empaste">Empaste</option>
+                                        <option value="corona">Corona</option>
+                                        <option value="extraccion">Extracción</option>
+                                        <option value="endodoncia">Endodoncia</option>
+                                        <option value="caries">Caries</option>
+                                        <option value="implante">Implante</option>
+                                        <option value="ausente">Ausente</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Notas del tratamiento</label>
+                                    <textarea id="diente-notas" rows="3" style="width:100%;resize:vertical;" placeholder="Ej: Empaste clase II, material composite..."></textarea>
+                                </div>
+                                <input type="hidden" id="diente-numero">
+                                <div style="display:flex;gap:10px;margin-top:16px;">
+                                    <button class="btn-secondary" style="flex:1;" onclick="closeModal('diente-modal')">Cancelar</button>
+                                    <button class="btn-primary" style="flex:1;" onclick="guardarTratamientoDiente()">Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODAL FICHA CLÍNICA -->
+                    <div id="ficha-clinica-modal" class="modal" style="display:none;">
+                        <div class="modal-overlay" onclick="closeModal('ficha-clinica-modal')"></div>
+                        <div class="modal-content" style="max-width:560px;">
+                            <div class="modal-header">
+                                <h3>Nueva Ficha Clínica</h3>
+                                <button class="modal-close" onclick="closeModal('ficha-clinica-modal')">×</button>
+                            </div>
+                            <div class="modal-body" style="padding:20px;">
+                                <div class="form-group">
+                                    <label>Fecha de Atención</label>
+                                    <input type="date" id="ficha-fecha" style="width:100%;">
+                                </div>
+                                <div class="form-group">
+                                    <label>Piezas Dentales Tratadas</label>
+                                    <input type="text" id="ficha-piezas" placeholder="Ej: 11, 12, 21 (separadas por coma)" style="width:100%;">
+                                </div>
+                                <div class="form-group">
+                                    <label>Diagnóstico / Tratamiento</label>
+                                    <textarea id="ficha-diagnostico" rows="3" style="width:100%;resize:vertical;" placeholder="Descripción del tratamiento realizado..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-flask" style="color:var(--primary);margin-right:6px;"></i>Materiales Utilizados</label>
+                                    <textarea id="ficha-materiales" rows="2" style="width:100%;resize:vertical;" placeholder="Ej: Composite 3M A2, Adhesivo Scotchbond..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-prescription-bottle-alt" style="color:var(--accent);margin-right:6px;"></i>Fórmulas / Medicamentos Recetados</label>
+                                    <textarea id="ficha-formulas" rows="2" style="width:100%;resize:vertical;" placeholder="Ej: Amoxicilina 500mg cada 8hs por 7 días..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Próxima Cita</label>
+                                    <input type="date" id="ficha-proxima-cita" style="width:100%;">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-paperclip" style="color:var(--gray-600);margin-right:6px;"></i>Adjuntar Archivos (placas, recetas)</label>
+                                    <input type="file" id="ficha-archivos" multiple accept="image/*,.pdf" style="width:100%;">
+                                    <small style="color:var(--gray-500);font-size:11px;">Imágenes y PDFs. Se guardan localmente.</small>
+                                </div>
+                                <div id="ficha-archivos-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;"></div>
+                                <div style="display:flex;gap:10px;margin-top:16px;">
+                                    <button class="btn-secondary" style="flex:1;" onclick="closeModal('ficha-clinica-modal')">Cancelar</button>
+                                    <button class="btn-primary" style="flex:1;" onclick="guardarFichaClinica()">Guardar Ficha</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3104,6 +3264,21 @@
                 salesLabel: "Operación",
                 categories: ["Venta", "Alquiler", "Alquiler Temporal"],
                 customClientFields: [{ name: "direccion", label: "Dirección" }, { name: "m2", label: "m²" }, { name: "ambientes", label: "Ambientes" }, { name: "estado", label: "Estado" }]
+            },
+            odontologia: {
+                clientLabel: "Paciente",
+                inventoryLabel: "Insumos Odontológicos",
+                salesLabel: "Consulta / Tratamiento",
+                categories: ["Consulta", "Ortodoncia", "Endodoncia", "Periodoncia", "Cirugía", "Prostodoncia", "Odontopediatría", "Blanqueamiento", "Insumos"],
+                customClientFields: [
+                    { name: "obra_social", label: "Obra Social" },
+                    { name: "num_afiliado", label: "Número Afiliado" },
+                    { name: "fecha_nacimiento", label: "Fecha de Nacimiento" },
+                    { name: "alergias", label: "Alergias / Medicamentos" }
+                ],
+                rubro: 'odontologia',
+                rubroName: 'Odontología',
+                esOdontologia: true
             }
         };
 
@@ -3383,16 +3558,15 @@
             renderDashboard();
             showPage('dashboard');
             cargarConfigWA();
-            // Mostrar estado de suscripcion
-            const banner = document.getElementById('subscription-status-banner');
-            if (banner && db.account) {
-                if (db.account.promoFreeForever) {
-                    banner.innerHTML = '<div style="background:#D1FAE5;padding:12px;border-radius:8px;color:#065F46;font-weight:600;"><i class="fas fa-crown" style="color:#F59E0B;"></i> Plan Premium - Gratis de por vida (codigo promocional)</div>';
-                } else {
-                    const plan = db.account.plan || 'emprendedor';
-                    banner.innerHTML = '<div style="background:#EFF6FF;padding:12px;border-radius:8px;color:#1E40AF;">Plan actual: <strong>' + plan.charAt(0).toUpperCase() + plan.slice(1) + '</strong> — Periodo de prueba 14 dias</div>';
-                }
-            }
+
+            // Banner dinámico de suscripción (nuevo sistema)
+            renderBannerSuscripcion();
+
+            // Aplicar modo lectura si el plan no está activo
+            setTimeout(aplicarModoLectura, 500);
+
+            // Escuchar activaciones de pago (polling)
+            escucharCambiosDePlan();
         }
 
         function registrationStep(step) {
@@ -3591,6 +3765,8 @@
                         }
                     }
 
+                    // Notificar a Make (email de bienvenida)
+                    notificarRegistroMake(email, businessName, ownerName, db.selectedPlan);
                     showLogin();
                 };
                 reader.readAsDataURL(logoFile);
@@ -3606,6 +3782,8 @@
                     }
                 }
 
+                // Notificar a Make (email de bienvenida)
+                notificarRegistroMake(email, businessName, ownerName, db.selectedPlan);
                 showLogin();
             }
         }
@@ -3620,9 +3798,13 @@
 
                 if (!rows) return;
 
+                let referidorUserId = null;
+
                 for (const row of rows) {
                     const acc = row.db_json?.account;
                     if (acc?.codigoReferido === codigoReferido) {
+                        referidorUserId = row.id; // user_id del referidor
+
                         const referidos = acc.referidosActivos || [];
                         if (!referidos.includes(emailNuevoUsuario)) {
                             referidos.push(emailNuevoUsuario);
@@ -3635,6 +3817,19 @@
                         break;
                     }
                 }
+
+                // Guardar id_referido_por en el registro del nuevo usuario
+                // (el user_id del referidor como valor de id_referido_por)
+                if (referidorUserId) {
+                    const { data: { user: newUser } } = await supabaseClient.auth.getUser();
+                    if (newUser) {
+                        db.account.idReferidoPor = referidorUserId;
+                        await supabaseClient
+                            .from('usuarios_datos')
+                            .update({ id_referido_por: referidorUserId })
+                            .eq('id', newUser.id);
+                    }
+                }
             } catch (e) {
                 console.warn('No se pudo registrar referido:', e);
             }
@@ -3644,12 +3839,29 @@
         async function _createCloudRecord(userId) {
             try {
                 const localData = localStorage.getItem('sistemavos_db');
+                const parsedData = JSON.parse(localData);
+                const referidoPor = parsedData?.account?.codigoReferidoUsado || null;
+                const esTrial = !parsedData?.account?.promoFreeForever;
+
+                // Fecha de vencimiento: 14 días de trial desde ahora
+                const fechaVenc = new Date(Date.now() + 14*24*60*60*1000).toISOString();
+
+                // Guardar en db local también
+                db.account.planStatus = esTrial ? 'trial' : 'active';
+                db.account.fechaVencimiento = esTrial ? fechaVenc : null;
+                localStorage.setItem('sistemavos_db', JSON.stringify(db));
+
                 await supabaseClient
                     .from('usuarios_datos')
                     .upsert({
                         id: userId,
-                        db_json: JSON.parse(localData),
-                        ultima_sincro: new Date().toISOString()
+                        db_json: db,
+                        ultima_sincro: new Date().toISOString(),
+                        email: db.account.email,
+                        nombre_negocio: db.account.businessName,
+                        plan_status: esTrial ? 'trial' : 'active',
+                        fecha_vencimiento: esTrial ? fechaVenc : null,
+                        id_referido_por: referidoPor
                     }, { onConflict: 'id' });
             } catch (e) {
                 console.warn('No se pudo crear registro en nube:', e);
@@ -4098,6 +4310,7 @@
             saveDB();
             closeModal('cliente-modal');
             renderClientes();
+            actualizarPanelOdontologico();
         }
 
         function renderClientes() {
@@ -5975,9 +6188,1219 @@
             }
         }
 
+        // ═══════════════════════════════════════════════════════
+        // MÓDULO ODONTOLÓGICO — Solo activo si rubro = 'odontologia'
+        // ═══════════════════════════════════════════════════════
+
+        const TRATAMIENTO_COLORES = {
+            sano:       '#10b981',
+            empaste:    '#f59e0b',
+            corona:     '#6C3AE1',
+            extraccion: '#ef4444',
+            endodoncia: '#06B6D4',
+            caries:     '#F43F5E',
+            implante:   '#94a3b8',
+            ausente:    '#e2e8f0'
+        };
+
+        // Numeración FDI estándar — dientes permanentes
+        const DIENTES_SUPERIORES = [18,17,16,15,14,13,12,11, 21,22,23,24,25,26,27,28];
+        const DIENTES_INFERIORES = [48,47,46,45,44,43,42,41, 31,32,33,34,35,36,37,38];
+
+        let _dientePacienteActual = null; // id del paciente con ficha abierta
+
+        function esOdontologia() {
+            return db.industryConfig?.esOdontologia === true || db.account?.industry === 'odontologia';
+        }
+
+        // Muestra/oculta el panel y carga el select de pacientes
+        function actualizarPanelOdontologico() {
+            const panel = document.getElementById('panel-odontologico');
+            if (!panel) return;
+            if (!esOdontologia()) { panel.style.display = 'none'; return; }
+
+            panel.style.display = 'block';
+            const select = document.getElementById('odonto-paciente-select');
+            if (!select) return;
+            const valorActual = select.value;
+            select.innerHTML = '<option value="">-- Seleccionar Paciente --</option>' +
+                db.clientes.map(c => `<option value="${c.id}" ${c.id == valorActual ? 'selected' : ''}>${c.nombre}</option>`).join('');
+        }
+
+        // Carga la ficha completa de un paciente
+        function cargarFichaOdontologica() {
+            const pacienteId = parseInt(document.getElementById('odonto-paciente-select').value);
+            const content = document.getElementById('odonto-ficha-content');
+            if (!pacienteId) { content.style.display = 'none'; return; }
+
+            _dientePacienteActual = pacienteId;
+            content.style.display = 'block';
+
+            // Inicializar estructura si no existe
+            if (!db.odontologia) db.odontologia = {};
+            if (!db.odontologia[pacienteId]) {
+                db.odontologia[pacienteId] = { dientes: {}, fichas: [] };
+            }
+
+            renderOdontograma(pacienteId);
+            renderFichasClinicas(pacienteId);
+            renderHistorialPieza();
+            poblarSelectHistorial();
+        }
+
+        // ═══ ODONTOGRAMA SVG ═══
+        function renderOdontograma(pacienteId) {
+            const dataDientes = db.odontologia[pacienteId]?.dientes || {};
+            const container = document.getElementById('odontograma-svg-container');
+            if (!container) return;
+
+            function dienteSVG(numero, x, esInferior) {
+                const trat = dataDientes[numero]?.tratamiento || 'sano';
+                const color = TRATAMIENTO_COLORES[trat] || '#10b981';
+                const y = esInferior ? 80 : 10;
+                const numY = esInferior ? 110 : 5;
+                const anchor = esInferior ? 'start' : 'end';
+                const dy = esInferior ? '0' : '-2';
+                const ausente = trat === 'ausente';
+                const xInner = x + 4;
+
+                return `
+                <g class="diente-grupo" onclick="abrirModalDiente(${numero}, ${pacienteId})" style="cursor:pointer;" title="${numero}: ${trat}">
+                    <rect x="${x}" y="${y}" width="30" height="34" rx="6"
+                        fill="${ausente ? '#f1f5f9' : color}"
+                        stroke="${ausente ? '#cbd5e1' : color}"
+                        stroke-width="2"
+                        opacity="${ausente ? 0.4 : 0.9}"
+                        class="diente-rect"/>
+                    ${ausente ? `<line x1="${x+4}" y1="${y+4}" x2="${x+26}" y2="${y+30}" stroke="#94a3b8" stroke-width="2"/>
+                                 <line x1="${x+26}" y1="${y+4}" x2="${x+4}" y2="${y+30}" stroke="#94a3b8" stroke-width="2"/>` : ''}
+                    ${dataDientes[numero]?.tratamiento && trat !== 'sano' && trat !== 'ausente'
+                        ? `<rect x="${xInner}" y="${y+8}" width="22" height="18" rx="3" fill="white" opacity="0.3"/>`
+                        : ''}
+                    <text x="${x+15}" y="${numY}" text-anchor="middle" font-size="10"
+                        fill="${esInferior ? '#475569' : '#475569'}" font-family="Arial"
+                        dy="${dy}">${numero}</text>
+                </g>`;
+            }
+
+            const totalW = DIENTES_SUPERIORES.length * 36 + 20;
+
+            let svgSup = '';
+            DIENTES_SUPERIORES.forEach((n, i) => {
+                const x = 10 + i * 36 + (i >= 8 ? 12 : 0);
+                svgSup += dienteSVG(n, x, false);
+            });
+
+            let svgInf = '';
+            DIENTES_INFERIORES.forEach((n, i) => {
+                const x = 10 + i * 36 + (i >= 8 ? 12 : 0);
+                svgInf += dienteSVG(n, x, true);
+            });
+
+            container.innerHTML = `
+            <div style="text-align:center;margin-bottom:4px;font-size:11px;color:#94a3b8;font-style:italic;">Clic en cada diente para registrar tratamiento</div>
+            <svg viewBox="0 0 ${totalW} 140" width="100%" style="max-width:720px;display:block;margin:0 auto;">
+                <!-- Línea media -->
+                <line x1="${totalW/2}" y1="0" x2="${totalW/2}" y2="140" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="4,3"/>
+                <!-- Etiquetas -->
+                <text x="4" y="30" font-size="9" fill="#94a3b8" font-family="Arial">SUP</text>
+                <text x="4" y="105" font-size="9" fill="#94a3b8" font-family="Arial">INF</text>
+                <!-- Separador horizontal -->
+                <line x1="0" y1="70" x2="${totalW}" y2="70" stroke="#e2e8f0" stroke-width="1.5"/>
+                ${svgSup}
+                ${svgInf}
+                <style>
+                    .diente-grupo:hover .diente-rect { opacity: 1 !important; filter: brightness(1.15); }
+                </style>
+            </svg>`;
+        }
+
+        function abrirModalDiente(numero, pacienteId) {
+            _dientePacienteActual = pacienteId;
+            document.getElementById('diente-modal-title').textContent = `Diente #${numero}`;
+            document.getElementById('diente-numero').value = numero;
+            const data = db.odontologia[pacienteId]?.dientes?.[numero] || {};
+            document.getElementById('diente-tratamiento').value = data.tratamiento || 'sano';
+            document.getElementById('diente-notas').value = data.notas || '';
+            openModal('diente-modal');
+        }
+
+        function guardarTratamientoDiente() {
+            const pacienteId = _dientePacienteActual;
+            const numero = parseInt(document.getElementById('diente-numero').value);
+            const tratamiento = document.getElementById('diente-tratamiento').value;
+            const notas = document.getElementById('diente-notas').value;
+
+            if (!db.odontologia) db.odontologia = {};
+            if (!db.odontologia[pacienteId]) db.odontologia[pacienteId] = { dientes: {}, fichas: [] };
+            if (!db.odontologia[pacienteId].dientes[numero]) db.odontologia[pacienteId].dientes[numero] = {};
+
+            const anterior = db.odontologia[pacienteId].dientes[numero].tratamiento;
+            db.odontologia[pacienteId].dientes[numero] = {
+                tratamiento, notas,
+                ultimaModificacion: new Date().toISOString(),
+                modificadoPor: currentUser?.name || 'Odontólogo'
+            };
+
+            // Log en fichas si cambió el tratamiento
+            if (anterior && anterior !== tratamiento) {
+                if (!db.odontologia[pacienteId].fichas) db.odontologia[pacienteId].fichas = [];
+                db.odontologia[pacienteId].fichas.push({
+                    id: Date.now(),
+                    fecha: new Date().toISOString(),
+                    piezas: [numero],
+                    diagnostico: `Cambio de estado: ${anterior} → ${tratamiento}`,
+                    materiales: notas,
+                    formulas: '',
+                    archivos: [],
+                    proximaCita: '',
+                    autor: currentUser?.name || 'Odontólogo'
+                });
+            }
+
+            saveDB();
+            closeModal('diente-modal');
+            renderOdontograma(pacienteId);
+            renderFichasClinicas(pacienteId);
+            renderHistorialPieza();
+            poblarSelectHistorial();
+        }
+
+        // ═══ FICHAS CLÍNICAS ═══
+        function abrirModalFichaClinica() {
+            document.getElementById('ficha-fecha').value = new Date().toISOString().slice(0,10);
+            document.getElementById('ficha-piezas').value = '';
+            document.getElementById('ficha-diagnostico').value = '';
+            document.getElementById('ficha-materiales').value = '';
+            document.getElementById('ficha-formulas').value = '';
+            document.getElementById('ficha-proxima-cita').value = '';
+            document.getElementById('ficha-archivos').value = '';
+            document.getElementById('ficha-archivos-preview').innerHTML = '';
+            openModal('ficha-clinica-modal');
+
+            // Preview de archivos al seleccionarlos
+            document.getElementById('ficha-archivos').onchange = function() {
+                const preview = document.getElementById('ficha-archivos-preview');
+                preview.innerHTML = '';
+                Array.from(this.files).forEach(file => {
+                    const icon = file.type.startsWith('image') ? '🖼️' : '📄';
+                    preview.innerHTML += `<span style="background:#f1f5f9;padding:4px 10px;border-radius:6px;font-size:12px;">${icon} ${file.name}</span>`;
+                });
+            };
+        }
+
+        function guardarFichaClinica() {
+            const pacienteId = _dientePacienteActual;
+            if (!pacienteId) return;
+
+            const fecha = document.getElementById('ficha-fecha').value;
+            const piezasRaw = document.getElementById('ficha-piezas').value;
+            const diagnostico = document.getElementById('ficha-diagnostico').value;
+            const materiales = document.getElementById('ficha-materiales').value;
+            const formulas = document.getElementById('ficha-formulas').value;
+            const proximaCita = document.getElementById('ficha-proxima-cita').value;
+
+            if (!fecha || !diagnostico) {
+                alert('Completá la fecha y el diagnóstico');
+                return;
+            }
+
+            const piezas = piezasRaw.split(',').map(p => parseInt(p.trim())).filter(n => !isNaN(n));
+
+            // Leer archivos como base64 (guardado local)
+            const archivosFiles = document.getElementById('ficha-archivos').files;
+            const archivosPromesas = Array.from(archivosFiles).map(file => {
+                return new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve({ nombre: file.name, tipo: file.type, data: e.target.result });
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            Promise.all(archivosPromesas).then(archivos => {
+                if (!db.odontologia) db.odontologia = {};
+                if (!db.odontologia[pacienteId]) db.odontologia[pacienteId] = { dientes: {}, fichas: [] };
+                if (!db.odontologia[pacienteId].fichas) db.odontologia[pacienteId].fichas = [];
+
+                const ficha = {
+                    id: Date.now(),
+                    fecha,
+                    piezas,
+                    diagnostico,
+                    materiales,
+                    formulas,
+                    proximaCita,
+                    archivos,
+                    autor: currentUser?.name || 'Odontólogo',
+                    creadaEn: new Date().toISOString()
+                };
+
+                db.odontologia[pacienteId].fichas.push(ficha);
+                saveDB();
+                closeModal('ficha-clinica-modal');
+                renderFichasClinicas(pacienteId);
+                renderHistorialPieza();
+                poblarSelectHistorial();
+            });
+        }
+
+        function renderFichasClinicas(pacienteId) {
+            const lista = document.getElementById('fichas-clinicas-lista');
+            if (!lista) return;
+            const fichas = (db.odontologia?.[pacienteId]?.fichas || [])
+                .filter(f => f.diagnostico) // solo fichas reales, no auto-logs
+                .slice().reverse();
+
+            if (fichas.length === 0) {
+                lista.innerHTML = `<div style="text-align:center;padding:24px;color:var(--gray-500);font-size:13px;"><i class="fas fa-notes-medical" style="font-size:32px;margin-bottom:8px;display:block;opacity:.3;"></i>Sin fichas clínicas aún. Creá la primera.</div>`;
+                return;
+            }
+
+            lista.innerHTML = fichas.map(f => `
+                <div style="border:1px solid var(--gray-200);border-radius:12px;padding:16px;background:#fff;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                        <div>
+                            <div style="font-weight:600;font-size:14px;">📅 ${formatDate(f.fecha)}</div>
+                            <div style="font-size:12px;color:var(--gray-600);">Dr/a ${f.autor || 'Odontólogo'}</div>
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            ${(f.piezas||[]).map(p => `<span style="background:var(--primary);color:#fff;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;">#${p}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div style="margin-bottom:8px;"><strong style="font-size:12px;color:var(--gray-700);">Diagnóstico:</strong><br><span style="font-size:13px;">${f.diagnostico}</span></div>
+                    ${f.materiales ? `<div style="margin-bottom:8px;background:#f0fdf4;border-radius:6px;padding:8px 10px;"><strong style="font-size:12px;color:#166534;">🧪 Materiales:</strong><br><span style="font-size:12px;">${f.materiales}</span></div>` : ''}
+                    ${f.formulas ? `<div style="margin-bottom:8px;background:#fdf4ff;border-radius:6px;padding:8px 10px;"><strong style="font-size:12px;color:#6b21a8;">💊 Fórmulas/Medicamentos:</strong><br><span style="font-size:12px;">${f.formulas}</span></div>` : ''}
+                    ${f.proximaCita ? `<div style="margin-bottom:8px;font-size:12px;color:var(--gray-600);">📌 Próxima cita: <strong>${formatDate(f.proximaCita)}</strong></div>` : ''}
+                    ${f.archivos?.length ? `<div style="margin-top:8px;">
+                        <strong style="font-size:12px;color:var(--gray-700);">📎 Adjuntos (${f.archivos.length}):</strong>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+                            ${f.archivos.map((a,i) => `<button onclick="verArchivoFicha(${pacienteId}, ${f.id}, ${i})" style="background:#f1f5f9;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">${a.tipo?.startsWith('image') ? '🖼️' : '📄'} ${a.nombre}</button>`).join('')}
+                        </div>
+                    </div>` : ''}
+                    <button onclick="eliminarFichaClinica(${pacienteId}, ${f.id})" style="margin-top:10px;background:none;border:none;color:#ef4444;font-size:12px;cursor:pointer;">🗑 Eliminar ficha</button>
+                </div>
+            `).join('');
+        }
+
+        function eliminarFichaClinica(pacienteId, fichaId) {
+            if (!confirm('¿Eliminar esta ficha clínica?')) return;
+            db.odontologia[pacienteId].fichas = db.odontologia[pacienteId].fichas.filter(f => f.id !== fichaId);
+            saveDB();
+            renderFichasClinicas(pacienteId);
+            renderHistorialPieza();
+        }
+
+        function verArchivoFicha(pacienteId, fichaId, idx) {
+            const ficha = db.odontologia?.[pacienteId]?.fichas?.find(f => f.id === fichaId);
+            if (!ficha || !ficha.archivos[idx]) return;
+            const a = ficha.archivos[idx];
+            const win = window.open('', '_blank');
+            if (a.tipo?.startsWith('image')) {
+                win.document.write(`<img src="${a.data}" style="max-width:100%;margin:auto;display:block;">`);
+            } else {
+                const link = win.document.createElement('a');
+                link.href = a.data; link.download = a.nombre; link.click();
+                win.close();
+            }
+        }
+
+        // ═══ HISTORIAL POR PIEZA ═══
+        function poblarSelectHistorial() {
+            const pacienteId = _dientePacienteActual;
+            const select = document.getElementById('historial-pieza-select');
+            if (!select || !pacienteId) return;
+
+            const dientes = db.odontologia?.[pacienteId]?.dientes || {};
+            const fichas = db.odontologia?.[pacienteId]?.fichas || [];
+            const piezasConActividad = new Set();
+
+            Object.keys(dientes).forEach(n => piezasConActividad.add(parseInt(n)));
+            fichas.forEach(f => (f.piezas||[]).forEach(p => piezasConActividad.add(p)));
+
+            const sorted = [...piezasConActividad].sort((a,b) => a - b);
+            const valorActual = select.value;
+            select.innerHTML = '<option value="">Todas las piezas</option>' +
+                sorted.map(p => `<option value="${p}" ${p == valorActual ? 'selected' : ''}>Pieza #${p}</option>`).join('');
+        }
+
+        function renderHistorialPieza() {
+            const pacienteId = _dientePacienteActual;
+            const container = document.getElementById('historial-pieza-content');
+            if (!container || !pacienteId) return;
+
+            const filtroPieza = parseInt(document.getElementById('historial-pieza-select')?.value) || null;
+            const fichas = db.odontologia?.[pacienteId]?.fichas || [];
+            const dientes = db.odontologia?.[pacienteId]?.dientes || {};
+
+            // Construir línea de tiempo unificada
+            const eventos = [];
+
+            // Agregar registros de dientes
+            Object.entries(dientes).forEach(([num, data]) => {
+                const n = parseInt(num);
+                if (filtroPieza && n !== filtroPieza) return;
+                if (data.ultimaModificacion) {
+                    eventos.push({
+                        fecha: data.ultimaModificacion,
+                        pieza: n,
+                        tipo: 'estado',
+                        texto: `<strong>Estado registrado:</strong> ${data.tratamiento}`,
+                        notas: data.notas || '',
+                        autor: data.modificadoPor || 'Odontólogo',
+                        color: TRATAMIENTO_COLORES[data.tratamiento] || '#10b981'
+                    });
+                }
+            });
+
+            // Agregar fichas clínicas
+            fichas.forEach(f => {
+                const piezasRelev = filtroPieza ? (f.piezas||[]).filter(p => p === filtroPieza) : (f.piezas||[]);
+                if (filtroPieza && piezasRelev.length === 0) return;
+                eventos.push({
+                    fecha: f.creadaEn || f.fecha,
+                    pieza: piezasRelev.length > 0 ? piezasRelev : (f.piezas||[]),
+                    tipo: 'ficha',
+                    texto: `<strong>Ficha Clínica:</strong> ${f.diagnostico}`,
+                    notas: [f.materiales ? `Materiales: ${f.materiales}` : '', f.formulas ? `Fórmulas: ${f.formulas}` : ''].filter(Boolean).join(' | '),
+                    autor: f.autor || 'Odontólogo',
+                    archivos: f.archivos?.length || 0,
+                    color: '#6C3AE1'
+                });
+            });
+
+            // Ordenar cronológicamente DESC
+            eventos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            if (eventos.length === 0) {
+                container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--gray-500);font-size:13px;"><i class="fas fa-history" style="font-size:32px;margin-bottom:8px;display:block;opacity:.3;"></i>${filtroPieza ? 'Sin actividad en pieza #' + filtroPieza : 'Sin historial registrado aún.'}</div>`;
+                return;
+            }
+
+            container.innerHTML = `<div style="position:relative;padding-left:24px;">
+                <div style="position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--gray-200);"></div>
+                ${eventos.map(e => `
+                <div style="position:relative;margin-bottom:14px;">
+                    <div style="position:absolute;left:-20px;top:6px;width:12px;height:12px;border-radius:50%;background:${e.color};border:2px solid #fff;box-shadow:0 0 0 2px ${e.color}33;"></div>
+                    <div style="background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:12px 14px;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+                            <div style="font-size:13px;">${e.texto}</div>
+                            <div style="font-size:11px;color:var(--gray-500);white-space:nowrap;margin-left:8px;">${formatDate(e.fecha)}</div>
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+                            ${Array.isArray(e.pieza) ? e.pieza.map(p => `<span style="background:${e.color}22;color:${e.color};border-radius:4px;padding:1px 7px;font-size:11px;font-weight:600;">#${p}</span>`).join('') :
+                              `<span style="background:${e.color}22;color:${e.color};border-radius:4px;padding:1px 7px;font-size:11px;font-weight:600;">#${e.pieza}</span>`}
+                        </div>
+                        ${e.notas ? `<div style="font-size:12px;color:var(--gray-600);">${e.notas}</div>` : ''}
+                        ${e.archivos > 0 ? `<div style="font-size:11px;color:var(--gray-500);margin-top:4px;">📎 ${e.archivos} archivo(s) adjunto(s)</div>` : ''}
+                        <div style="font-size:11px;color:var(--gray-400);margin-top:4px;">Dr/a ${e.autor}</div>
+                    </div>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // BLOQUEO POR FALTA DE PAGO + MERCADO PAGO + MAKE WEBHOOKS
+        // ══════════════════════════════════════════════════════════
+
+        // Enviar datos de registro al Webhook de Make (email de bienvenida)
+        async function notificarRegistroMake(email, businessName, ownerName, plan) {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                await fetch(MAKE_WEBHOOK_REGISTRO, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        nombre_negocio: businessName,
+                        nombre_propietario: ownerName,
+                        plan: plan,
+                        user_id: user?.id || null,
+                        fecha_registro: new Date().toISOString()
+                    })
+                });
+                console.log('Webhook de registro enviado a Make');
+            } catch(e) {
+                console.warn('No se pudo enviar webhook de registro:', e);
+            }
+        }
+
+        // Sincronizar campos de negocio con las columnas directas de Supabase
+        async function syncSupabaseColumns() {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user || !db.account) return;
+
+                const referidoPor = db.account.codigoReferidoUsado || null;
+
+                await supabaseClient
+                    .from('usuarios_datos')
+                    .update({
+                        email: db.account.email,
+                        nombre_negocio: db.account.businessName,
+                        plan_status: db.account.planStatus || (db.account.promoFreeForever ? 'active' : 'trial'),
+                        fecha_vencimiento: db.account.fechaVencimiento || null,
+                        id_referido_por: referidoPor
+                    })
+                    .eq('id', user.id);
+            } catch(e) {
+                console.warn('No se pudieron sync columnas de Supabase:', e);
+            }
+        }
+
+        // Verificar estado de la suscripción
+        function verificarEstadoPlan() {
+            if (!db.account) return { activo: false, razon: 'sin_cuenta' };
+
+            // Lifetime gratis (promo)
+            if (db.account.promoFreeForever || db.account.subscriptionStatus === 'premium_lifetime') {
+                return { activo: true, plan: 'premium', tipo: 'lifetime' };
+            }
+
+            // Master admin siempre tiene acceso
+            if (currentUser?.role === 'master') {
+                return { activo: true, plan: 'premium', tipo: 'master' };
+            }
+
+            const status = db.account.planStatus || db.account.subscriptionStatus || 'trial_14d';
+            const vencimiento = db.account.fechaVencimiento ? new Date(db.account.fechaVencimiento) : null;
+            const ahora = new Date();
+
+            // Plan activo pagado
+            if (status === 'active' && vencimiento && vencimiento > ahora) {
+                const diasRestantes = Math.ceil((vencimiento - ahora) / (1000*60*60*24));
+                return { activo: true, plan: db.account.plan, tipo: 'pagado', diasRestantes };
+            }
+
+            // Trial 14 días
+            if (status === 'trial_14d' || status === 'trial') {
+                const createdAt = new Date(db.account.createdAt);
+                const diasDesdeCreacion = Math.floor((ahora - createdAt) / (1000*60*60*24));
+                const diasRestantes = 14 - diasDesdeCreacion;
+                if (diasRestantes > 0) {
+                    return { activo: true, plan: db.account.plan, tipo: 'trial', diasRestantes };
+                } else {
+                    return { activo: false, plan: db.account.plan, tipo: 'trial_expirado', razon: 'Trial de 14 días vencido' };
+                }
+            }
+
+            // Expired
+            if (status === 'expired' || (vencimiento && vencimiento <= ahora)) {
+                return { activo: false, plan: db.account.plan, tipo: 'expirado', razon: 'Suscripción vencida' };
+            }
+
+            // Fallback: permitir acceso
+            return { activo: true, plan: db.account.plan || 'emprendedor', tipo: 'desconocido' };
+        }
+
+        // Mostrar banner de estado de suscripción
+        function renderBannerSuscripcion() {
+            let banner = document.getElementById('suscripcion-banner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'suscripcion-banner';
+                const header = document.querySelector('.header');
+                if (header) header.parentElement.insertBefore(banner, header.nextSibling);
+            }
+
+            const estado = verificarEstadoPlan();
+
+            if (!estado.activo) {
+                // BLOQUEADO
+                banner.style.cssText = 'background:linear-gradient(135deg,#fef2f2,#fff1f2);border-bottom:2px solid #fecaca;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;';
+                banner.innerHTML = `
+                    <div>
+                        <strong style="color:#991b1b;font-size:14px;"><i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>${estado.razon}</strong>
+                        <p style="font-size:12px;color:#7f1d1d;margin-top:4px;">Algunas funciones están bloqueadas. Suscribite para seguir usando SistemaVOS sin límites.</p>
+                    </div>
+                    <button onclick="abrirPanelPago()" style="padding:10px 24px;background:linear-gradient(135deg,#6C3AE1,#06B6D4);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;">
+                        <i class="fas fa-credit-card" style="margin-right:6px;"></i>Suscribirme Ahora
+                    </button>`;
+                return;
+            }
+
+            if (estado.tipo === 'trial' && estado.diasRestantes <= 5) {
+                // Trial por vencer
+                banner.style.cssText = 'background:linear-gradient(135deg,#fffbeb,#fef9c3);border-bottom:2px solid #fde68a;padding:12px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;';
+                banner.innerHTML = `
+                    <div>
+                        <strong style="color:#92400e;font-size:13px;"><i class="fas fa-clock" style="margin-right:6px;"></i>Tu prueba gratuita vence en ${estado.diasRestantes} día${estado.diasRestantes !== 1 ? 's' : ''}</strong>
+                        <p style="font-size:12px;color:#78350f;margin-top:2px;">Suscribite ahora para no perder tus datos.</p>
+                    </div>
+                    <button onclick="abrirPanelPago()" style="padding:8px 20px;background:#f59e0b;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">
+                        <i class="fas fa-crown" style="margin-right:4px;"></i>Elegir Plan
+                    </button>`;
+                return;
+            }
+
+            if (estado.tipo === 'pagado') {
+                banner.style.cssText = 'display:none;';
+                return;
+            }
+
+            if (estado.tipo === 'lifetime') {
+                banner.style.cssText = 'display:none;';
+                return;
+            }
+
+            if (estado.tipo === 'trial' && estado.diasRestantes > 5) {
+                banner.style.cssText = 'background:linear-gradient(135deg,#eff6ff,#f0f9ff);border-bottom:1px solid #bfdbfe;padding:8px 32px;display:flex;justify-content:space-between;align-items:center;';
+                banner.innerHTML = `<span style="font-size:12px;color:#1e40af;"><i class="fas fa-info-circle" style="margin-right:4px;"></i>Prueba gratuita: ${estado.diasRestantes} días restantes</span>
+                    <button onclick="abrirPanelPago()" style="padding:6px 14px;background:#3b82f6;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Mejorar plan</button>`;
+                return;
+            }
+
+            banner.style.cssText = 'display:none;';
+        }
+
+        // Función para bloquear funciones premium (llamar antes de acciones)
+        function requierePlan(funcionNombre) {
+            const estado = verificarEstadoPlan();
+            if (estado.activo) return true;
+
+            // Mostrar modal de paywall en vez de un alert
+            _mostrarPaywallModal(funcionNombre, estado.razon);
+            return false;
+        }
+
+        function _mostrarPaywallModal(funcionNombre, razon) {
+            let modal = document.getElementById('paywall-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'paywall-modal';
+                modal.className = 'modal';
+                modal.innerHTML = `<div class="modal-overlay" onclick="closeModal('paywall-modal')"></div>
+                    <div class="modal-content" style="max-width:440px;">
+                        <div class="modal-body" id="paywall-modal-body" style="padding:32px;text-align:center;"></div>
+                    </div>`;
+                document.body.appendChild(modal);
+            }
+            document.getElementById('paywall-modal-body').innerHTML = `
+                <div style="font-size:56px;margin-bottom:16px;">🔒</div>
+                <h2 style="font-size:20px;margin-bottom:8px;color:#1e293b;">Función Bloqueada</h2>
+                <p style="color:var(--gray-600);font-size:14px;margin-bottom:8px;">${razon || 'Tu plan expiró'}</p>
+                <p style="color:var(--gray-500);font-size:13px;margin-bottom:20px;">Para usar <strong>"${funcionNombre}"</strong> y todas las funciones de SistemaVOS, activá tu suscripción.</p>
+                <button onclick="closeModal('paywall-modal');abrirPanelPago();" style="width:100%;padding:14px;background:linear-gradient(135deg,#6C3AE1,#06B6D4);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;">
+                    <i class="fas fa-crown" style="margin-right:6px;"></i>Activar Plan Ahora
+                </button>
+                <button onclick="closeModal('paywall-modal')" style="width:100%;padding:10px;background:none;color:var(--gray-500);border:1px solid var(--gray-300);border-radius:8px;cursor:pointer;font-size:13px;">Solo ver datos (modo lectura)</button>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        // ═══ MODO LECTURA: deshabilitar botones si plan no activo ═══
+        function aplicarModoLectura() {
+            const estado = verificarEstadoPlan();
+            if (estado.activo) {
+                // Restaurar botones
+                document.querySelectorAll('[data-paywall-disabled]').forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    btn.removeAttribute('data-paywall-disabled');
+                });
+                return;
+            }
+
+            // Deshabilitar botones de acción (guardar, editar, eliminar, nuevo)
+            const selectores = [
+                'button[onclick*="guardar"]',
+                'button[onclick*="Guardar"]',
+                'button[onclick*="completar"]',
+                'button[onclick*="emitir"]',
+                'button[onclick*="eliminar"]',
+                'button[onclick*="Eliminar"]',
+                'button[onclick*="openModal"]',
+                'button[onclick*="Modal"]',
+                'button[onclick*="Nuevo"]',
+                'button[onclick*="nuevo"]',
+                'button[onclick*="agregar"]',
+                'button[onclick*="conectar"]',
+                'button[onclick*="generar"]',
+                'button[onclick*="limpiar"]',
+                'button[onclick*="reset"]'
+            ];
+
+            // Solo deshabilitar dentro de app-page, no en login/registro
+            const appPage = document.getElementById('app-page');
+            if (!appPage) return;
+
+            selectores.forEach(sel => {
+                appPage.querySelectorAll(sel).forEach(btn => {
+                    // No deshabilitar botones de navegación o pago
+                    if (btn.closest('#suscripcion-banner') || btn.closest('#pago-modal') || btn.closest('#paywall-modal')) return;
+                    if (btn.getAttribute('onclick')?.includes('showPage') || btn.getAttribute('onclick')?.includes('abrirPanelPago')) return;
+
+                    btn.setAttribute('data-paywall-disabled', 'true');
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.pointerEvents = 'none';
+                });
+            });
+        }
+
+        // ═══ PANEL DE PAGO CON MERCADO PAGO ═══
+        function abrirPanelPago() {
+            const plan = db.account?.plan || 'emprendedor';
+            const referidos = db.account?.referidosActivos?.length || 0;
+            const descuento = Math.min(referidos * 20, 100);
+
+            let html = '<div style="text-align:center;margin-bottom:20px;">';
+            html += '<h2 style="font-size:22px;margin-bottom:8px;">Elegí tu plan</h2>';
+            html += '<p style="color:var(--gray-600);font-size:13px;">Pagá con Mercado Pago de forma segura</p>';
+            if (descuento > 0) {
+                html += `<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:8px 16px;display:inline-block;margin-top:8px;font-size:13px;color:#15803d;"><i class="fas fa-gift" style="margin-right:4px;"></i>¡Tenés un <strong>${descuento}%</strong> de descuento por ${referidos} referido${referidos>1?'s':''}!</div>`;
+            }
+            html += '</div>';
+
+            html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">';
+            Object.entries(PLAN_PRICES).forEach(([key, p]) => {
+                const precioFinal = descuento > 0 ? (p.price * (1 - descuento/100)).toFixed(2) : p.price;
+                const selected = key === plan;
+                html += `<div onclick="seleccionarPlanPago('${key}')" id="plan-pago-${key}" style="border:2px solid ${selected ? 'var(--primary)' : '#e2e8f0'};border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;${selected ? 'background:#f0ecfc;' : ''}">
+                    <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${p.name}</div>
+                    ${descuento > 0 ? `<div style="text-decoration:line-through;color:var(--gray-400);font-size:12px;">US$${p.price}</div>` : ''}
+                    <div style="font-size:22px;font-weight:700;color:var(--primary);">US$${precioFinal}</div>
+                    <div style="font-size:11px;color:var(--gray-500);">/mes</div>
+                </div>`;
+            });
+            html += '</div>';
+
+            html += `<button onclick="iniciarPagoMercadoPago()" style="width:100%;padding:14px;background:linear-gradient(135deg,#00b1ea,#009ee3);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/6.6.92/mercadopago/logo__large@2x.png" style="height:22px;filter:brightness(10);" alt="MP">
+                Pagar con Mercado Pago
+            </button>`;
+            html += '<p style="text-align:center;font-size:11px;color:var(--gray-500);margin-top:10px;">Pago seguro procesado por Mercado Pago. Tu plan se activa automáticamente.</p>';
+
+            // Abrir en un "modal" reutilizando la lógica existente
+            let modal = document.getElementById('pago-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'pago-modal';
+                modal.className = 'modal';
+                modal.innerHTML = `<div class="modal-overlay" onclick="closeModal('pago-modal')"></div>
+                    <div class="modal-content" style="max-width:520px;">
+                        <div class="modal-header"><h3><i class="fas fa-credit-card" style="margin-right:8px;"></i>Suscripción</h3><button class="modal-close" onclick="closeModal('pago-modal')">×</button></div>
+                        <div class="modal-body" id="pago-modal-body" style="padding:24px;"></div>
+                    </div>`;
+                document.body.appendChild(modal);
+            }
+            document.getElementById('pago-modal-body').innerHTML = html;
+            modal.style.display = 'flex';
+        }
+
+        let _planPagoSeleccionado = null;
+        function seleccionarPlanPago(plan) {
+            _planPagoSeleccionado = plan;
+            Object.keys(PLAN_PRICES).forEach(k => {
+                const el = document.getElementById('plan-pago-' + k);
+                if (el) {
+                    el.style.borderColor = k === plan ? 'var(--primary)' : '#e2e8f0';
+                    el.style.background = k === plan ? '#f0ecfc' : '#fff';
+                }
+            });
+        }
+
+        async function iniciarPagoMercadoPago() {
+            const plan = _planPagoSeleccionado || db.account?.plan || 'emprendedor';
+            const planInfo = PLAN_PRICES[plan] || PLAN_PRICES.emprendedor;
+            const referidos = db.account?.referidosActivos?.length || 0;
+            const descuento = Math.min(referidos * 20, 100);
+            const precioFinal = parseFloat((planInfo.price * (1 - descuento/100)).toFixed(2));
+
+            // Obtener user.id de Supabase (VITAL para external_reference)
+            let userId = null;
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                userId = user?.id;
+            } catch(e) {}
+
+            if (!userId) {
+                alert('Necesitás estar logueado con tu cuenta para realizar el pago. Intentá cerrar sesión e iniciar de nuevo.');
+                return;
+            }
+
+            if (precioFinal <= 0) {
+                alert('¡Tu plan es gratis gracias a tus referidos! No necesitás pagar.');
+                db.account.planStatus = 'active';
+                db.account.fechaVencimiento = new Date(Date.now() + 30*24*60*60*1000).toISOString();
+                saveDB();
+                syncSupabaseColumns();
+                closeModal('pago-modal');
+                renderBannerSuscripcion();
+                return;
+            }
+
+            // Cambiar botón a loading
+            const btn = document.querySelector('#pago-modal-body button[onclick="iniciarPagoMercadoPago()"]');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando link de pago...'; }
+
+            // Enviar al webhook de Make que genera la preferencia de Checkout Pro
+            // CLAVE: external_reference = userId para que Make sepa a quién activar
+            try {
+                const response = await fetch(MAKE_WEBHOOK_PAGO, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        accion: 'crear_preferencia',
+                        external_reference: userId,
+                        user_id: userId,
+                        email: db.account.email,
+                        nombre_negocio: db.account.businessName,
+                        plan: plan,
+                        plan_nombre: planInfo.name,
+                        precio: precioFinal,
+                        currency: planInfo.currency,
+                        descuento_referidos: descuento
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.init_point || data.checkout_url || data.url) {
+                    // Make devolvió la URL de Checkout Pro de Mercado Pago
+                    window.open(data.init_point || data.checkout_url || data.url, '_blank');
+                    closeModal('pago-modal');
+
+                    // Mostrar modal de esperando confirmación
+                    _mostrarEsperandoPago();
+                } else {
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/6.6.92/mercadopago/logo__large@2x.png" style="height:22px;filter:brightness(10);" alt="MP"> Pagar con Mercado Pago'; }
+                    alert('No se pudo generar el link de pago.\nContactá a contacto@multigestiones.com para activar tu plan.');
+                }
+            } catch(e) {
+                console.error('Error al iniciar pago:', e);
+                if (btn) { btn.disabled = false; btn.innerHTML = 'Reintentar pago'; }
+                alert('Error de conexión. Verificá tu internet e intentá de nuevo.');
+            }
+        }
+
+        function _mostrarEsperandoPago() {
+            let modal = document.getElementById('pago-modal');
+            if (!modal) return;
+            document.getElementById('pago-modal-body').innerHTML = `
+                <div style="text-align:center;padding:24px;">
+                    <div style="font-size:48px;margin-bottom:16px;"><i class="fas fa-clock" style="color:#f59e0b;"></i></div>
+                    <h3 style="margin-bottom:12px;">Esperando confirmación de pago</h3>
+                    <p style="color:var(--gray-600);font-size:13px;margin-bottom:16px;">Completá el pago en la ventana de Mercado Pago que se abrió.<br>Tu plan se activará automáticamente en unos segundos después de pagar.</p>
+                    <div style="background:var(--gray-100);border-radius:8px;padding:12px;font-size:12px;color:var(--gray-600);">
+                        <i class="fas fa-info-circle" style="margin-right:4px;"></i>Si la ventana no se abrió, <a href="#" onclick="abrirPanelPago();return false;" style="color:var(--primary);text-decoration:underline;">hacé clic acá</a> para reintentar.
+                    </div>
+                    <button onclick="closeModal('pago-modal')" style="margin-top:16px;padding:10px 24px;background:var(--gray-200);color:var(--gray-700);border:none;border-radius:8px;cursor:pointer;font-size:13px;">Cerrar</button>
+                </div>`;
+            modal.style.display = 'flex';
+        }
+
+        // Escuchar cambios de plan_status desde Supabase (real-time)
+        async function escucharCambiosDePlan() {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) return;
+
+                // Polling cada 15 segundos para detectar activación de pago por Make
+                setInterval(async () => {
+                    try {
+                        const { data } = await supabaseClient
+                            .from('usuarios_datos')
+                            .select('plan_status, fecha_vencimiento')
+                            .eq('id', user.id)
+                            .single();
+
+                        if (data?.plan_status === 'active' && db.account.planStatus !== 'active') {
+                            // ¡PAGO DETECTADO! Make actualizó la columna
+                            db.account.planStatus = 'active';
+                            db.account.fechaVencimiento = data.fecha_vencimiento;
+                            localStorage.setItem('sistemavos_db', JSON.stringify(db));
+                            renderBannerSuscripcion();
+                            aplicarModoLectura(); // Restaurar botones
+                            closeModal('paywall-modal');
+                            closeModal('pago-modal');
+                            alert('🎉 ¡Tu plan fue activado exitosamente!\nGracias por elegir SistemaVOS. Ya tenés acceso completo.');
+                        }
+                    } catch(e) {}
+                }, 15000);
+            } catch(e) {}
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // MÓDULO ODONTOLOGÍA — Odontograma, Fichas Clínicas, Historial
+        // ══════════════════════════════════════════════════════════
+
+        const DENTAL_TRATAMIENTOS = {
+            sano:       { color: '#10b981', label: 'Sano' },
+            empaste:    { color: '#f59e0b', label: 'Empaste' },
+            corona:     { color: '#6C3AE1', label: 'Corona' },
+            extraccion: { color: '#ef4444', label: 'Extracción' },
+            endodoncia: { color: '#06B6D4', label: 'Endodoncia' },
+            caries:     { color: '#F43F5E', label: 'Caries' },
+            implante:   { color: '#94a3b8', label: 'Implante' },
+            ausente:    { color: '#e2e8f0', label: 'Ausente' }
+        };
+
+        // Nomenclatura FDI: 11-18, 21-28 (superiores), 31-38, 41-48 (inferiores)
+        const DIENTES_SUPERIORES = [18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
+        const DIENTES_INFERIORES = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
+        const TODOS_DIENTES = [...DIENTES_SUPERIORES, ...DIENTES_INFERIORES];
+
+        let _odontoPacienteId = null;
+
+        function esRubroOdontologia() {
+            return db.account?.industry === 'odontologia' || db.industryConfig?.esOdontologia;
+        }
+
+        function actualizarPanelOdontologico() {
+            const panel = document.getElementById('panel-odontologico');
+            if (!panel) return;
+            if (esRubroOdontologia()) {
+                panel.style.display = 'block';
+                poblarSelectPacientes();
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        function poblarSelectPacientes() {
+            const sel = document.getElementById('odonto-paciente-select');
+            if (!sel) return;
+            const current = sel.value;
+            sel.innerHTML = '<option value="">-- Seleccionar Paciente --</option>' +
+                db.clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+            if (current) sel.value = current;
+        }
+
+        // ═══ GENERAR ODONTOGRAMA SVG ═══
+        function generarOdontogramaSVG(pacienteId) {
+            const odonto = obtenerOdontograma(pacienteId);
+            const W = 780, rowH = 80, gap = 16, padX = 10, padY = 10;
+            const toothW = (W - padX * 2) / 16;
+            const H = padY + rowH + gap + rowH + padY + 60;
+
+            let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:${W}px;font-family:Inter,Arial,sans-serif;">`;
+
+            // Título arcadas
+            svg += `<text x="${W/2}" y="${padY+14}" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600">ARCADA SUPERIOR</text>`;
+
+            // Fila superior
+            DIENTES_SUPERIORES.forEach((num, i) => {
+                const x = padX + i * toothW;
+                const y = padY + 22;
+                const trat = odonto[num]?.tratamiento || 'sano';
+                const col = DENTAL_TRATAMIENTOS[trat]?.color || '#10b981';
+                const isAusente = trat === 'ausente';
+
+                svg += `<g style="cursor:pointer;" onclick="abrirModalDiente(${num})">`;
+                svg += `<rect x="${x+2}" y="${y}" width="${toothW-4}" height="${rowH-10}" rx="6" fill="${isAusente ? '#f1f5f9' : '#fff'}" stroke="${col}" stroke-width="2.5"/>`;
+                if (isAusente) {
+                    svg += `<line x1="${x+6}" y1="${y+4}" x2="${x+toothW-6}" y2="${y+rowH-14}" stroke="#cbd5e1" stroke-width="2"/>`;
+                    svg += `<line x1="${x+toothW-6}" y1="${y+4}" x2="${x+6}" y2="${y+rowH-14}" stroke="#cbd5e1" stroke-width="2"/>`;
+                } else {
+                    svg += `<rect x="${x+8}" y="${y+20}" width="${toothW-20}" height="20" rx="4" fill="${col}" opacity="0.2"/>`;
+                    svg += `<rect x="${x+10}" y="${y+22}" width="${toothW-24}" height="16" rx="3" fill="${col}" opacity="0.5"/>`;
+                }
+                svg += `<text x="${x+toothW/2}" y="${y-4}" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">${num}</text>`;
+                svg += `<text x="${x+toothW/2}" y="${y+rowH-1}" text-anchor="middle" fill="${col}" font-size="8" font-weight="500">${DENTAL_TRATAMIENTOS[trat]?.label || ''}</text>`;
+                svg += `</g>`;
+            });
+
+            // Línea divisoria
+            const lineY = padY + 22 + rowH + gap/2;
+            svg += `<line x1="${padX}" y1="${lineY}" x2="${W-padX}" y2="${lineY}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="6,4"/>`;
+            svg += `<text x="${W/2}" y="${lineY + 16}" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600">ARCADA INFERIOR</text>`;
+
+            // Fila inferior
+            DIENTES_INFERIORES.forEach((num, i) => {
+                const x = padX + i * toothW;
+                const y = padY + 22 + rowH + gap + 22;
+                const trat = odonto[num]?.tratamiento || 'sano';
+                const col = DENTAL_TRATAMIENTOS[trat]?.color || '#10b981';
+                const isAusente = trat === 'ausente';
+
+                svg += `<g style="cursor:pointer;" onclick="abrirModalDiente(${num})">`;
+                svg += `<rect x="${x+2}" y="${y}" width="${toothW-4}" height="${rowH-10}" rx="6" fill="${isAusente ? '#f1f5f9' : '#fff'}" stroke="${col}" stroke-width="2.5"/>`;
+                if (isAusente) {
+                    svg += `<line x1="${x+6}" y1="${y+4}" x2="${x+toothW-6}" y2="${y+rowH-14}" stroke="#cbd5e1" stroke-width="2"/>`;
+                    svg += `<line x1="${x+toothW-6}" y1="${y+4}" x2="${x+6}" y2="${y+rowH-14}" stroke="#cbd5e1" stroke-width="2"/>`;
+                } else {
+                    svg += `<rect x="${x+8}" y="${y+20}" width="${toothW-20}" height="20" rx="4" fill="${col}" opacity="0.2"/>`;
+                    svg += `<rect x="${x+10}" y="${y+22}" width="${toothW-24}" height="16" rx="3" fill="${col}" opacity="0.5"/>`;
+                }
+                svg += `<text x="${x+toothW/2}" y="${y+rowH+4}" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">${num}</text>`;
+                svg += `<text x="${x+toothW/2}" y="${y-4}" text-anchor="middle" fill="${col}" font-size="8" font-weight="500">${DENTAL_TRATAMIENTOS[trat]?.label || ''}</text>`;
+                svg += `</g>`;
+            });
+
+            svg += `</svg>`;
+            return svg;
+        }
+
+        function obtenerOdontograma(pacienteId) {
+            if (!db.odontogramas) db.odontogramas = {};
+            if (!db.odontogramas[pacienteId]) db.odontogramas[pacienteId] = {};
+            return db.odontogramas[pacienteId];
+        }
+
+        function abrirModalDiente(nroDiente) {
+            if (!_odontoPacienteId) { alert('Selecciona un paciente primero'); return; }
+            const odonto = obtenerOdontograma(_odontoPacienteId);
+            const data = odonto[nroDiente] || {};
+            document.getElementById('diente-modal-title').textContent = `Pieza Dental #${nroDiente}`;
+            document.getElementById('diente-numero').value = nroDiente;
+            document.getElementById('diente-tratamiento').value = data.tratamiento || 'sano';
+            document.getElementById('diente-notas').value = data.notas || '';
+            openModal('diente-modal');
+        }
+
+        function guardarTratamientoDiente() {
+            if (!_odontoPacienteId) return;
+            const nro = parseInt(document.getElementById('diente-numero').value);
+            const tratamiento = document.getElementById('diente-tratamiento').value;
+            const notas = document.getElementById('diente-notas').value;
+            const odonto = obtenerOdontograma(_odontoPacienteId);
+            const anterior = odonto[nro]?.tratamiento || 'sano';
+
+            odonto[nro] = {
+                tratamiento,
+                notas,
+                ultimaModificacion: new Date().toISOString(),
+                modificadoPor: currentUser?.name || 'Sistema'
+            };
+
+            // Guardar en historial de la pieza
+            if (!db.historialDental) db.historialDental = {};
+            if (!db.historialDental[_odontoPacienteId]) db.historialDental[_odontoPacienteId] = {};
+            if (!db.historialDental[_odontoPacienteId][nro]) db.historialDental[_odontoPacienteId][nro] = [];
+
+            db.historialDental[_odontoPacienteId][nro].push({
+                fecha: new Date().toISOString(),
+                tratamientoAnterior: anterior,
+                tratamientoNuevo: tratamiento,
+                notas,
+                por: currentUser?.name || 'Sistema'
+            });
+
+            saveDB();
+            closeModal('diente-modal');
+            renderOdontograma();
+            renderHistorialPieza();
+        }
+
+        function renderOdontograma() {
+            if (!_odontoPacienteId) return;
+            const container = document.getElementById('odontograma-svg-container');
+            if (container) container.innerHTML = generarOdontogramaSVG(_odontoPacienteId);
+        }
+
+        // ═══ CARGAR FICHA AL SELECCIONAR PACIENTE ═══
+        function cargarFichaOdontologica() {
+            const sel = document.getElementById('odonto-paciente-select');
+            const id = parseInt(sel.value);
+            const content = document.getElementById('odonto-ficha-content');
+
+            if (!id) {
+                _odontoPacienteId = null;
+                if (content) content.style.display = 'none';
+                return;
+            }
+
+            _odontoPacienteId = id;
+            if (content) content.style.display = 'block';
+
+            renderOdontograma();
+            renderFichasClinicas();
+            poblarSelectHistorialPiezas();
+            renderHistorialPieza();
+        }
+
+        // ═══ FICHAS CLÍNICAS ═══
+        function abrirModalFichaClinica() {
+            if (!_odontoPacienteId) { alert('Selecciona un paciente'); return; }
+            document.getElementById('ficha-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('ficha-piezas').value = '';
+            document.getElementById('ficha-diagnostico').value = '';
+            document.getElementById('ficha-materiales').value = '';
+            document.getElementById('ficha-formulas').value = '';
+            document.getElementById('ficha-proxima-cita').value = '';
+            document.getElementById('ficha-archivos').value = '';
+            document.getElementById('ficha-archivos-preview').innerHTML = '';
+            openModal('ficha-clinica-modal');
+        }
+
+        async function guardarFichaClinica() {
+            if (!_odontoPacienteId) return;
+            const fecha = document.getElementById('ficha-fecha').value;
+            const piezas = document.getElementById('ficha-piezas').value;
+            const diagnostico = document.getElementById('ficha-diagnostico').value;
+            const materiales = document.getElementById('ficha-materiales').value;
+            const formulas = document.getElementById('ficha-formulas').value;
+            const proximaCita = document.getElementById('ficha-proxima-cita').value;
+
+            if (!diagnostico) { alert('Ingresa un diagnóstico o tratamiento'); return; }
+
+            // Procesar archivos adjuntos (como base64)
+            const archivosInput = document.getElementById('ficha-archivos');
+            const adjuntos = [];
+            if (archivosInput.files.length > 0) {
+                for (const file of archivosInput.files) {
+                    try {
+                        const base64 = await _fileToBase64(file);
+                        adjuntos.push({ nombre: file.name, tipo: file.type, size: file.size, data: base64 });
+                    } catch(e) { console.warn('Error leyendo archivo:', e); }
+                }
+            }
+
+            if (!db.fichasClinicas) db.fichasClinicas = {};
+            if (!db.fichasClinicas[_odontoPacienteId]) db.fichasClinicas[_odontoPacienteId] = [];
+
+            const ficha = {
+                id: Date.now(),
+                fecha,
+                piezas: piezas.split(',').map(p => p.trim()).filter(p => p),
+                diagnostico,
+                materiales,
+                formulas,
+                proximaCita,
+                adjuntos,
+                creadaPor: currentUser?.name || 'Sistema',
+                creadaEn: new Date().toISOString()
+            };
+
+            db.fichasClinicas[_odontoPacienteId].push(ficha);
+            saveDB();
+            closeModal('ficha-clinica-modal');
+            renderFichasClinicas();
+
+            // Agregar al historial de cada pieza mencionada
+            ficha.piezas.forEach(p => {
+                const nro = parseInt(p);
+                if (!nro || !TODOS_DIENTES.includes(nro)) return;
+                if (!db.historialDental) db.historialDental = {};
+                if (!db.historialDental[_odontoPacienteId]) db.historialDental[_odontoPacienteId] = {};
+                if (!db.historialDental[_odontoPacienteId][nro]) db.historialDental[_odontoPacienteId][nro] = [];
+                db.historialDental[_odontoPacienteId][nro].push({
+                    fecha: ficha.fecha || new Date().toISOString(),
+                    tipo: 'ficha_clinica',
+                    diagnostico,
+                    materiales,
+                    formulas,
+                    por: currentUser?.name || 'Sistema'
+                });
+            });
+            saveDB();
+            renderHistorialPieza();
+        }
+
+        function _fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderFichasClinicas() {
+            if (!_odontoPacienteId) return;
+            const lista = document.getElementById('fichas-clinicas-lista');
+            if (!lista) return;
+            const fichas = (db.fichasClinicas && db.fichasClinicas[_odontoPacienteId]) || [];
+
+            if (fichas.length === 0) {
+                lista.innerHTML = '<div style="text-align:center;color:var(--gray-500);padding:24px;font-size:13px;"><i class="fas fa-notes-medical" style="font-size:32px;margin-bottom:8px;display:block;opacity:.4;"></i>No hay fichas clínicas para este paciente</div>';
+                return;
+            }
+
+            lista.innerHTML = fichas.slice().reverse().map(f => {
+                const adjuntosHtml = (f.adjuntos || []).map(a =>
+                    `<a href="${a.data}" target="_blank" download="${a.nombre}" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--primary);background:#f0ecfc;padding:4px 10px;border-radius:6px;text-decoration:none;"><i class="fas fa-paperclip"></i>${a.nombre}</a>`
+                ).join(' ');
+
+                return `<div style="background:var(--gray-100);border-radius:12px;padding:16px;border-left:4px solid var(--primary);">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                        <div>
+                            <strong style="font-size:14px;">${formatDate(f.fecha)}</strong>
+                            ${f.piezas.length ? `<span style="font-size:12px;color:var(--primary);margin-left:8px;">Piezas: ${f.piezas.join(', ')}</span>` : ''}
+                        </div>
+                        <span style="font-size:11px;color:var(--gray-500);">Por: ${f.creadaPor}</span>
+                    </div>
+                    <p style="font-size:13px;margin-bottom:6px;"><strong>Diagnóstico:</strong> ${f.diagnostico}</p>
+                    ${f.materiales ? `<p style="font-size:12px;color:#0e7490;margin-bottom:4px;"><i class="fas fa-flask" style="margin-right:4px;"></i><strong>Materiales:</strong> ${f.materiales}</p>` : ''}
+                    ${f.formulas ? `<p style="font-size:12px;color:#be123c;margin-bottom:4px;"><i class="fas fa-prescription-bottle-alt" style="margin-right:4px;"></i><strong>Fórmulas:</strong> ${f.formulas}</p>` : ''}
+                    ${f.proximaCita ? `<p style="font-size:12px;color:var(--gray-600);"><i class="fas fa-calendar" style="margin-right:4px;"></i><strong>Próxima cita:</strong> ${formatDate(f.proximaCita)}</p>` : ''}
+                    ${adjuntosHtml ? `<div style="margin-top:8px;">${adjuntosHtml}</div>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        // ═══ HISTORIAL POR PIEZA DENTAL ═══
+        function poblarSelectHistorialPiezas() {
+            const sel = document.getElementById('historial-pieza-select');
+            if (!sel) return;
+            const historial = (db.historialDental && db.historialDental[_odontoPacienteId]) || {};
+            const piezasConHistorial = Object.keys(historial).filter(k => historial[k].length > 0).sort((a,b) => parseInt(a) - parseInt(b));
+
+            sel.innerHTML = '<option value="">Todas las piezas</option>' +
+                piezasConHistorial.map(p => `<option value="${p}">Pieza #${p}</option>`).join('');
+        }
+
+        function renderHistorialPieza() {
+            if (!_odontoPacienteId) return;
+            const container = document.getElementById('historial-pieza-content');
+            if (!container) return;
+            const filtro = document.getElementById('historial-pieza-select')?.value;
+            const historial = (db.historialDental && db.historialDental[_odontoPacienteId]) || {};
+
+            const piezas = filtro ? [filtro] : Object.keys(historial).sort((a,b) => parseInt(a) - parseInt(b));
+
+            if (piezas.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:var(--gray-500);padding:24px;font-size:13px;"><i class="fas fa-history" style="font-size:32px;margin-bottom:8px;display:block;opacity:.4;"></i>Sin historial dental registrado</div>';
+                return;
+            }
+
+            let html = '';
+            piezas.forEach(p => {
+                const eventos = historial[p];
+                if (!eventos || eventos.length === 0) return;
+
+                html += `<div style="margin-bottom:16px;">
+                    <h4 style="font-size:14px;font-weight:600;margin-bottom:8px;color:var(--primary);">
+                        <i class="fas fa-tooth" style="margin-right:6px;"></i>Pieza #${p}
+                    </h4>
+                    <div style="border-left:3px solid var(--primary);padding-left:16px;">`;
+
+                eventos.slice().reverse().forEach(e => {
+                    if (e.tipo === 'ficha_clinica') {
+                        html += `<div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <strong style="color:#166534;"><i class="fas fa-notes-medical" style="margin-right:4px;"></i>Ficha Clínica</strong>
+                                <span style="color:var(--gray-500);">${formatDate(e.fecha)}</span>
+                            </div>
+                            <p>${e.diagnostico}</p>
+                            ${e.materiales ? `<p style="color:#0e7490;"><i class="fas fa-flask" style="margin-right:3px;"></i>${e.materiales}</p>` : ''}
+                            ${e.formulas ? `<p style="color:#be123c;"><i class="fas fa-prescription-bottle-alt" style="margin-right:3px;"></i>${e.formulas}</p>` : ''}
+                            <p style="color:var(--gray-500);">Por: ${e.por}</p>
+                        </div>`;
+                    } else {
+                        html += `<div style="background:var(--gray-100);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <strong><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${DENTAL_TRATAMIENTOS[e.tratamientoNuevo]?.color||'#94a3b8'};margin-right:6px;"></span>${DENTAL_TRATAMIENTOS[e.tratamientoAnterior]?.label||e.tratamientoAnterior} → ${DENTAL_TRATAMIENTOS[e.tratamientoNuevo]?.label||e.tratamientoNuevo}</strong>
+                                <span style="color:var(--gray-500);">${formatDate(e.fecha)}</span>
+                            </div>
+                            ${e.notas ? `<p>${e.notas}</p>` : ''}
+                            <p style="color:var(--gray-500);">Por: ${e.por}</p>
+                        </div>`;
+                    }
+                });
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ═══ FIN MÓDULO ODONTOLOGÍA ═══
+
         // PAGE RENDER HOOKS
         const pageRenderHooks = {
-            'clientes': () => { renderVentasSelects(); renderClientes(); },
+            'clientes': () => { renderVentasSelects(); renderClientes(); actualizarPanelOdontologico(); },
             'inventario': () => { renderProductos(); },
             'ventas': () => { renderVentasSelects(); renderVentas(); renderCarrito(); },
             'facturacion': () => { renderVentasSelects(); renderFacturas(); renderFacturaItems(); initFacturaDocZone(); },
@@ -5997,6 +7420,8 @@
             if (pageRenderHooks[page]) {
                 pageRenderHooks[page]();
             }
+            // Reaplicar modo lectura tras renderizar la página
+            setTimeout(aplicarModoLectura, 200);
         };
     </script>
 </body>
