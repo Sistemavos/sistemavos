@@ -3707,6 +3707,13 @@
             const urlParams = new URLSearchParams(window.location.search);
             const wantsLogin = urlParams.get('login') === '1';
 
+            // Si hay datos de demo en localStorage, limpiarlos para que no contaminen sesiones reales
+            if (db.account?.email === 'demo@sistemavos.com') {
+                localStorage.removeItem('sistemavos_db');
+                db = {};
+                loadDB(); // recargar limpio
+            }
+
             // Intentar restaurar sesión de Supabase existente
             if (navigator.onLine) {
                 try {
@@ -4218,6 +4225,13 @@
                     if (!authError && authData.user) {
                         clearLoginError();
 
+                        // Limpiar datos de demo si había sesión demo previa
+                        if (db.account?.email === DEMO_CREDENTIALS.email || currentUser?.role === 'demo') {
+                            localStorage.removeItem('sistemavos_db');
+                            db = {};
+                            currentUser = null;
+                        }
+
                         // Descargar datos de la nube e inyectar en localStorage
                         try {
                             const { data: cloudData, error: fetchError } = await supabaseClient
@@ -4414,7 +4428,15 @@
                 document.getElementById(pageName).classList.add('active');
             }
             document.querySelectorAll('.sidebar-menu button').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('button').classList.add('active');
+            try {
+                const clickedBtn = (typeof event !== 'undefined' && event && event.target)
+                    ? event.target.closest('button')
+                    : document.querySelector(`.sidebar-menu button[onclick*="'${page}'"]`);
+                if (clickedBtn) clickedBtn.classList.add('active');
+            } catch(e) {
+                const fallbackBtn = document.querySelector(`.sidebar-menu button[onclick*="'${page}'"]`);
+                if (fallbackBtn) fallbackBtn.classList.add('active');
+            }
             updatePageTitle(page);
             if (page === 'citas') renderCitas();
             if (page === 'config') { cargarConfiguracion(); renderRubroSelector(); }
@@ -4446,8 +4468,15 @@
         }
 
         function switchTab(tabName, element) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            // Solo afectar tabs del mismo contenedor (no todos los .tab-content de la app)
+            const parentPage = element.closest('.page');
+            if (parentPage) {
+                parentPage.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                parentPage.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            } else {
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            }
             if (document.getElementById(tabName)) {
                 document.getElementById(tabName).classList.add('active');
             }
