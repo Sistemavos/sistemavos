@@ -3707,13 +3707,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             const wantsLogin = urlParams.get('login') === '1';
 
-            // Si hay datos de demo en localStorage, limpiarlos para que no contaminen sesiones reales
-            if (db.account?.email === 'demo@sistemavos.com') {
-                localStorage.removeItem('sistemavos_db');
-                db = {};
-                loadDB(); // recargar limpio
-            }
-
             // Intentar restaurar sesión de Supabase existente
             if (navigator.onLine) {
                 try {
@@ -3750,14 +3743,25 @@
                 }
             }
 
+            // Si quedaron datos demo en localStorage y el usuario viene a loguearse, limpiar
+            if (db.account?.email === 'demo@sistemavos.com' && (wantsLogin || !db.account)) {
+                localStorage.removeItem('sistemavos_db');
+                db = {};
+            }
+
             if (wantsLogin) {
                 // Siempre mostrar login si viene de "Iniciar Sesion"
                 showLogin();
             } else if (!db.account || !db.account.email) {
                 // Sin cuenta registrada y sin param login -> registro
                 showRegistration();
+            } else if (db.account.email === 'demo@sistemavos.com') {
+                // Datos demo sin sesión activa → mostrar login limpio
+                localStorage.removeItem('sistemavos_db');
+                db = {};
+                showLogin();
             } else {
-                // Tiene cuenta -> login
+                // Tiene cuenta real -> login
                 showLogin();
             }
         }
@@ -4250,6 +4254,34 @@
 
                         if (!db.account) loadDB();
 
+                        // Si aún sin datos (primer login sin datos locales ni nube), crear estructura mínima
+                        if (!db.account) {
+                            const meta = authData.user.user_metadata || {};
+                            db = {
+                                account: {
+                                    email,
+                                    ownerName: meta.owner_name || email.split('@')[0],
+                                    businessName: meta.business_name || 'Mi Negocio',
+                                    industry: meta.industry || 'general',
+                                    currency: '$', iva: 21, puntoVenta: 1,
+                                    plan_status: 'trial',
+                                    fechaRegistro: new Date().toISOString()
+                                },
+                                selectedIndustry: meta.industry || 'general',
+                                industryConfig: INDUSTRY_CONFIGS[meta.industry || 'general'] || INDUSTRY_CONFIGS['general'],
+                                clientes: [], productos: [], ventas: [], facturas: [],
+                                gastos: [], empleados: [], nominas: [], sucursales: [],
+                                proveedores: [], arqueo: [],
+                                odontologia: {}, inmobiliaria: { propiedades: [], visitas: {} }
+                            };
+                            localStorage.setItem('sistemavos_db', JSON.stringify(db));
+                        }
+
+                        // Asegurar que industryConfig exista
+                        if (!db.industryConfig) {
+                            db.industryConfig = INDUSTRY_CONFIGS[db.account?.industry || 'general'] || INDUSTRY_CONFIGS['general'];
+                        }
+
                         currentUser = {
                             email,
                             name: db.account?.ownerName || authData.user.user_metadata?.owner_name || 'Usuario',
@@ -4396,16 +4428,20 @@
         }
 
         function updateSidebarBrand() {
-            document.getElementById('sidebar-business-name').textContent = db.account.businessName;
-            document.getElementById('sidebar-owner-name').textContent = db.account.ownerName;
+            const acct = db.account || {};
+            const bizName = acct.businessName || currentUser?.name || 'Mi Negocio';
+            document.getElementById('sidebar-business-name').textContent = bizName;
+            document.getElementById('sidebar-owner-name').textContent = acct.ownerName || currentUser?.name || '';
             const logoEl = document.getElementById('sidebar-logo');
-            if (db.account.logo) {
-                logoEl.innerHTML = `<img src="${db.account.logo}" style="width: 100%; height: 100%; object-fit: cover;">`;
-            } else {
-                logoEl.textContent = db.account.businessName.substring(0, 2).toUpperCase();
+            if (logoEl) {
+                if (acct.logo) {
+                    logoEl.innerHTML = `<img src="${acct.logo}" style="width:100%;height:100%;object-fit:cover;">`;
+                } else {
+                    logoEl.textContent = bizName.substring(0, 2).toUpperCase();
+                }
             }
-            if (db.account.color) {
-                document.documentElement.style.setProperty('--primary', db.account.color);
+            if (acct.color) {
+                document.documentElement.style.setProperty('--primary', acct.color);
             }
         }
 
