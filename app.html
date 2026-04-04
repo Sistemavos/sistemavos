@@ -4418,6 +4418,8 @@
             updatePageTitle(page);
             if (page === 'citas') renderCitas();
             if (page === 'config') { cargarConfiguracion(); renderRubroSelector(); }
+            if (page === 'clientes') { try { actualizarPanelOdontologico(); actualizarPanelInmobiliario(); } catch(e){} }
+            setTimeout(aplicarModoLectura, 200);
         }
 
         function updatePageTitle(page) {
@@ -7745,48 +7747,7 @@
             }, 15000);
         }
 
-        // ── pageRenderHooks ──────────────────────────────────────────────────
-        const pageRenderHooks = {
-            'dashboard':    () => { renderDashboard(); renderBannerSuscripcion(); },
-            'clientes':     () => { renderVentasSelects(); renderClientes(); actualizarPanelOdontologico(); actualizarPanelInmobiliario(); },
-            'productos':    () => { renderProductos(); },
-            'ventas':       () => { renderVentasSelects(); renderVentas(); },
-            'facturas':     () => { renderFacturas(); },
-            'gastos':       () => { renderGastos(); },
-            'empleados':    () => { renderEmpleados(); },
-            'nominas':      () => { renderNominas(); },
-            'sucursales':   () => { renderSucursales(); },
-            'proveedores':  () => { renderProveedores(); },
-            'arqueo':       () => { renderArqueo(); },
-            'reportes':     () => { renderReportes(); },
-            'config':       () => { cargarConfiguracion(); renderRubroSelector(); }
-        };
-
-        // ── Override showPage para aplicar modo lectura ──────────────────────
-        const _showPageOriginal = showPage;
-        function showPage(page) {
-            _showPageOriginal(page);
-            if (pageRenderHooks[page]) {
-                try { pageRenderHooks[page](); } catch(e) { console.warn('pageRenderHook error:', page, e); }
-            }
-            setTimeout(aplicarModoLectura, 200);
-        }
-
-        // ── Init ─────────────────────────────────────────────────────────────
-        (function init() {
-            try {
-                const saved = localStorage.getItem('sistemavos_db');
-                if (saved) db = JSON.parse(saved);
-            } catch(e) { db = {}; }
-
-            if (db.account && db.currentUser) {
-                currentUser = db.currentUser;
-                showApp();
-                escucharCambiosDePlan();
-            } else {
-                showLogin();
-            }
-        })();
+        // (pageRenderHooks integrados en showPage y showApp — ver funciones correspondientes)
 
     </script>
 </body>
