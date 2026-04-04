@@ -1482,7 +1482,7 @@
     </style>
 
     <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
     <script>
         // ═══════════════════════════════════════════════════════
         // SUPABASE CONFIG & CLOUD SYNC ENGINE
@@ -1981,6 +1981,64 @@
                         </div>
                     </div>
 
+                        <!-- PANEL INMOBILIARIO (solo visible si rubro = inmobiliarias) -->
+                        <div id="panel-inmobiliario" style="display:none; margin-top:20px;">
+
+                            <!-- Header panel -->
+                            <div class="card" style="margin-bottom:16px;">
+                                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                                    <i class="fas fa-building" style="font-size:24px;color:var(--primary);"></i>
+                                    <div style="flex:1;">
+                                        <h2 style="margin:0;">Módulo Inmobiliario</h2>
+                                        <p style="font-size:13px;color:var(--gray-600);margin:0;">Gestión de propiedades, visitas y seguimiento de clientes</p>
+                                    </div>
+                                    <button class="btn-primary" onclick="abrirModalPropiedad()">
+                                        <i class="fas fa-plus" style="margin-right:6px;"></i>Nueva Propiedad
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Listado de propiedades -->
+                            <div class="card" style="margin-bottom:16px;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                    <h3 style="display:flex;align-items:center;gap:8px;"><i class="fas fa-home" style="color:var(--primary);"></i> Propiedades</h3>
+                                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                        <input type="text" id="inmob-search" placeholder="Buscar propiedad..." oninput="renderPropiedades()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--gray-300);font-size:13px;min-width:180px;">
+                                        <select id="inmob-estado-filter" onchange="renderPropiedades()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--gray-300);font-size:13px;">
+                                            <option value="">Todos los estados</option>
+                                            <option value="venta">En Venta</option>
+                                            <option value="alquiler">En Alquiler</option>
+                                            <option value="reservado">Reservado</option>
+                                            <option value="vendido">Vendido/Cerrado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="inmob-propiedades-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;"></div>
+                            </div>
+
+                            <!-- Seguimiento de visitas por cliente -->
+                            <div class="card">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                    <h3 style="display:flex;align-items:center;gap:8px;"><i class="fas fa-calendar-check" style="color:var(--primary);"></i> Seguimiento de Visitas</h3>
+                                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                                        <select id="inmob-cliente-select" onchange="renderVisitasCliente()" style="padding:8px 14px;border-radius:8px;border:1px solid var(--gray-300);font-size:13px;min-width:200px;">
+                                            <option value="">-- Seleccionar Cliente --</option>
+                                        </select>
+                                        <button class="btn-primary" onclick="abrirModalVisita()" id="btn-nueva-visita" style="display:none;">
+                                            <i class="fas fa-plus" style="margin-right:6px;"></i>Registrar Visita
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="inmob-visitas-content">
+                                    <div style="text-align:center;color:var(--gray-500);padding:24px;font-size:13px;">
+                                        <i class="fas fa-user" style="font-size:32px;margin-bottom:8px;display:block;opacity:.4;"></i>
+                                        Seleccioná un cliente para ver sus visitas registradas
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
                     <!-- MODAL TRATAMIENTO DENTAL -->
                     <div id="diente-modal" class="modal" style="display:none;">
                         <div class="modal-overlay" onclick="closeModal('diente-modal')"></div>
@@ -2058,6 +2116,154 @@
                                 <div style="display:flex;gap:10px;margin-top:16px;">
                                     <button class="btn-secondary" style="flex:1;" onclick="closeModal('ficha-clinica-modal')">Cancelar</button>
                                     <button class="btn-primary" style="flex:1;" onclick="guardarFichaClinica()">Guardar Ficha</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODAL PROPIEDAD INMOBILIARIA -->
+                    <div id="propiedad-modal" class="modal" style="display:none;">
+                        <div class="modal-overlay" onclick="closeModal('propiedad-modal')"></div>
+                        <div class="modal-content" style="max-width:620px;max-height:92vh;overflow-y:auto;">
+                            <div class="modal-header">
+                                <h3 id="propiedad-modal-title">Nueva Propiedad</h3>
+                                <button class="modal-close" onclick="closeModal('propiedad-modal')">×</button>
+                            </div>
+                            <div class="modal-body" style="padding:20px;">
+                                <input type="hidden" id="propiedad-id">
+
+                                <!-- Datos básicos -->
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px;">
+                                    <div class="form-group" style="grid-column:1/-1;">
+                                        <label>Nombre / Identificación de la Propiedad *</label>
+                                        <input type="text" id="prop-nombre" placeholder="Ej: Casa 3 amb. Villa Crespo" style="width:100%;">
+                                    </div>
+                                    <div class="form-group" style="grid-column:1/-1;">
+                                        <label><i class="fas fa-map-marker-alt" style="color:var(--primary);margin-right:6px;"></i>Dirección</label>
+                                        <div style="display:flex;gap:8px;">
+                                            <input type="text" id="prop-direccion" placeholder="Ej: Av. Corrientes 1234, CABA" style="flex:1;" oninput="sugerirBusquedaMapa()">
+                                            <button type="button" onclick="buscarEnMapa()" style="padding:8px 14px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;white-space:nowrap;">
+                                                <i class="fas fa-search"></i> Buscar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mapa embed -->
+                                <div id="prop-mapa-container" style="margin-bottom:12px;border-radius:10px;overflow:hidden;border:1px solid var(--gray-300);display:none;">
+                                    <div id="prop-mapa-preview" style="width:100%;height:220px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:var(--gray-500);font-size:13px;">
+                                        <i class="fas fa-map" style="margin-right:8px;"></i> Ingresá la dirección y hacé clic en Buscar
+                                    </div>
+                                </div>
+                                <div style="display:flex;gap:8px;margin-bottom:12px;" id="prop-coords-row" style="display:none;">
+                                    <div class="form-group" style="flex:1;margin:0;">
+                                        <label>Latitud</label>
+                                        <input type="text" id="prop-lat" placeholder="-34.6037" style="width:100%;" readonly>
+                                    </div>
+                                    <div class="form-group" style="flex:1;margin:0;">
+                                        <label>Longitud</label>
+                                        <input type="text" id="prop-lng" placeholder="-58.3816" style="width:100%;" readonly>
+                                    </div>
+                                    <div style="display:flex;align-items:flex-end;">
+                                        <button type="button" onclick="abrirEnGoogleMaps()" style="padding:8px 10px;background:#34A853;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;white-space:nowrap;margin-bottom:0;">
+                                            <i class="fas fa-external-link-alt"></i> Ver en Maps
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Datos catastrales y técnicos -->
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                    <div class="form-group">
+                                        <label><i class="fas fa-file-alt" style="color:var(--gray-600);margin-right:5px;"></i>Referencia Catastral</label>
+                                        <input type="text" id="prop-catastral" placeholder="Ej: 007-0001-0001-000" style="width:100%;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Estado</label>
+                                        <select id="prop-estado" style="width:100%;">
+                                            <option value="venta">En Venta</option>
+                                            <option value="alquiler">En Alquiler</option>
+                                            <option value="reservado">Reservado</option>
+                                            <option value="vendido">Vendido/Cerrado</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Metros Cuadrados (m²)</label>
+                                        <input type="number" id="prop-m2" placeholder="85" min="1" style="width:100%;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Ambientes</label>
+                                        <input type="number" id="prop-ambientes" placeholder="3" min="1" style="width:100%;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Precio</label>
+                                        <input type="number" id="prop-precio" placeholder="150000" min="0" style="width:100%;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Moneda</label>
+                                        <select id="prop-moneda" style="width:100%;">
+                                            <option value="USD">USD</option>
+                                            <option value="ARS">ARS</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="grid-column:1/-1;">
+                                        <label><i class="fas fa-link" style="color:var(--primary);margin-right:5px;"></i>Link de Publicación (Zonaprop / Argenprop / etc.)</label>
+                                        <input type="url" id="prop-link" placeholder="https://www.zonaprop.com.ar/..." style="width:100%;">
+                                    </div>
+                                    <div class="form-group" style="grid-column:1/-1;">
+                                        <label>Descripción / Observaciones</label>
+                                        <textarea id="prop-descripcion" rows="3" style="width:100%;resize:vertical;" placeholder="Características adicionales, estado de la propiedad, expensas..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex;gap:10px;margin-top:16px;">
+                                    <button class="btn-secondary" style="flex:1;" onclick="closeModal('propiedad-modal')">Cancelar</button>
+                                    <button class="btn-primary" style="flex:1;" onclick="guardarPropiedad()">Guardar Propiedad</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODAL VISITA INMOBILIARIA -->
+                    <div id="visita-modal" class="modal" style="display:none;">
+                        <div class="modal-overlay" onclick="closeModal('visita-modal')"></div>
+                        <div class="modal-content" style="max-width:500px;">
+                            <div class="modal-header">
+                                <h3>Registrar Visita</h3>
+                                <button class="modal-close" onclick="closeModal('visita-modal')">×</button>
+                            </div>
+                            <div class="modal-body" style="padding:20px;">
+                                <div class="form-group">
+                                    <label>Fecha de la Visita</label>
+                                    <input type="date" id="visita-fecha" style="width:100%;">
+                                </div>
+                                <div class="form-group">
+                                    <label>Propiedad Visitada</label>
+                                    <select id="visita-propiedad-select" style="width:100%;">
+                                        <option value="">-- Seleccionar Propiedad --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-sticky-note" style="color:var(--primary);margin-right:5px;"></i>Anotaciones de la Visita</label>
+                                    <textarea id="visita-anotaciones" rows="4" style="width:100%;resize:vertical;" placeholder="Observaciones del cliente, interés, objeciones, acuerdos..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-link" style="color:var(--primary);margin-right:5px;"></i>Link de la publicación</label>
+                                    <input type="url" id="visita-link" placeholder="https://www.zonaprop.com.ar/..." style="width:100%;">
+                                    <small style="color:var(--gray-500);font-size:11px;">Se auto-completa al seleccionar la propiedad si tiene link guardado</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Estado del interés del cliente</label>
+                                    <select id="visita-interes" style="width:100%;">
+                                        <option value="interesado">Muy interesado</option>
+                                        <option value="dudoso">Dudoso / Necesita pensar</option>
+                                        <option value="descartado">Descartó la propiedad</option>
+                                        <option value="en_negociacion">En negociación</option>
+                                        <option value="cerrado">Operación cerrada</option>
+                                    </select>
+                                </div>
+                                <div style="display:flex;gap:10px;margin-top:16px;">
+                                    <button class="btn-secondary" style="flex:1;" onclick="closeModal('visita-modal')">Cancelar</button>
+                                    <button class="btn-primary" style="flex:1;" onclick="guardarVisita()">Guardar Visita</button>
                                 </div>
                             </div>
                         </div>
@@ -3263,7 +3469,15 @@
                 inventoryLabel: "Propiedades",
                 salesLabel: "Operación",
                 categories: ["Venta", "Alquiler", "Alquiler Temporal"],
-                customClientFields: [{ name: "direccion", label: "Dirección" }, { name: "m2", label: "m²" }, { name: "ambientes", label: "Ambientes" }, { name: "estado", label: "Estado" }]
+                customClientFields: [
+                    { name: "direccion", label: "Dirección" },
+                    { name: "telefono2", label: "Teléfono Alternativo" },
+                    { name: "dni", label: "DNI / CUIT" },
+                    { name: "interes", label: "Interés (venta/alquiler)" }
+                ],
+                rubro: 'inmobiliarias',
+                rubroName: 'Inmobiliaria',
+                esInmobiliaria: true
             },
             odontologia: {
                 clientLabel: "Paciente",
@@ -3916,6 +4130,9 @@
             }
 
             // ═══ Intentar login con Supabase primero ═══
+            const loginBtn = document.querySelector('#login-page button[onclick*="performLogin"]');
+            if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Iniciando sesión...'; }
+
             if (navigator.onLine) {
                 try {
                     const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
@@ -3935,7 +4152,6 @@
                                 .single();
 
                             if (!fetchError && cloudData && cloudData.db_json) {
-                                // Los datos de la nube son la fuente de verdad
                                 localStorage.setItem('sistemavos_db', JSON.stringify(cloudData.db_json));
                                 db = cloudData.db_json;
                             }
@@ -3943,7 +4159,6 @@
                             console.warn('No se pudieron descargar datos de la nube, usando datos locales:', e);
                         }
 
-                        // Asegurar que db tiene datos cargados
                         if (!db.account) loadDB();
 
                         currentUser = {
@@ -3951,19 +4166,43 @@
                             name: db.account?.ownerName || authData.user.user_metadata?.owner_name || 'Usuario',
                             role: 'admin'
                         };
+                        if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Iniciar Sesión'; }
                         showApp();
                         return;
                     }
 
-                    // Si Supabase devolvió error de credenciales
-                    if (authError && (authError.message.includes('Invalid login') || authError.message.includes('invalid'))) {
-                        showLoginError('Email o contraseña incorrectos');
-                        return;
+                    // ═══ Manejo detallado de errores de Supabase ═══
+                    if (authError) {
+                        if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Iniciar Sesión'; }
+                        const msg = authError.message || '';
+                        console.warn('Supabase auth error:', msg);
+
+                        if (msg.toLowerCase().includes('email not confirmed') || msg.toLowerCase().includes('not confirmed')) {
+                            showLoginError('⚠️ Tu email todavía no fue confirmado. Revisá tu bandeja de entrada y hacé clic en el link de confirmación que te enviamos al registrarte.');
+                            return;
+                        }
+                        if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('credentials') || msg.toLowerCase().includes('wrong')) {
+                            showLoginError('Email o contraseña incorrectos. Verificá los datos ingresados.');
+                            return;
+                        }
+                        if (msg.toLowerCase().includes('too many') || msg.toLowerCase().includes('rate')) {
+                            showLoginError('Demasiados intentos. Esperá unos minutos e intentá de nuevo.');
+                            return;
+                        }
+                        if (msg.toLowerCase().includes('user not found') || msg.toLowerCase().includes('no user')) {
+                            showLoginError('No existe una cuenta con ese email. ¿Querés registrarte?');
+                            return;
+                        }
+                        // Error genérico de Supabase — caer a login local
+                        console.warn('Error Supabase no reconocido, probando login local:', msg);
                     }
                 } catch (e) {
+                    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Iniciar Sesión'; }
                     console.warn('Error conectando con el servidor, intentando login local:', e);
                 }
             }
+
+            if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Iniciar Sesión'; }
 
             // ═══ Fallback: Login local (offline) ═══
             if (!db.account || !db.account.email) {
@@ -3991,12 +4230,21 @@
             if (!el) {
                 el = document.createElement('div');
                 el.id = 'login-error-msg';
-                el.style.cssText = 'background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:12px;display:flex;align-items:start;gap:8px;';
-                const btn = document.querySelector('#login-page .btn-primary');
-                if (btn) btn.parentElement.insertBefore(el, btn);
+                el.style.cssText = 'background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px;';
+                // Intentar insertar antes del botón de login
+                const btn = document.querySelector('#login-page button[onclick*="performLogin"]');
+                if (btn && btn.parentElement) {
+                    btn.parentElement.insertBefore(el, btn);
+                } else {
+                    // Fallback: agregar al login-box directamente
+                    const box = document.querySelector('.login-box');
+                    if (box) box.appendChild(el);
+                }
             }
-            el.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#EF4444;margin-top:2px;flex-shrink:0;"></i><span>' + msg + '</span>';
+            el.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#EF4444;margin-top:2px;flex-shrink:0;"></i><span style="line-height:1.5;">' + msg + '</span>';
             el.style.display = 'flex';
+            // Scroll suave hacia el error para que siempre sea visible
+            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function clearLoginError() {
@@ -6599,6 +6847,420 @@
         }
 
         // ══════════════════════════════════════════════════════════
+        // MÓDULO INMOBILIARIA — Propiedades, Mapas, Visitas
+        // ══════════════════════════════════════════════════════════
+
+        function esInmobiliaria() {
+            return db.account?.industry === 'inmobiliarias' || db.industryConfig?.esInmobiliaria;
+        }
+
+        // Inicializar estructura de datos si no existe
+        function _initInmobDB() {
+            if (!db.inmobiliaria) db.inmobiliaria = {};
+            if (!db.inmobiliaria.propiedades) db.inmobiliaria.propiedades = [];
+            if (!db.inmobiliaria.visitas) db.inmobiliaria.visitas = {};
+        }
+
+        // Muestra/oculta el panel y puebla el select de clientes para visitas
+        function actualizarPanelInmobiliario() {
+            const panel = document.getElementById('panel-inmobiliario');
+            if (!panel) return;
+            if (esInmobiliaria()) {
+                panel.style.display = 'block';
+                _initInmobDB();
+                renderPropiedades();
+                _poblarSelectClientesVisitas();
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        function _poblarSelectClientesVisitas() {
+            const sel = document.getElementById('inmob-cliente-select');
+            if (!sel) return;
+            const current = sel.value;
+            sel.innerHTML = '<option value="">-- Seleccionar Cliente --</option>' +
+                (db.clientes || []).map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+            if (current) sel.value = current;
+        }
+
+        // ═══ PROPIEDADES ═══
+
+        function renderPropiedades() {
+            _initInmobDB();
+            const grid = document.getElementById('inmob-propiedades-grid');
+            if (!grid) return;
+            const busqueda = (document.getElementById('inmob-search')?.value || '').toLowerCase();
+            const estadoFiltro = document.getElementById('inmob-estado-filter')?.value || '';
+
+            let props = db.inmobiliaria.propiedades;
+            if (busqueda) {
+                props = props.filter(p =>
+                    p.nombre?.toLowerCase().includes(busqueda) ||
+                    p.direccion?.toLowerCase().includes(busqueda) ||
+                    p.refCatastral?.toLowerCase().includes(busqueda)
+                );
+            }
+            if (estadoFiltro) {
+                props = props.filter(p => p.estado === estadoFiltro);
+            }
+
+            if (props.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--gray-500);padding:40px;font-size:13px;">
+                    <i class="fas fa-home" style="font-size:48px;margin-bottom:12px;display:block;opacity:.3;"></i>
+                    No hay propiedades cargadas aún. ¡Creá la primera!
+                </div>`;
+                return;
+            }
+
+            const ESTADO_CONFIG = {
+                venta:     { label: 'En Venta',      color: '#10b981', bg: '#d1fae5' },
+                alquiler:  { label: 'En Alquiler',   color: '#3b82f6', bg: '#dbeafe' },
+                reservado: { label: 'Reservado',     color: '#f59e0b', bg: '#fef3c7' },
+                vendido:   { label: 'Vendido/Cerrado', color: '#6b7280', bg: '#f3f4f6' }
+            };
+
+            grid.innerHTML = props.map(p => {
+                const est = ESTADO_CONFIG[p.estado] || ESTADO_CONFIG.venta;
+                const precioFmt = p.precio ? `${p.moneda || 'USD'} ${Number(p.precio).toLocaleString('es-AR')}` : '—';
+                const coordsHtml = (p.lat && p.lng)
+                    ? `<a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="font-size:11px;color:#34A853;display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-top:4px;">
+                        <i class="fas fa-map-marker-alt"></i> Ver en Google Maps
+                    </a>`
+                    : '';
+                const linkHtml = p.linkPublicacion
+                    ? `<a href="${p.linkPublicacion}" target="_blank" style="font-size:11px;color:var(--primary);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-top:4px;">
+                        <i class="fas fa-external-link-alt"></i> Ver publicación
+                    </a>`
+                    : '';
+
+                return `<div style="background:var(--gray-100);border-radius:14px;padding:16px;border-left:4px solid ${est.color};position:relative;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                        <strong style="font-size:14px;line-height:1.3;">${p.nombre}</strong>
+                        <span style="font-size:11px;font-weight:600;background:${est.bg};color:${est.color};padding:3px 10px;border-radius:20px;white-space:nowrap;margin-left:8px;">${est.label}</span>
+                    </div>
+                    ${p.direccion ? `<p style="font-size:12px;color:var(--gray-600);margin-bottom:4px;"><i class="fas fa-map-marker-alt" style="width:14px;color:var(--gray-500);"></i> ${p.direccion}</p>` : ''}
+                    ${p.refCatastral ? `<p style="font-size:12px;color:var(--gray-600);margin-bottom:4px;"><i class="fas fa-file-alt" style="width:14px;color:var(--gray-500);"></i> Catastral: <strong>${p.refCatastral}</strong></p>` : ''}
+                    <div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap;">
+                        ${p.m2 ? `<span style="font-size:12px;color:var(--gray-700);"><i class="fas fa-ruler-combined" style="color:var(--gray-500);margin-right:3px;"></i>${p.m2} m²</span>` : ''}
+                        ${p.ambientes ? `<span style="font-size:12px;color:var(--gray-700);"><i class="fas fa-door-open" style="color:var(--gray-500);margin-right:3px;"></i>${p.ambientes} amb.</span>` : ''}
+                        <span style="font-size:12px;font-weight:700;color:var(--primary);">${precioFmt}</span>
+                    </div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">${coordsHtml}${linkHtml}</div>
+                    ${p.descripcion ? `<p style="font-size:11px;color:var(--gray-500);margin-top:8px;border-top:1px solid var(--gray-200);padding-top:6px;">${p.descripcion.substring(0,120)}${p.descripcion.length > 120 ? '…' : ''}</p>` : ''}
+                    <div style="display:flex;gap:8px;margin-top:12px;">
+                        <button onclick="abrirModalPropiedad(${p.id})" style="flex:1;padding:6px;background:var(--gray-200);border:none;border-radius:6px;cursor:pointer;font-size:12px;color:var(--gray-700);">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button onclick="eliminarPropiedad(${p.id})" style="padding:6px 10px;background:#fee2e2;border:none;border-radius:6px;cursor:pointer;font-size:12px;color:#ef4444;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function abrirModalPropiedad(id) {
+            _initInmobDB();
+            const isEdit = id !== undefined;
+            document.getElementById('propiedad-modal-title').textContent = isEdit ? 'Editar Propiedad' : 'Nueva Propiedad';
+
+            if (isEdit) {
+                const p = db.inmobiliaria.propiedades.find(x => x.id === id);
+                if (!p) return;
+                document.getElementById('propiedad-id').value = p.id;
+                document.getElementById('prop-nombre').value = p.nombre || '';
+                document.getElementById('prop-direccion').value = p.direccion || '';
+                document.getElementById('prop-catastral').value = p.refCatastral || '';
+                document.getElementById('prop-estado').value = p.estado || 'venta';
+                document.getElementById('prop-m2').value = p.m2 || '';
+                document.getElementById('prop-ambientes').value = p.ambientes || '';
+                document.getElementById('prop-precio').value = p.precio || '';
+                document.getElementById('prop-moneda').value = p.moneda || 'USD';
+                document.getElementById('prop-link').value = p.linkPublicacion || '';
+                document.getElementById('prop-descripcion').value = p.descripcion || '';
+                document.getElementById('prop-lat').value = p.lat || '';
+                document.getElementById('prop-lng').value = p.lng || '';
+                if (p.lat && p.lng) {
+                    _mostrarMapaEnModal(p.lat, p.lng, p.direccion);
+                } else {
+                    document.getElementById('prop-mapa-container').style.display = 'none';
+                    document.getElementById('prop-coords-row').style.display = 'none';
+                }
+            } else {
+                document.getElementById('propiedad-id').value = '';
+                ['prop-nombre','prop-direccion','prop-catastral','prop-m2','prop-ambientes','prop-precio','prop-link','prop-descripcion','prop-lat','prop-lng'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+                document.getElementById('prop-estado').value = 'venta';
+                document.getElementById('prop-moneda').value = 'USD';
+                document.getElementById('prop-mapa-container').style.display = 'none';
+                document.getElementById('prop-coords-row').style.display = 'none';
+            }
+            openModal('propiedad-modal');
+        }
+
+        function guardarPropiedad() {
+            _initInmobDB();
+            const nombre = document.getElementById('prop-nombre').value.trim();
+            if (!nombre) { alert('El nombre de la propiedad es obligatorio'); return; }
+
+            const idVal = document.getElementById('propiedad-id').value;
+            const isEdit = !!idVal;
+
+            const propData = {
+                id: isEdit ? parseInt(idVal) : Date.now(),
+                nombre,
+                direccion: document.getElementById('prop-direccion').value.trim(),
+                refCatastral: document.getElementById('prop-catastral').value.trim(),
+                estado: document.getElementById('prop-estado').value,
+                m2: parseFloat(document.getElementById('prop-m2').value) || null,
+                ambientes: parseInt(document.getElementById('prop-ambientes').value) || null,
+                precio: parseFloat(document.getElementById('prop-precio').value) || null,
+                moneda: document.getElementById('prop-moneda').value,
+                linkPublicacion: document.getElementById('prop-link').value.trim(),
+                descripcion: document.getElementById('prop-descripcion').value.trim(),
+                lat: document.getElementById('prop-lat').value.trim() || null,
+                lng: document.getElementById('prop-lng').value.trim() || null,
+                creadaEn: isEdit ? undefined : new Date().toISOString(),
+                actualizadaEn: new Date().toISOString(),
+                creadaPor: currentUser?.name || 'Sistema'
+            };
+
+            if (isEdit) {
+                const idx = db.inmobiliaria.propiedades.findIndex(x => x.id === propData.id);
+                if (idx !== -1) {
+                    propData.creadaEn = db.inmobiliaria.propiedades[idx].creadaEn;
+                    db.inmobiliaria.propiedades[idx] = propData;
+                }
+            } else {
+                db.inmobiliaria.propiedades.push(propData);
+            }
+
+            saveDB();
+            closeModal('propiedad-modal');
+            renderPropiedades();
+            // Actualizar el select de propiedades en el modal de visita
+            _poblarSelectPropiedadesVisita();
+        }
+
+        function eliminarPropiedad(id) {
+            if (!confirm('¿Eliminar esta propiedad? Esta acción no se puede deshacer.')) return;
+            _initInmobDB();
+            db.inmobiliaria.propiedades = db.inmobiliaria.propiedades.filter(p => p.id !== id);
+            saveDB();
+            renderPropiedades();
+        }
+
+        // ═══ MAPA / GEOCODIFICACIÓN ═══
+
+        async function buscarEnMapa() {
+            const dir = document.getElementById('prop-direccion').value.trim();
+            if (!dir) { alert('Ingresá una dirección primero'); return; }
+
+            try {
+                // Usamos la API de Nominatim (OpenStreetMap) — sin clave requerida
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dir)}&limit=1&addressdetails=1`;
+                const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+                const data = await res.json();
+
+                if (!data || data.length === 0) {
+                    alert('No se encontró la dirección. Intentá ser más específico.');
+                    return;
+                }
+
+                const { lat, lon, display_name } = data[0];
+                document.getElementById('prop-lat').value = parseFloat(lat).toFixed(6);
+                document.getElementById('prop-lng').value = parseFloat(lon).toFixed(6);
+                _mostrarMapaEnModal(lat, lon, display_name);
+
+            } catch(e) {
+                // Fallback si no hay conexión: guardar solo la dirección
+                console.warn('Error geocodificando:', e);
+                alert('No se pudo conectar al servicio de mapas. Las coordenadas no se guardarán automáticamente, pero podés ingresarlas manualmente.');
+                document.getElementById('prop-mapa-container').style.display = 'block';
+            }
+        }
+
+        function _mostrarMapaEnModal(lat, lng, label) {
+            const container = document.getElementById('prop-mapa-container');
+            const preview = document.getElementById('prop-mapa-preview');
+            const coordsRow = document.getElementById('prop-coords-row');
+            container.style.display = 'block';
+            if (coordsRow) coordsRow.style.display = 'flex';
+
+            // Embed de OpenStreetMap (sin API key)
+            const zoom = 16;
+            preview.innerHTML = `<iframe
+                src="https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(lng)-0.005},${parseFloat(lat)-0.003},${parseFloat(lng)+0.005},${parseFloat(lat)+0.003}&layer=mapnik&marker=${lat},${lng}"
+                style="width:100%;height:220px;border:none;"
+                loading="lazy"
+                title="Mapa de la propiedad">
+            </iframe>`;
+        }
+
+        function abrirEnGoogleMaps() {
+            const lat = document.getElementById('prop-lat').value;
+            const lng = document.getElementById('prop-lng').value;
+            if (lat && lng) {
+                window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
+            }
+        }
+
+        function sugerirBusquedaMapa() {
+            // Nada aquí — solo para el oninput, la búsqueda se hace al presionar el botón
+        }
+
+        // ═══ VISITAS ═══
+
+        function _poblarSelectPropiedadesVisita() {
+            _initInmobDB();
+            const sel = document.getElementById('visita-propiedad-select');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">-- Seleccionar Propiedad --</option>' +
+                db.inmobiliaria.propiedades.map(p =>
+                    `<option value="${p.id}">${p.nombre}${p.direccion ? ' — ' + p.direccion : ''}</option>`
+                ).join('');
+        }
+
+        function renderVisitasCliente() {
+            _initInmobDB();
+            const sel = document.getElementById('inmob-cliente-select');
+            const clienteId = sel?.value ? parseInt(sel.value) : null;
+            const btnNueva = document.getElementById('btn-nueva-visita');
+            const container = document.getElementById('inmob-visitas-content');
+            if (!container) return;
+
+            if (!clienteId) {
+                if (btnNueva) btnNueva.style.display = 'none';
+                container.innerHTML = `<div style="text-align:center;color:var(--gray-500);padding:24px;font-size:13px;">
+                    <i class="fas fa-user" style="font-size:32px;margin-bottom:8px;display:block;opacity:.4;"></i>
+                    Seleccioná un cliente para ver sus visitas registradas
+                </div>`;
+                return;
+            }
+
+            if (btnNueva) btnNueva.style.display = 'inline-flex';
+            const cliente = db.clientes.find(c => c.id === clienteId);
+            const visitas = (db.inmobiliaria.visitas[clienteId] || []).slice().reverse();
+
+            const INTERES_CONFIG = {
+                interesado:     { label: 'Muy interesado',     color: '#10b981', bg: '#d1fae5' },
+                dudoso:         { label: 'Dudoso',             color: '#f59e0b', bg: '#fef3c7' },
+                descartado:     { label: 'Descartó',           color: '#ef4444', bg: '#fee2e2' },
+                en_negociacion: { label: 'En negociación',     color: '#6C3AE1', bg: '#ede9fe' },
+                cerrado:        { label: 'Cerrado',            color: '#64748b', bg: '#f1f5f9' }
+            };
+
+            if (visitas.length === 0) {
+                container.innerHTML = `<div style="text-align:center;color:var(--gray-500);padding:24px;font-size:13px;">
+                    <i class="fas fa-calendar-times" style="font-size:32px;margin-bottom:8px;display:block;opacity:.4;"></i>
+                    <strong>${cliente?.nombre || ''}</strong> no tiene visitas registradas aún.
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = `<div style="display:flex;flex-direction:column;gap:12px;">
+                ${visitas.map(v => {
+                    const prop = db.inmobiliaria.propiedades.find(p => p.id === v.propiedadId);
+                    const interesConf = INTERES_CONFIG[v.interes] || INTERES_CONFIG.dudoso;
+                    const linkHtml = v.linkPublicacion
+                        ? `<a href="${v.linkPublicacion}" target="_blank" style="font-size:12px;color:var(--primary);display:inline-flex;align-items:center;gap:4px;text-decoration:none;">
+                            <i class="fas fa-external-link-alt"></i> Ver publicación
+                           </a>`
+                        : '';
+                    const propHtml = prop
+                        ? `<p style="font-size:13px;font-weight:600;margin-bottom:4px;"><i class="fas fa-home" style="color:var(--primary);margin-right:5px;"></i>${prop.nombre}</p>
+                           ${prop.direccion ? `<p style="font-size:12px;color:var(--gray-600);margin-bottom:4px;"><i class="fas fa-map-marker-alt" style="width:14px;color:var(--gray-500);"></i>${prop.direccion}</p>` : ''}`
+                        : `<p style="font-size:12px;color:var(--gray-500);">Propiedad eliminada</p>`;
+
+                    return `<div style="background:var(--gray-100);border-radius:12px;padding:14px 16px;border-left:4px solid ${interesConf.color};">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+                            <strong style="font-size:13px;">${formatDate(v.fecha)}</strong>
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <span style="font-size:11px;font-weight:600;background:${interesConf.bg};color:${interesConf.color};padding:3px 10px;border-radius:20px;">${interesConf.label}</span>
+                                <button onclick="eliminarVisita(${clienteId}, ${v.id})" style="background:#fee2e2;border:none;border-radius:6px;cursor:pointer;font-size:11px;color:#ef4444;padding:3px 8px;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        ${propHtml}
+                        ${v.anotaciones ? `<div style="background:#fff;border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:var(--gray-700);line-height:1.5;"><i class="fas fa-sticky-note" style="color:var(--primary);margin-right:5px;"></i>${v.anotaciones}</div>` : ''}
+                        ${linkHtml ? `<div style="margin-top:8px;">${linkHtml}</div>` : ''}
+                        <p style="font-size:11px;color:var(--gray-400);margin-top:8px;">Registrado por: ${v.por || 'Sistema'}</p>
+                    </div>`;
+                }).join('')}
+            </div>`;
+        }
+
+        function abrirModalVisita() {
+            _initInmobDB();
+            const sel = document.getElementById('inmob-cliente-select');
+            if (!sel?.value) { alert('Seleccioná un cliente primero'); return; }
+
+            document.getElementById('visita-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('visita-anotaciones').value = '';
+            document.getElementById('visita-link').value = '';
+            document.getElementById('visita-interes').value = 'interesado';
+            _poblarSelectPropiedadesVisita();
+            document.getElementById('visita-propiedad-select').value = '';
+
+            // Al cambiar propiedad, auto-completar el link si la propiedad lo tiene
+            document.getElementById('visita-propiedad-select').onchange = function() {
+                const propId = parseInt(this.value);
+                if (propId) {
+                    const prop = db.inmobiliaria.propiedades.find(p => p.id === propId);
+                    if (prop?.linkPublicacion) {
+                        document.getElementById('visita-link').value = prop.linkPublicacion;
+                    }
+                }
+            };
+
+            openModal('visita-modal');
+        }
+
+        function guardarVisita() {
+            _initInmobDB();
+            const sel = document.getElementById('inmob-cliente-select');
+            const clienteId = sel?.value ? parseInt(sel.value) : null;
+            if (!clienteId) { alert('Error: no hay cliente seleccionado'); return; }
+
+            const propId = document.getElementById('visita-propiedad-select').value;
+            const fecha = document.getElementById('visita-fecha').value;
+            if (!fecha) { alert('Ingresá la fecha de la visita'); return; }
+
+            const visita = {
+                id: Date.now(),
+                propiedadId: propId ? parseInt(propId) : null,
+                fecha,
+                anotaciones: document.getElementById('visita-anotaciones').value.trim(),
+                linkPublicacion: document.getElementById('visita-link').value.trim(),
+                interes: document.getElementById('visita-interes').value,
+                por: currentUser?.name || 'Sistema',
+                creadaEn: new Date().toISOString()
+            };
+
+            if (!db.inmobiliaria.visitas[clienteId]) db.inmobiliaria.visitas[clienteId] = [];
+            db.inmobiliaria.visitas[clienteId].push(visita);
+
+            saveDB();
+            closeModal('visita-modal');
+            renderVisitasCliente();
+        }
+
+        function eliminarVisita(clienteId, visitaId) {
+            if (!confirm('¿Eliminar esta visita?')) return;
+            _initInmobDB();
+            if (db.inmobiliaria.visitas[clienteId]) {
+                db.inmobiliaria.visitas[clienteId] = db.inmobiliaria.visitas[clienteId].filter(v => v.id !== visitaId);
+            }
+            saveDB();
+            renderVisitasCliente();
+        }
+
+        // ═══ FIN MÓDULO INMOBILIARIA ═══
+
+        // ══════════════════════════════════════════════════════════
         // BLOQUEO POR FALTA DE PAGO + MERCADO PAGO + MAKE WEBHOOKS
         // ══════════════════════════════════════════════════════════
 
@@ -7021,386 +7683,9 @@
             } catch(e) {}
         }
 
-        // ══════════════════════════════════════════════════════════
-        // MÓDULO ODONTOLOGÍA — Odontograma, Fichas Clínicas, Historial
-        // ══════════════════════════════════════════════════════════
-
-        const DENTAL_TRATAMIENTOS = {
-            sano:       { color: '#10b981', label: 'Sano' },
-            empaste:    { color: '#f59e0b', label: 'Empaste' },
-            corona:     { color: '#6C3AE1', label: 'Corona' },
-            extraccion: { color: '#ef4444', label: 'Extracción' },
-            endodoncia: { color: '#06B6D4', label: 'Endodoncia' },
-            caries:     { color: '#F43F5E', label: 'Caries' },
-            implante:   { color: '#94a3b8', label: 'Implante' },
-            ausente:    { color: '#e2e8f0', label: 'Ausente' }
-        };
-
-        // Nomenclatura FDI: 11-18, 21-28 (superiores), 31-38, 41-48 (inferiores)
-        const DIENTES_SUPERIORES = [18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
-        const DIENTES_INFERIORES = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
-        const TODOS_DIENTES = [...DIENTES_SUPERIORES, ...DIENTES_INFERIORES];
-
-        let _odontoPacienteId = null;
-
-        function esRubroOdontologia() {
-            return db.account?.industry === 'odontologia' || db.industryConfig?.esOdontologia;
-        }
-
-        function actualizarPanelOdontologico() {
-            const panel = document.getElementById('panel-odontologico');
-            if (!panel) return;
-            if (esRubroOdontologia()) {
-                panel.style.display = 'block';
-                poblarSelectPacientes();
-            } else {
-                panel.style.display = 'none';
-            }
-        }
-
-        function poblarSelectPacientes() {
-            const sel = document.getElementById('odonto-paciente-select');
-            if (!sel) return;
-            const current = sel.value;
-            sel.innerHTML = '<option value="">-- Seleccionar Paciente --</option>' +
-                db.clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
-            if (current) sel.value = current;
-        }
-
-        // ═══ GENERAR ODONTOGRAMA SVG ═══
-        function generarOdontogramaSVG(pacienteId) {
-            const odonto = obtenerOdontograma(pacienteId);
-            const W = 780, rowH = 80, gap = 16, padX = 10, padY = 10;
-            const toothW = (W - padX * 2) / 16;
-            const H = padY + rowH + gap + rowH + padY + 60;
-
-            let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:${W}px;font-family:Inter,Arial,sans-serif;">`;
-
-            // Título arcadas
-            svg += `<text x="${W/2}" y="${padY+14}" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600">ARCADA SUPERIOR</text>`;
-
-            // Fila superior
-            DIENTES_SUPERIORES.forEach((num, i) => {
-                const x = padX + i * toothW;
-                const y = padY + 22;
-                const trat = odonto[num]?.tratamiento || 'sano';
-                const col = DENTAL_TRATAMIENTOS[trat]?.color || '#10b981';
-                const isAusente = trat === 'ausente';
-
-                svg += `<g style="cursor:pointer;" onclick="abrirModalDiente(${num})">`;
-                svg += `<rect x="${x+2}" y="${y}" width="${toothW-4}" height="${rowH-10}" rx="6" fill="${isAusente ? '#f1f5f9' : '#fff'}" stroke="${col}" stroke-width="2.5"/>`;
-                if (isAusente) {
-                    svg += `<line x1="${x+6}" y1="${y+4}" x2="${x+toothW-6}" y2="${y+rowH-14}" stroke="#cbd5e1" stroke-width="2"/>`;
-                    svg += `<line x1="${x+toothW-6}" y1="${y+4}" x2="${x+6}" y2="${y+rowH-14}" stroke="#cbd5e1" stroke-width="2"/>`;
-                } else {
-                    svg += `<rect x="${x+8}" y="${y+20}" width="${toothW-20}" height="20" rx="4" fill="${col}" opacity="0.2"/>`;
-                    svg += `<rect x="${x+10}" y="${y+22}" width="${toothW-24}" height="16" rx="3" fill="${col}" opacity="0.5"/>`;
-                }
-                svg += `<text x="${x+toothW/2}" y="${y-4}" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">${num}</text>`;
-                svg += `<text x="${x+toothW/2}" y="${y+rowH-1}" text-anchor="middle" fill="${col}" font-size="8" font-weight="500">${DENTAL_TRATAMIENTOS[trat]?.label || ''}</text>`;
-                svg += `</g>`;
-            });
-
-            // Línea divisoria
-            const lineY = padY + 22 + rowH + gap/2;
-            svg += `<line x1="${padX}" y1="${lineY}" x2="${W-padX}" y2="${lineY}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="6,4"/>`;
-            svg += `<text x="${W/2}" y="${lineY + 16}" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600">ARCADA INFERIOR</text>`;
-
-            // Fila inferior
-            DIENTES_INFERIORES.forEach((num, i) => {
-                const x = padX + i * toothW;
-                const y = padY + 22 + rowH + gap + 22;
-                const trat = odonto[num]?.tratamiento || 'sano';
-                const col = DENTAL_TRATAMIENTOS[trat]?.color || '#10b981';
-                const isAusente = trat === 'ausente';
-
-                svg += `<g style="cursor:pointer;" onclick="abrirModalDiente(${num})">`;
-                svg += `<rect x="${x+2}" y="${y}" width="${toothW-4}" height="${rowH-10}" rx="6" fill="${isAusente ? '#f1f5f9' : '#fff'}" stroke="${col}" stroke-width="2.5"/>`;
-                if (isAusente) {
-                    svg += `<line x1="${x+6}" y1="${y+4}" x2="${x+toothW-6}" y2="${y+rowH-14}" stroke="#cbd5e1" stroke-width="2"/>`;
-                    svg += `<line x1="${x+toothW-6}" y1="${y+4}" x2="${x+6}" y2="${y+rowH-14}" stroke="#cbd5e1" stroke-width="2"/>`;
-                } else {
-                    svg += `<rect x="${x+8}" y="${y+20}" width="${toothW-20}" height="20" rx="4" fill="${col}" opacity="0.2"/>`;
-                    svg += `<rect x="${x+10}" y="${y+22}" width="${toothW-24}" height="16" rx="3" fill="${col}" opacity="0.5"/>`;
-                }
-                svg += `<text x="${x+toothW/2}" y="${y+rowH+4}" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">${num}</text>`;
-                svg += `<text x="${x+toothW/2}" y="${y-4}" text-anchor="middle" fill="${col}" font-size="8" font-weight="500">${DENTAL_TRATAMIENTOS[trat]?.label || ''}</text>`;
-                svg += `</g>`;
-            });
-
-            svg += `</svg>`;
-            return svg;
-        }
-
-        function obtenerOdontograma(pacienteId) {
-            if (!db.odontogramas) db.odontogramas = {};
-            if (!db.odontogramas[pacienteId]) db.odontogramas[pacienteId] = {};
-            return db.odontogramas[pacienteId];
-        }
-
-        function abrirModalDiente(nroDiente) {
-            if (!_odontoPacienteId) { alert('Selecciona un paciente primero'); return; }
-            const odonto = obtenerOdontograma(_odontoPacienteId);
-            const data = odonto[nroDiente] || {};
-            document.getElementById('diente-modal-title').textContent = `Pieza Dental #${nroDiente}`;
-            document.getElementById('diente-numero').value = nroDiente;
-            document.getElementById('diente-tratamiento').value = data.tratamiento || 'sano';
-            document.getElementById('diente-notas').value = data.notas || '';
-            openModal('diente-modal');
-        }
-
-        function guardarTratamientoDiente() {
-            if (!_odontoPacienteId) return;
-            const nro = parseInt(document.getElementById('diente-numero').value);
-            const tratamiento = document.getElementById('diente-tratamiento').value;
-            const notas = document.getElementById('diente-notas').value;
-            const odonto = obtenerOdontograma(_odontoPacienteId);
-            const anterior = odonto[nro]?.tratamiento || 'sano';
-
-            odonto[nro] = {
-                tratamiento,
-                notas,
-                ultimaModificacion: new Date().toISOString(),
-                modificadoPor: currentUser?.name || 'Sistema'
-            };
-
-            // Guardar en historial de la pieza
-            if (!db.historialDental) db.historialDental = {};
-            if (!db.historialDental[_odontoPacienteId]) db.historialDental[_odontoPacienteId] = {};
-            if (!db.historialDental[_odontoPacienteId][nro]) db.historialDental[_odontoPacienteId][nro] = [];
-
-            db.historialDental[_odontoPacienteId][nro].push({
-                fecha: new Date().toISOString(),
-                tratamientoAnterior: anterior,
-                tratamientoNuevo: tratamiento,
-                notas,
-                por: currentUser?.name || 'Sistema'
-            });
-
-            saveDB();
-            closeModal('diente-modal');
-            renderOdontograma();
-            renderHistorialPieza();
-        }
-
-        function renderOdontograma() {
-            if (!_odontoPacienteId) return;
-            const container = document.getElementById('odontograma-svg-container');
-            if (container) container.innerHTML = generarOdontogramaSVG(_odontoPacienteId);
-        }
-
-        // ═══ CARGAR FICHA AL SELECCIONAR PACIENTE ═══
-        function cargarFichaOdontologica() {
-            const sel = document.getElementById('odonto-paciente-select');
-            const id = parseInt(sel.value);
-            const content = document.getElementById('odonto-ficha-content');
-
-            if (!id) {
-                _odontoPacienteId = null;
-                if (content) content.style.display = 'none';
-                return;
-            }
-
-            _odontoPacienteId = id;
-            if (content) content.style.display = 'block';
-
-            renderOdontograma();
-            renderFichasClinicas();
-            poblarSelectHistorialPiezas();
-            renderHistorialPieza();
-        }
-
-        // ═══ FICHAS CLÍNICAS ═══
-        function abrirModalFichaClinica() {
-            if (!_odontoPacienteId) { alert('Selecciona un paciente'); return; }
-            document.getElementById('ficha-fecha').value = new Date().toISOString().split('T')[0];
-            document.getElementById('ficha-piezas').value = '';
-            document.getElementById('ficha-diagnostico').value = '';
-            document.getElementById('ficha-materiales').value = '';
-            document.getElementById('ficha-formulas').value = '';
-            document.getElementById('ficha-proxima-cita').value = '';
-            document.getElementById('ficha-archivos').value = '';
-            document.getElementById('ficha-archivos-preview').innerHTML = '';
-            openModal('ficha-clinica-modal');
-        }
-
-        async function guardarFichaClinica() {
-            if (!_odontoPacienteId) return;
-            const fecha = document.getElementById('ficha-fecha').value;
-            const piezas = document.getElementById('ficha-piezas').value;
-            const diagnostico = document.getElementById('ficha-diagnostico').value;
-            const materiales = document.getElementById('ficha-materiales').value;
-            const formulas = document.getElementById('ficha-formulas').value;
-            const proximaCita = document.getElementById('ficha-proxima-cita').value;
-
-            if (!diagnostico) { alert('Ingresa un diagnóstico o tratamiento'); return; }
-
-            // Procesar archivos adjuntos (como base64)
-            const archivosInput = document.getElementById('ficha-archivos');
-            const adjuntos = [];
-            if (archivosInput.files.length > 0) {
-                for (const file of archivosInput.files) {
-                    try {
-                        const base64 = await _fileToBase64(file);
-                        adjuntos.push({ nombre: file.name, tipo: file.type, size: file.size, data: base64 });
-                    } catch(e) { console.warn('Error leyendo archivo:', e); }
-                }
-            }
-
-            if (!db.fichasClinicas) db.fichasClinicas = {};
-            if (!db.fichasClinicas[_odontoPacienteId]) db.fichasClinicas[_odontoPacienteId] = [];
-
-            const ficha = {
-                id: Date.now(),
-                fecha,
-                piezas: piezas.split(',').map(p => p.trim()).filter(p => p),
-                diagnostico,
-                materiales,
-                formulas,
-                proximaCita,
-                adjuntos,
-                creadaPor: currentUser?.name || 'Sistema',
-                creadaEn: new Date().toISOString()
-            };
-
-            db.fichasClinicas[_odontoPacienteId].push(ficha);
-            saveDB();
-            closeModal('ficha-clinica-modal');
-            renderFichasClinicas();
-
-            // Agregar al historial de cada pieza mencionada
-            ficha.piezas.forEach(p => {
-                const nro = parseInt(p);
-                if (!nro || !TODOS_DIENTES.includes(nro)) return;
-                if (!db.historialDental) db.historialDental = {};
-                if (!db.historialDental[_odontoPacienteId]) db.historialDental[_odontoPacienteId] = {};
-                if (!db.historialDental[_odontoPacienteId][nro]) db.historialDental[_odontoPacienteId][nro] = [];
-                db.historialDental[_odontoPacienteId][nro].push({
-                    fecha: ficha.fecha || new Date().toISOString(),
-                    tipo: 'ficha_clinica',
-                    diagnostico,
-                    materiales,
-                    formulas,
-                    por: currentUser?.name || 'Sistema'
-                });
-            });
-            saveDB();
-            renderHistorialPieza();
-        }
-
-        function _fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function renderFichasClinicas() {
-            if (!_odontoPacienteId) return;
-            const lista = document.getElementById('fichas-clinicas-lista');
-            if (!lista) return;
-            const fichas = (db.fichasClinicas && db.fichasClinicas[_odontoPacienteId]) || [];
-
-            if (fichas.length === 0) {
-                lista.innerHTML = '<div style="text-align:center;color:var(--gray-500);padding:24px;font-size:13px;"><i class="fas fa-notes-medical" style="font-size:32px;margin-bottom:8px;display:block;opacity:.4;"></i>No hay fichas clínicas para este paciente</div>';
-                return;
-            }
-
-            lista.innerHTML = fichas.slice().reverse().map(f => {
-                const adjuntosHtml = (f.adjuntos || []).map(a =>
-                    `<a href="${a.data}" target="_blank" download="${a.nombre}" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--primary);background:#f0ecfc;padding:4px 10px;border-radius:6px;text-decoration:none;"><i class="fas fa-paperclip"></i>${a.nombre}</a>`
-                ).join(' ');
-
-                return `<div style="background:var(--gray-100);border-radius:12px;padding:16px;border-left:4px solid var(--primary);">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-                        <div>
-                            <strong style="font-size:14px;">${formatDate(f.fecha)}</strong>
-                            ${f.piezas.length ? `<span style="font-size:12px;color:var(--primary);margin-left:8px;">Piezas: ${f.piezas.join(', ')}</span>` : ''}
-                        </div>
-                        <span style="font-size:11px;color:var(--gray-500);">Por: ${f.creadaPor}</span>
-                    </div>
-                    <p style="font-size:13px;margin-bottom:6px;"><strong>Diagnóstico:</strong> ${f.diagnostico}</p>
-                    ${f.materiales ? `<p style="font-size:12px;color:#0e7490;margin-bottom:4px;"><i class="fas fa-flask" style="margin-right:4px;"></i><strong>Materiales:</strong> ${f.materiales}</p>` : ''}
-                    ${f.formulas ? `<p style="font-size:12px;color:#be123c;margin-bottom:4px;"><i class="fas fa-prescription-bottle-alt" style="margin-right:4px;"></i><strong>Fórmulas:</strong> ${f.formulas}</p>` : ''}
-                    ${f.proximaCita ? `<p style="font-size:12px;color:var(--gray-600);"><i class="fas fa-calendar" style="margin-right:4px;"></i><strong>Próxima cita:</strong> ${formatDate(f.proximaCita)}</p>` : ''}
-                    ${adjuntosHtml ? `<div style="margin-top:8px;">${adjuntosHtml}</div>` : ''}
-                </div>`;
-            }).join('');
-        }
-
-        // ═══ HISTORIAL POR PIEZA DENTAL ═══
-        function poblarSelectHistorialPiezas() {
-            const sel = document.getElementById('historial-pieza-select');
-            if (!sel) return;
-            const historial = (db.historialDental && db.historialDental[_odontoPacienteId]) || {};
-            const piezasConHistorial = Object.keys(historial).filter(k => historial[k].length > 0).sort((a,b) => parseInt(a) - parseInt(b));
-
-            sel.innerHTML = '<option value="">Todas las piezas</option>' +
-                piezasConHistorial.map(p => `<option value="${p}">Pieza #${p}</option>`).join('');
-        }
-
-        function renderHistorialPieza() {
-            if (!_odontoPacienteId) return;
-            const container = document.getElementById('historial-pieza-content');
-            if (!container) return;
-            const filtro = document.getElementById('historial-pieza-select')?.value;
-            const historial = (db.historialDental && db.historialDental[_odontoPacienteId]) || {};
-
-            const piezas = filtro ? [filtro] : Object.keys(historial).sort((a,b) => parseInt(a) - parseInt(b));
-
-            if (piezas.length === 0) {
-                container.innerHTML = '<div style="text-align:center;color:var(--gray-500);padding:24px;font-size:13px;"><i class="fas fa-history" style="font-size:32px;margin-bottom:8px;display:block;opacity:.4;"></i>Sin historial dental registrado</div>';
-                return;
-            }
-
-            let html = '';
-            piezas.forEach(p => {
-                const eventos = historial[p];
-                if (!eventos || eventos.length === 0) return;
-
-                html += `<div style="margin-bottom:16px;">
-                    <h4 style="font-size:14px;font-weight:600;margin-bottom:8px;color:var(--primary);">
-                        <i class="fas fa-tooth" style="margin-right:6px;"></i>Pieza #${p}
-                    </h4>
-                    <div style="border-left:3px solid var(--primary);padding-left:16px;">`;
-
-                eventos.slice().reverse().forEach(e => {
-                    if (e.tipo === 'ficha_clinica') {
-                        html += `<div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12px;">
-                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-                                <strong style="color:#166534;"><i class="fas fa-notes-medical" style="margin-right:4px;"></i>Ficha Clínica</strong>
-                                <span style="color:var(--gray-500);">${formatDate(e.fecha)}</span>
-                            </div>
-                            <p>${e.diagnostico}</p>
-                            ${e.materiales ? `<p style="color:#0e7490;"><i class="fas fa-flask" style="margin-right:3px;"></i>${e.materiales}</p>` : ''}
-                            ${e.formulas ? `<p style="color:#be123c;"><i class="fas fa-prescription-bottle-alt" style="margin-right:3px;"></i>${e.formulas}</p>` : ''}
-                            <p style="color:var(--gray-500);">Por: ${e.por}</p>
-                        </div>`;
-                    } else {
-                        html += `<div style="background:var(--gray-100);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12px;">
-                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-                                <strong><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${DENTAL_TRATAMIENTOS[e.tratamientoNuevo]?.color||'#94a3b8'};margin-right:6px;"></span>${DENTAL_TRATAMIENTOS[e.tratamientoAnterior]?.label||e.tratamientoAnterior} → ${DENTAL_TRATAMIENTOS[e.tratamientoNuevo]?.label||e.tratamientoNuevo}</strong>
-                                <span style="color:var(--gray-500);">${formatDate(e.fecha)}</span>
-                            </div>
-                            ${e.notas ? `<p>${e.notas}</p>` : ''}
-                            <p style="color:var(--gray-500);">Por: ${e.por}</p>
-                        </div>`;
-                    }
-                });
-
-                html += `</div></div>`;
-            });
-
-            container.innerHTML = html;
-        }
-
-        // ═══ FIN MÓDULO ODONTOLOGÍA ═══
-
         // PAGE RENDER HOOKS
         const pageRenderHooks = {
-            'clientes': () => { renderVentasSelects(); renderClientes(); actualizarPanelOdontologico(); },
+            'clientes': () => { renderVentasSelects(); renderClientes(); actualizarPanelOdontologico(); actualizarPanelInmobiliario(); },
             'inventario': () => { renderProductos(); },
             'ventas': () => { renderVentasSelects(); renderVentas(); renderCarrito(); },
             'facturacion': () => { renderVentasSelects(); renderFacturas(); renderFacturaItems(); initFacturaDocZone(); },
