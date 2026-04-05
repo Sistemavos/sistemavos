@@ -6,7 +6,7 @@
     <title>SistemaVOS - CRM para Pymes</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         :root {
             --primary: #6C3AE1;
@@ -3433,6 +3433,18 @@
         };
 
         const INDUSTRY_CONFIGS = {
+            general: {
+                clientLabel: "Cliente",
+                inventoryLabel: "Productos",
+                salesLabel: "Venta",
+                categories: ["Producto", "Servicio", "Combo", "Otro"],
+                customClientFields: [],
+                rubro: 'general',
+                rubroName: 'General',
+                // Módulos visibles por defecto para general
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','nominas','sucursales','citas','proveedores','config'],
+                dashboardStats: ['ventas','clientes','productos','gastos']
+            },
             indumentaria: {
                 clientLabel: "Cliente",
                 inventoryLabel: "Productos",
@@ -3440,50 +3452,78 @@
                 categories: ["Remeras", "Pantalones", "Vestidos", "Calzado", "Accesorios", "Lencería", "Deportivo"],
                 customClientFields: [{ name: "tamaño", label: "Talla Preferida" }],
                 sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-                colors: ["Negro", "Blanco", "Rojo", "Azul", "Verde", "Otros"]
+                colors: ["Negro", "Blanco", "Rojo", "Azul", "Verde", "Otros"],
+                rubro: 'indumentaria', rubroName: 'Indumentaria',
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','nominas','proveedores','config'],
+                dashboardStats: ['ventas','clientes','productos','gastos'],
+                dashboardExtra: { stat1Label: 'Stock bajo', stat1Fn: 'stockBajo' }
             },
             medicina: {
                 clientLabel: "Paciente",
                 inventoryLabel: "Insumos Médicos",
                 salesLabel: "Consulta",
                 categories: ["Consulta", "Laboratorio", "Medicamentos", "Insumos"],
-                customClientFields: [{ name: "obra_social", label: "Obra Social" }, { name: "num_afiliado", label: "Número Afiliado" }]
+                customClientFields: [{ name: "obra_social", label: "Obra Social" }, { name: "num_afiliado", label: "Número Afiliado" }],
+                rubro: 'medicina', rubroName: 'Medicina',
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','gastos','empleados','nominas','citas','proveedores','config'],
+                dashboardStats: ['ventas','clientes','citas','gastos'],
+                dashboardLabels: { ventas: 'Consultas (7d)', clientes: 'Pacientes', productos: 'Insumos' }
             },
             talleres: {
                 clientLabel: "Vehículo",
                 inventoryLabel: "Repuestos",
                 salesLabel: "Orden de Trabajo",
                 categories: ["Filtros", "Aceites", "Frenos", "Neumáticos", "Electricidad", "Carrocería"],
-                customClientFields: [{ name: "patente", label: "Patente" }, { name: "marca", label: "Marca" }, { name: "modelo", label: "Modelo" }, { name: "año", label: "Año" }]
+                customClientFields: [{ name: "patente", label: "Patente" }, { name: "marca", label: "Marca" }, { name: "modelo", label: "Modelo" }, { name: "año", label: "Año" }],
+                rubro: 'talleres', rubroName: 'Taller Mecánico',
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','proveedores','config'],
+                dashboardStats: ['ventas','clientes','productos','gastos'],
+                dashboardLabels: { ventas: 'Facturación (7d)', clientes: 'Vehículos', productos: 'Repuestos' }
             },
             gastronomia: {
-                clientLabel: "Mesa",
-                inventoryLabel: "Productos",
+                clientLabel: "Cliente",
+                inventoryLabel: "Carta / Menú",
                 salesLabel: "Comanda",
-                categories: ["Entradas", "Platos Principales", "Postres", "Bebidas", "Cafetería"]
+                categories: ["Entradas", "Platos Principales", "Postres", "Bebidas", "Cafetería"],
+                rubro: 'gastronomia', rubroName: 'Gastronomía',
+                modulosVisibles: ['dashboard','inventario','ventas','facturacion','arqueo','gastos','empleados','nominas','proveedores','config'],
+                dashboardStats: ['ventas','productos','gastos','arqueo'],
+                dashboardLabels: { ventas: 'Ventas (7d)', productos: 'Platos en carta', gastos: 'Costos (7d)' }
             },
             belleza: {
                 clientLabel: "Cliente",
                 inventoryLabel: "Servicios",
-                salesLabel: "Servicio",
+                salesLabel: "Turno / Servicio",
                 categories: ["Corte", "Color", "Tratamiento Facial", "Manicura", "Depilación", "Masajes"],
-                customClientFields: [{ name: "tipo_piel", label: "Tipo de Piel" }, { name: "alergias", label: "Alergias" }]
+                customClientFields: [{ name: "tipo_piel", label: "Tipo de Piel" }, { name: "alergias", label: "Alergias" }],
+                rubro: 'belleza', rubroName: 'Belleza / Estética',
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','citas','proveedores','config'],
+                dashboardStats: ['ventas','clientes','citas','gastos'],
+                dashboardLabels: { ventas: 'Ingresos (7d)', clientes: 'Clientes activos', productos: 'Servicios' }
             },
             kioscos: {
                 clientLabel: "Cliente",
                 inventoryLabel: "Stock",
                 salesLabel: "Venta",
-                categories: ["Golosinas", "Bebidas", "Cigarrillos", "Limpieza", "Lácteos", "Fiambres", "Varios"]
+                categories: ["Golosinas", "Bebidas", "Cigarrillos", "Limpieza", "Lácteos", "Fiambres", "Varios"],
+                rubro: 'kioscos', rubroName: 'Kiosco / Almacén',
+                modulosVisibles: ['dashboard','inventario','ventas','arqueo','gastos','proveedores','config'],
+                dashboardStats: ['ventas','productos','gastos','arqueo'],
+                dashboardLabels: { ventas: 'Ventas (7d)', productos: 'Productos en stock' }
             },
             lavaderos: {
                 clientLabel: "Vehículo",
                 inventoryLabel: "Servicios",
                 salesLabel: "Servicio",
                 categories: ["Lavado Simple", "Lavado Completo", "Encerado", "Interior", "Motor"],
-                customClientFields: [{ name: "patente", label: "Patente" }, { name: "tipo_vehiculo", label: "Tipo Vehículo" }]
+                customClientFields: [{ name: "patente", label: "Patente" }, { name: "tipo_vehiculo", label: "Tipo Vehículo" }],
+                rubro: 'lavaderos', rubroName: 'Lavadero',
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','arqueo','gastos','empleados','config'],
+                dashboardStats: ['ventas','clientes','gastos','arqueo'],
+                dashboardLabels: { ventas: 'Ingresos (7d)', clientes: 'Vehículos atendidos' }
             },
             inmobiliarias: {
-                clientLabel: "Cliente",
+                clientLabel: "Cliente / Interesado",
                 inventoryLabel: "Propiedades",
                 salesLabel: "Operación",
                 categories: ["Venta", "Alquiler", "Alquiler Temporal"],
@@ -3493,9 +3533,11 @@
                     { name: "dni", label: "DNI / CUIT" },
                     { name: "interes", label: "Interés (venta/alquiler)" }
                 ],
-                rubro: 'inmobiliarias',
-                rubroName: 'Inmobiliaria',
-                esInmobiliaria: true
+                rubro: 'inmobiliarias', rubroName: 'Inmobiliaria',
+                esInmobiliaria: true,
+                modulosVisibles: ['dashboard','clientes','ventas','facturacion','gastos','empleados','config'],
+                dashboardStats: ['ventas','clientes','propiedades','gastos'],
+                dashboardLabels: { ventas: 'Operaciones (7d)', clientes: 'Interesados', productos: 'Propiedades' }
             },
             odontologia: {
                 clientLabel: "Paciente",
@@ -3508,9 +3550,11 @@
                     { name: "fecha_nacimiento", label: "Fecha de Nacimiento" },
                     { name: "alergias", label: "Alergias / Medicamentos" }
                 ],
-                rubro: 'odontologia',
-                rubroName: 'Odontología',
-                esOdontologia: true
+                rubro: 'odontologia', rubroName: 'Odontología',
+                esOdontologia: true,
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','gastos','empleados','nominas','citas','config'],
+                dashboardStats: ['ventas','clientes','citas','gastos'],
+                dashboardLabels: { ventas: 'Consultas (7d)', clientes: 'Pacientes', productos: 'Insumos' }
             }
         };
 
@@ -3793,10 +3837,34 @@
             }
         }
 
+        function _ensureDBStructure() {
+            if (!db.account) db.account = { businessName: 'Mi Negocio', ownerName: currentUser?.name || '', email: currentUser?.email || '', industry: 'general' };
+            if (!db.industryConfig) db.industryConfig = INDUSTRY_CONFIGS[db.account.industry || 'general'] || INDUSTRY_CONFIGS['general'];
+            if (!Array.isArray(db.clientes)) db.clientes = [];
+            if (!Array.isArray(db.productos)) db.productos = [];
+            if (!Array.isArray(db.ventas)) db.ventas = [];
+            if (!Array.isArray(db.facturas)) db.facturas = [];
+            if (!Array.isArray(db.gastos)) db.gastos = [];
+            if (!Array.isArray(db.empleados)) db.empleados = [];
+            if (!Array.isArray(db.nominas)) db.nominas = [];
+            if (!Array.isArray(db.sucursales)) db.sucursales = [];
+            if (!Array.isArray(db.proveedores)) db.proveedores = [];
+            if (!Array.isArray(db.arqueo)) db.arqueo = [];
+            if (!Array.isArray(db.citas)) db.citas = [];
+            if (!Array.isArray(db.usuarios)) db.usuarios = [];
+            if (!db.odontologia) db.odontologia = {};
+            if (!db.inmobiliaria) db.inmobiliaria = { propiedades: [], visitas: {} };
+            if (!db.documentos) db.documentos = {};
+        }
+
         function showApp() {
             document.getElementById('registration-page').style.display = 'none';
             document.getElementById('login-page').style.display = 'none';
             document.getElementById('app-page').style.display = 'flex';
+
+            // Asegurar estructura mínima de db para evitar crashes
+            _ensureDBStructure();
+
             updateSidebarBrand();
             renderDashboard();
             showPage('dashboard');
@@ -3804,6 +3872,9 @@
 
             // Banner dinámico de suscripción (nuevo sistema)
             renderBannerSuscripcion();
+
+            // Filtrar sidebar y labels según rubro
+            aplicarVisibilidadModulos();
 
             // Aplicar modo lectura si el plan no está activo
             setTimeout(aplicarModoLectura, 500);
@@ -4427,6 +4498,33 @@
             }
         }
 
+        // ── Filtrar sidebar por rubro ──────────────────────────────────────
+        function aplicarVisibilidadModulos() {
+            const cfg = db.industryConfig || INDUSTRY_CONFIGS['general'];
+            const visibles = cfg.modulosVisibles || null;
+            // Si no tiene modulosVisibles definido, mostrar todo
+            if (!visibles) return;
+            const allButtons = document.querySelectorAll('.sidebar-menu button[onclick*="showPage"]');
+            allButtons.forEach(btn => {
+                const match = btn.getAttribute('onclick').match(/showPage\('(\w+)'\)/);
+                if (!match) return;
+                const page = match[1];
+                const li = btn.closest('li');
+                if (!li) return;
+                // Siempre visibles: dashboard, config, usuarios, mercadopago, whatsapp, ia
+                const siempreVisibles = ['dashboard','config','usuarios','mercadopago','whatsapp','ia'];
+                if (siempreVisibles.includes(page)) { li.style.display = ''; return; }
+                li.style.display = visibles.includes(page) ? '' : 'none';
+            });
+            // Actualizar labels del sidebar según el rubro
+            const menuClientes = document.getElementById('menu-clientes');
+            const menuInventario = document.getElementById('menu-inventario');
+            const menuVentas = document.getElementById('menu-ventas');
+            if (menuClientes) menuClientes.textContent = cfg.clientLabel ? cfg.clientLabel + 's' : 'Clientes';
+            if (menuInventario) menuInventario.textContent = cfg.inventoryLabel || 'Inventario';
+            if (menuVentas) menuVentas.textContent = cfg.salesLabel ? cfg.salesLabel + 's' : 'Ventas';
+        }
+
         function updateSidebarBrand() {
             const acct = db.account || {};
             const bizName = acct.businessName || currentUser?.name || 'Mi Negocio';
@@ -4483,9 +4581,9 @@
         function updatePageTitle(page) {
             const titles = {
                 dashboard: 'Dashboard',
-                clientes: db.industryConfig.clientLabel || 'Clientes',
-                inventario: db.industryConfig.inventoryLabel || 'Inventario',
-                ventas: db.industryConfig.salesLabel || 'Ventas',
+                clientes: (db.industryConfig?.clientLabel || 'Cliente') + 's',
+                inventario: db.industryConfig?.inventoryLabel || 'Inventario',
+                ventas: db.industryConfig?.salesLabel || 'Ventas',
                 facturacion: 'Facturación AFIP',
                 arqueo: 'Arqueo de Caja',
                 gastos: 'Gastos',
@@ -4528,52 +4626,69 @@
         }
 
         function renderDashboard() {
+            const cfg = db.industryConfig || INDUSTRY_CONFIGS['general'];
+            const labels = cfg.dashboardLabels || {};
             const today = new Date();
             const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-            const ventasHoy = db.ventas.filter(v => new Date(v.fecha) > sevenDaysAgo).reduce((sum, v) => sum + v.total, 0);
-            const clientesCount = db.clientes.length;
-            const productosCount = db.productos.length;
-            const gastosHoy = db.gastos.filter(g => new Date(g.fecha) > sevenDaysAgo).reduce((sum, g) => sum + g.monto, 0);
+            const ventas = Array.isArray(db.ventas) ? db.ventas : [];
+            const clientes = Array.isArray(db.clientes) ? db.clientes : [];
+            const productos = Array.isArray(db.productos) ? db.productos : [];
+            const gastos = Array.isArray(db.gastos) ? db.gastos : [];
+            const citas = Array.isArray(db.citas) ? db.citas : [];
+            const propiedades = db.inmobiliaria?.propiedades || [];
 
-            const statsHTML = `
-                <div class="stat-card primary">
-                    <div class="stat-label">Ventas (7 días)</div>
-                    <div class="stat-value">${formatCurrency(ventasHoy)}</div>
-                    <div class="stat-change">+12% vs período anterior</div>
-                </div>
-                <div class="stat-card accent">
-                    <div class="stat-label">Clientes</div>
-                    <div class="stat-value">${clientesCount}</div>
-                    <div class="stat-change">${clientesCount > 0 ? '+Activos' : 'Sin clientes'}</div>
-                </div>
-                <div class="stat-card accent2">
-                    <div class="stat-label">Productos</div>
-                    <div class="stat-value">${productosCount}</div>
-                    <div class="stat-change">En stock</div>
-                </div>
-                <div class="stat-card success">
-                    <div class="stat-label">Gastos (7 días)</div>
-                    <div class="stat-value">${formatCurrency(gastosHoy)}</div>
-                    <div class="stat-change">Control de costos</div>
-                </div>
-            `;
+            const ventasHoy = ventas.filter(v => new Date(v.fecha) > sevenDaysAgo).reduce((sum, v) => sum + (v.total || 0), 0);
+            const clientesCount = clientes.length;
+            const productosCount = productos.length;
+            const gastosHoy = gastos.filter(g => new Date(g.fecha) > sevenDaysAgo).reduce((sum, g) => sum + (g.monto || 0), 0);
+            const citasProximas = citas.filter(c => new Date(c.fecha) >= today && c.estado !== 'cancelada').length;
+            const propiedadesActivas = propiedades.filter(p => p.estado !== 'vendido').length;
+            const stockBajo = productos.filter(p => p.stock <= (p.stockMin || 5)).length;
+
+            // Dashboard adaptado al rubro
+            const statsDef = cfg.dashboardStats || ['ventas','clientes','productos','gastos'];
+            const statCards = {
+                ventas: { css: 'primary', icon: 'fa-dollar-sign', label: labels.ventas || 'Ventas (7d)', value: formatCurrency(ventasHoy), sub: ventasHoy > 0 ? 'Activo' : 'Sin movimiento' },
+                clientes: { css: 'accent', icon: 'fa-users', label: labels.clientes || cfg.clientLabel + 's', value: clientesCount, sub: clientesCount > 0 ? 'Registrados' : 'Sin registros' },
+                productos: { css: 'accent2', icon: 'fa-boxes', label: labels.productos || cfg.inventoryLabel, value: productosCount, sub: stockBajo > 0 ? `⚠️ ${stockBajo} con stock bajo` : 'Stock OK' },
+                gastos: { css: 'success', icon: 'fa-receipt', label: labels.gastos || 'Gastos (7d)', value: formatCurrency(gastosHoy), sub: 'Control de costos' },
+                citas: { css: 'accent', icon: 'fa-calendar-check', label: 'Próximas citas', value: citasProximas, sub: citasProximas > 0 ? 'Programadas' : 'Sin citas' },
+                propiedades: { css: 'accent2', icon: 'fa-building', label: 'Propiedades activas', value: propiedadesActivas, sub: propiedadesActivas > 0 ? 'En cartera' : 'Sin propiedades' },
+                arqueo: { css: 'success', icon: 'fa-cash-register', label: 'Caja', value: formatCurrency(ventasHoy - gastosHoy), sub: 'Balance 7 días' },
+                stockBajo: { css: 'accent2', icon: 'fa-exclamation-triangle', label: 'Stock bajo', value: stockBajo, sub: stockBajo > 0 ? '¡Reponer!' : 'Todo OK' }
+            };
+
+            const statsHTML = statsDef.map(key => {
+                const s = statCards[key];
+                if (!s) return '';
+                return `<div class="stat-card ${s.css}">
+                    <div class="stat-label"><i class="fas ${s.icon}" style="margin-right:6px;opacity:.6;"></i>${s.label}</div>
+                    <div class="stat-value">${s.value}</div>
+                    <div class="stat-change">${s.sub}</div>
+                </div>`;
+            }).join('');
+
             document.getElementById('dashboard-stats').innerHTML = statsHTML;
 
-            renderSalesChart();
-            renderTopProductsChart();
+            try { renderSalesChart(); } catch(e) { console.warn('Chart render error:', e); }
+            try { renderTopProductsChart(); } catch(e) { console.warn('Chart render error:', e); }
             renderRecentActivity();
         }
 
         function renderSalesChart() {
-            const ctx = document.getElementById('salesChart').getContext('2d');
+            const canvas = document.getElementById('salesChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (typeof Chart === 'undefined') return;
+            const ventas = Array.isArray(db.ventas) ? db.ventas : [];
             const labels = [];
             const data = [];
             for (let i = 6; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 labels.push(date.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' }));
-                const dayVentas = db.ventas.filter(v => new Date(v.fecha).toDateString() === date.toDateString()).reduce((sum, v) => sum + v.total, 0);
+                const dayVentas = ventas.filter(v => new Date(v.fecha).toDateString() === date.toDateString()).reduce((sum, v) => sum + (v.total || 0), 0);
                 data.push(dayVentas);
             }
             new Chart(ctx, {
@@ -4602,8 +4717,11 @@
         }
 
         function renderTopProductsChart() {
-            const ctx = document.getElementById('topProductsChart').getContext('2d');
-            const topProducts = db.productos.slice(0, 5);
+            const canvas = document.getElementById('topProductsChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (typeof Chart === 'undefined') return;
+            const topProducts = (Array.isArray(db.productos) ? db.productos : []).slice(0, 5);
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -4624,7 +4742,10 @@
         }
 
         function renderRecentActivity() {
-            const activities = [...db.ventas.map(v => ({ tipo: 'Venta', desc: `Venta a ${db.clientes.find(c => c.id === v.clienteId)?.nombre || 'Cliente'}`, fecha: v.fecha, monto: v.total })), ...db.gastos.map(g => ({ tipo: 'Gasto', desc: g.descripcion, fecha: g.fecha, monto: -g.monto }))].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 10);
+            const ventas = Array.isArray(db.ventas) ? db.ventas : [];
+            const gastos = Array.isArray(db.gastos) ? db.gastos : [];
+            const clientes = Array.isArray(db.clientes) ? db.clientes : [];
+            const activities = [...ventas.map(v => ({ tipo: 'Venta', desc: `Venta a ${clientes.find(c => c.id === v.clienteId)?.nombre || 'Cliente'}`, fecha: v.fecha, monto: v.total || 0 })), ...gastos.map(g => ({ tipo: 'Gasto', desc: g.descripcion, fecha: g.fecha, monto: -(g.monto || 0) }))].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 10);
             let html = '';
             activities.forEach(a => {
                 html += `<tr><td><span class="badge ${a.tipo === 'Venta' ? 'badge-success' : 'badge-danger'}">${a.tipo}</span></td><td>${a.desc}</td><td>${new Date(a.fecha).toLocaleDateString('es-AR')}</td><td style="color: ${a.monto > 0 ? 'var(--success)' : 'var(--danger)'};">${formatCurrency(Math.abs(a.monto))}</td></tr>`;
@@ -7409,14 +7530,13 @@
 
         const RUBRO_ICONOS = {
             general:        { icon: 'fa-store', label: 'General' },
-            restaurantes:   { icon: 'fa-utensils', label: 'Restaurantes' },
-            peluquerias:    { icon: 'fa-cut', label: 'Peluquerías' },
-            clinicas:       { icon: 'fa-heartbeat', label: 'Clínicas' },
-            gimnasios:      { icon: 'fa-dumbbell', label: 'Gimnasios' },
-            tiendas:        { icon: 'fa-shopping-bag', label: 'Tiendas' },
-            talleres:       { icon: 'fa-wrench', label: 'Talleres' },
-            lavaderos:      { icon: 'fa-car-side', label: 'Lavaderos' },
-            kioscos:        { icon: 'fa-store-alt', label: 'Kioscos' },
+            indumentaria:   { icon: 'fa-tshirt', label: 'Indumentaria' },
+            medicina:       { icon: 'fa-heartbeat', label: 'Medicina' },
+            talleres:       { icon: 'fa-wrench', label: 'Taller Mecánico' },
+            gastronomia:    { icon: 'fa-utensils', label: 'Gastronomía' },
+            belleza:        { icon: 'fa-cut', label: 'Belleza / Estética' },
+            kioscos:        { icon: 'fa-store-alt', label: 'Kiosco / Almacén' },
+            lavaderos:      { icon: 'fa-car-side', label: 'Lavadero' },
             inmobiliarias:  { icon: 'fa-building', label: 'Inmobiliaria' },
             odontologia:    { icon: 'fa-tooth', label: 'Odontología' }
         };
@@ -7493,8 +7613,9 @@
 
             saveDB();
 
-            // Actualizar sidebar labels
+            // Actualizar sidebar labels y visibilidad
             updateSidebarBrand();
+            aplicarVisibilidadModulos();
 
             // Re-renderizar panel actual
             renderRubroSelector();
