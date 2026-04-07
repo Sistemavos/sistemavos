@@ -7890,7 +7890,7 @@
                 });
                 const data = await res.json().catch(() => ({}));
                 if (data.init_point) {
-                    window.open(data.init_point, '_blank');
+                    window.location.href = data.init_point;
                 } else {
                     console.error('MP response:', data);
                     alert('No se pudo generar el enlace de pago. Error: ' + (data.message || data.error || 'desconocido'));
