@@ -7851,28 +7851,49 @@
 
         // ── Iniciar pago MercadoPago vía Make ────────────────────────────────
         async function iniciarPagoMercadoPago(periodo, monto) {
-            if (!MAKE_WEBHOOK_PAGO) { alert('Sistema de pagos no configurado.'); return; }
             const userId = currentUser?.id || db.account?.email || 'anonimo';
             _mostrarEsperandoPago();
-            try {
-                const res = await fetch(MAKE_WEBHOOK_PAGO, {
+            // Log en Make.com de forma asíncrona (no bloquea)
+            if (MAKE_WEBHOOK_PAGO) {
+                fetch(MAKE_WEBHOOK_PAGO, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        evento: 'iniciar_pago',
-                        periodo, monto,
-                        userId,
+                        evento: 'iniciar_pago', periodo, monto, userId,
                         email: db.account?.email,
                         businessName: db.account?.businessName,
                         external_reference: userId,
                         timestamp: new Date().toISOString()
                     })
+                }).catch(() => {});
+            }
+            try {
+                // Llamada directa a MercadoPago para obtener init_point de forma síncrona
+                const MP_ACCESS_TOKEN = 'APP_USR-1118548784284560-040217-dc5514ac00a273506dca523129d5f4d7-3310907652';
+                const res = await fetch('https://api.mercadopago.com/checkout/preferences', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${MP_ACCESS_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        items: [{ title: `Plan SistemaVOS - ${periodo}`, quantity: 1, unit_price: monto, currency_id: 'ARS' }],
+                        payer: { email: db.account?.email || '', name: db.account?.businessName || '' },
+                        external_reference: userId,
+                        back_urls: {
+                            success: 'https://sistemavos.vercel.app/?pago=exitoso',
+                            failure: 'https://sistemavos.vercel.app/?pago=fallido',
+                            pending: 'https://sistemavos.vercel.app/?pago=pendiente'
+                        },
+                        auto_return: 'approved'
+                    })
                 });
                 const data = await res.json().catch(() => ({}));
-                if (data.init_point || data.checkout_url) {
-                    window.open(data.init_point || data.checkout_url, '_blank');
+                if (data.init_point) {
+                    window.open(data.init_point, '_blank');
                 } else {
-                    alert('Redirigiendo al sistema de pago... Si no abre, revisá tu bloqueador de pop-ups.');
+                    console.error('MP response:', data);
+                    alert('No se pudo generar el enlace de pago. Error: ' + (data.message || data.error || 'desconocido'));
                 }
             } catch (err) {
                 console.error('Error al iniciar pago:', err);
