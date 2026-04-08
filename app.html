@@ -1479,6 +1479,99 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+    
+        /* ===== MÓDULOS CLÍNICA (ClinicFlow) ===== */
+        .clinic-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
+        .clinic-kpi-card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(15,23,42,.06);transition:box-shadow .2s}
+        .clinic-kpi-card:hover{box-shadow:0 8px 20px rgba(15,23,42,.1)}
+        .clinic-kpi-card.teal{background:linear-gradient(135deg,#00C6A7,#00b899);color:#fff}
+        .clinic-kpi-card.teal .kpi-label,.clinic-kpi-card.teal .kpi-sub{color:rgba(255,255,255,.85)}
+        .kpi-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-500);margin-bottom:6px}
+        .kpi-value{font-size:32px;font-weight:700;line-height:1;margin-bottom:4px}
+        .kpi-sub{font-size:12px;color:var(--gray-500)}
+        .kpi-delta{font-size:12px;font-weight:600;color:#10b981}
+        .kpi-delta.neg{color:#ef4444}
+        .clinic-two-col{display:grid;grid-template-columns:1fr 300px;gap:16px}
+        @media(max-width:900px){.clinic-two-col{grid-template-columns:1fr}}
+        .clinic-actions-panel{background:#fff;border:1px solid var(--gray-200);border-radius:16px;padding:20px}
+        .clinic-actions-panel>h3{font-size:14px;font-weight:700;margin-bottom:4px}
+        .clinic-actions-panel>p{font-size:12px;color:var(--gray-500);margin-bottom:14px}
+        .clinic-action-item{border:1px solid var(--gray-200);border-radius:12px;padding:14px;margin-bottom:10px}
+        .clinic-action-item h4{font-size:13px;font-weight:600;margin-bottom:2px}
+        .clinic-action-item p{font-size:11px;color:var(--gray-500);margin:0 0 8px}
+        .clinic-action-btn{font-size:12px;font-weight:600;color:var(--primary);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;padding:0}
+        .op-card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;padding:20px}
+        .op-big{font-size:36px;font-weight:700;color:var(--gray-900)}
+        .op-sub{font-size:13px;color:var(--gray-500);margin-bottom:14px}
+        .op-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--gray-100);font-size:13px}
+        .op-row:last-child{border-bottom:none}
+        .op-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+        .op-badge.green{background:#d1fae5;color:#065f46}
+        .op-badge.blue{background:#dbeafe;color:#1d4ed8}
+        .op-badge.yellow{background:#fef3c7;color:#92400e}
+        .p360-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--gray-100);color:var(--gray-600);margin-right:3px}
+        .p360-tag.vip{background:#fef9c3;color:#92400e}
+        .p360-tag.alergia{background:#fee2e2;color:#991b1b}
+        .p360-state{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+        .p360-state.activo{background:#d1fae5;color:#065f46}
+        .p360-state.tratamiento{background:#dbeafe;color:#1e40af}
+        .p360-state.seguimiento{background:#fef3c7;color:#92400e}
+        .p360-state.inactivo{background:#f1f5f9;color:#64748b}
+        .p360-next-action{font-size:11px;font-weight:600;padding:3px 8px;border-radius:8px;white-space:nowrap}
+        .p360-next-action.teal{background:#ccfbf1;color:#0f766e}
+        .p360-next-action.orange{background:#ffedd5;color:#9a3412}
+        .p360-next-action.blue{background:#dbeafe;color:#1d4ed8}
+        .quote-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;padding:18px 20px;margin-bottom:12px;transition:box-shadow .2s}
+        .quote-card:hover{box-shadow:0 6px 18px rgba(15,23,42,.08)}
+        .q-num{font-weight:700;font-size:14px}
+        .q-date{font-size:11px;color:var(--gray-500)}
+        .q-amount{font-size:22px;font-weight:700}
+        .q-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+        .q-badge.enviado{background:#dbeafe;color:#1e40af}
+        .q-badge.visto{background:#fef3c7;color:#92400e}
+        .q-badge.confirmado{background:#d1fae5;color:#065f46}
+        .q-badge.borrador{background:#f1f5f9;color:#64748b}
+        .q-badge.vencido{background:#fee2e2;color:#991b1b}
+        .quote-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+        .quote-actions button{font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid var(--gray-200);background:#fff;cursor:pointer;font-weight:500;transition:background .15s}
+        .quote-actions button:hover{background:var(--gray-100)}
+        .quote-actions .btn-del{color:#ef4444;border-color:#fecaca}
+        .kanban-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;align-items:start}
+        .kanban-col{background:var(--gray-100);border-radius:14px;padding:14px;min-height:160px}
+        .kanban-col-header{font-size:13px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--gray-200)}
+        .kanban-col-header.lead{color:#6C3AE1;border-color:#c4b5fd}
+        .kanban-col-header.valora{color:#06b6d4;border-color:#a5f3fc}
+        .kanban-col-header.presup{color:#f59e0b;border-color:#fde68a}
+        .kanban-col-header.negoc{color:#00C6A7;border-color:#99f6e4}
+        .kanban-col-header.ganado{color:#10b981;border-color:#a7f3d0}
+        .kanban-card{background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;transition:box-shadow .15s}
+        .kanban-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+        .kanban-card h5{font-size:13px;font-weight:600;margin-bottom:2px}
+        .kanban-card p{font-size:11px;color:var(--gray-500);margin:0 0 8px}
+        .kc-btn{font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--gray-200);background:none;cursor:pointer}
+        .task-row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid var(--gray-200);border-radius:12px;margin-bottom:8px;transition:box-shadow .15s;flex-wrap:wrap}
+        .task-row:hover{box-shadow:0 4px 10px rgba(0,0,0,.06)}
+        .task-row .t-title{font-size:14px;font-weight:600;flex:1;min-width:120px}
+        .task-row .t-assigned,.task-row .t-due{font-size:12px;color:var(--gray-500)}
+        .t-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+        .t-badge.todo{background:#f1f5f9;color:#64748b}
+        .t-badge.doing{background:#fef3c7;color:#92400e}
+        .t-badge.done{background:#d1fae5;color:#065f46}
+        .task-template-card{background:var(--gray-100);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:background .15s}
+        .task-template-card:hover{background:var(--gray-200)}
+        .task-template-card h5{font-size:13px;font-weight:600;margin-bottom:2px}
+        .task-template-card p{font-size:11px;color:var(--gray-500);margin:0}
+        .comm-template{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+        .comm-template .ct-left h4{font-size:13px;font-weight:600;margin-bottom:3px}
+        .comm-template .ct-left p{font-size:12px;color:var(--gray-500);margin:0}
+        .comm-channel{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+        .comm-channel.wa{background:#d1fae5;color:#065f46}
+        .comm-channel.email{background:#dbeafe;color:#1e40af}
+        .comm-channel.sms{background:#f3e8ff;color:#6d28d9}
+        .comm-draft-panel{background:#fff;border:1px solid var(--gray-200);border-radius:16px;padding:20px}
+        .comm-draft-panel h3{font-size:14px;font-weight:700;margin-bottom:14px}
+        .comm-preview{background:var(--gray-100);border-radius:10px;padding:14px;font-size:13px;color:var(--gray-700);min-height:80px;margin-top:12px;font-style:italic}
+        .sidebar-group-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:14px 12px 4px}
     </style>
 
     <!-- Supabase SDK -->
@@ -1827,10 +1920,18 @@
                     <li><button onclick="showPage('nominas')"><i class="fas fa-file-contract"></i> <span>Nóminas</span></button></li>
                     <li><button onclick="showPage('sucursales')"><i class="fas fa-map-pin"></i> <span>Sucursales</span></button></li>
                     <li><button onclick="showPage('citas')"><i class="fas fa-calendar-check"></i> <span>Citas / Agenda</span></button></li>
+                    <!-- MÓDULOS CLÍNICA -->
+                    <div class="sidebar-group-label menu-clinica" style="display:none">— Clínica —</div>
+                    <li class="menu-clinica" style="display:none"><button onclick="showPage('cockpit-clinica')"><i class="fas fa-chart-pulse"></i> <span>Cockpit Clínico</span></button></li>
+                    <li class="menu-clinica" style="display:none"><button onclick="showPage('pacientes360')"><i class="fas fa-user-injured"></i> <span>Pacientes 360</span></button></li>
+                    <li class="menu-clinica" style="display:none"><button onclick="showPage('presupuestos-clinica')"><i class="fas fa-file-medical"></i> <span>Presupuestos</span></button></li>
+                    <li class="menu-clinica" style="display:none"><button onclick="showPage('embudo-clinica')"><i class="fas fa-filter"></i> <span>Embudo Clínico</span></button></li>
+                    <li class="menu-clinica" style="display:none"><button onclick="showPage('tareas-clinica')"><i class="fas fa-stethoscope"></i> <span>Tareas</span></button></li>
+                    <li class="menu-clinica" style="display:none"><button onclick="showPage('comunicaciones-clinica')"><i class="fas fa-message"></i> <span>Comunicaciones</span></button></li>
                     <li><button onclick="showPage('proveedores')"><i class="fas fa-handshake"></i> <span>Proveedores</span></button></li>
                     <li><button onclick="showPage('presupuestos')"><i class="fas fa-file-invoice"></i> <span>Presupuestos</span></button></li>
                     <li><button onclick="showPage('remitos')"><i class="fas fa-truck"></i> <span>Remitos</span></button></li>
-                    <li><button onclick="showPage('usuarios'"><i class="fas fa-user-shield"></i> <span>Usuarios</span></button></li>
+                    <li><button onclick="showPage('usuarios')"><i class="fas fa-user-shield"></i> <span>Usuarios</span></button></li>
                     <li><button onclick="showPage('mercadopago')"><i class="fas fa-credit-card"></i> <span>MercadoPago</span></button></li>
                     <li><button onclick="showPage('whatsapp')"><i class="fab fa-whatsapp"></i> <span>WhatsApp Business</span></button></li>
                     <li><button onclick="showPage('ia')"><i class="fas fa-robot"></i> <span>Asistente IA</span></button></li>
@@ -2835,7 +2936,6 @@
                         </div>
                     </div>
 
-
                     <!-- PRESUPUESTOS PAGE -->
                     <div id="presupuestos" class="page">
                         <div class="card">
@@ -2854,30 +2954,68 @@
                                     <option value="vencido">Vencido</option>
                                 </select>
                             </div>
-                            <div style="overflow-x:auto;"><table class="table" id="presupuestos-table"><thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Vence</th><th>Ítems</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+                            <div style="overflow-x:auto;">
+                                <table class="table" id="presupuestos-table">
+                                    <thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Vence</th><th>Productos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
+
+                        <!-- Modal Presupuesto -->
                         <div class="modal" id="presupuesto-modal">
                             <div class="modal-content" style="max-width:750px;">
-                                <div class="modal-header"><h3 id="presupuesto-modal-title">Nuevo Presupuesto</h3><button onclick="closeModal('presupuesto-modal')" class="modal-close">✕</button></div>
+                                <div class="modal-header">
+                                    <h3 id="presupuesto-modal-title">Nuevo Presupuesto</h3>
+                                    <button onclick="closeModal('presupuesto-modal')" class="modal-close">✕</button>
+                                </div>
                                 <div class="modal-body">
                                     <div class="grid-2">
-                                        <div class="form-group"><label>Cliente *</label><select id="pres-cliente"></select></div>
-                                        <div class="form-group"><label>Fecha emisión</label><input type="date" id="pres-fecha"></div>
-                                        <div class="form-group"><label>Fecha vencimiento</label><input type="date" id="pres-vencimiento"></div>
-                                        <div class="form-group"><label>Estado</label><select id="pres-estado"><option value="borrador">Borrador</option><option value="enviado">Enviado</option><option value="aprobado">Aprobado</option><option value="rechazado">Rechazado</option></select></div>
+                                        <div class="form-group">
+                                            <label>Cliente *</label>
+                                            <select id="pres-cliente"></select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Fecha emisión</label>
+                                            <input type="date" id="pres-fecha">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Fecha vencimiento</label>
+                                            <input type="date" id="pres-vencimiento">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Estado</label>
+                                            <select id="pres-estado">
+                                                <option value="borrador">Borrador</option>
+                                                <option value="enviado">Enviado</option>
+                                                <option value="aprobado">Aprobado</option>
+                                                <option value="rechazado">Rechazado</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="form-group"><label>Observaciones</label><textarea id="pres-observaciones" rows="2" style="width:100%;padding:8px;border:1px solid var(--gray-300);border-radius:8px;"></textarea></div>
-                                    <h4 style="margin:16px 0 8px;">Ítems</h4>
+                                    <div class="form-group">
+                                        <label>Observaciones</label>
+                                        <textarea id="pres-observaciones" rows="2" style="width:100%;padding:8px;border:1px solid var(--gray-300);border-radius:8px;"></textarea>
+                                    </div>
+                                    <h4 style="margin:16px 0 8px;">Ítems del Presupuesto</h4>
                                     <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
                                         <select id="pres-item-producto" style="flex:2;min-width:160px;" onchange="autocompletarPrecioPresupuesto()"></select>
                                         <input type="number" id="pres-item-cantidad" placeholder="Cant." min="1" value="1" style="width:80px;">
                                         <input type="number" id="pres-item-precio" placeholder="Precio unit." style="flex:1;min-width:100px;">
                                         <button class="btn-primary" onclick="agregarItemPresupuesto()"><i class="fas fa-plus"></i></button>
                                     </div>
-                                    <table class="table" id="pres-items-table"><thead><tr><th>Producto</th><th>Cant.</th><th>P.Unit.</th><th>Subtotal</th><th></th></tr></thead><tbody id="pres-items-body"></tbody></table>
-                                    <div style="text-align:right;margin-top:12px;font-weight:700;">Total: <span id="pres-total-display">$0</span></div>
+                                    <table class="table" id="pres-items-table">
+                                        <thead><tr><th>Producto</th><th>Cant.</th><th>Precio Unit.</th><th>Subtotal</th><th></th></tr></thead>
+                                        <tbody id="pres-items-body"></tbody>
+                                    </table>
+                                    <div style="text-align:right;margin-top:12px;font-size:1.1rem;font-weight:700;">
+                                        Total: <span id="pres-total-display">$0</span>
+                                    </div>
                                 </div>
-                                <div class="modal-footer"><button onclick="closeModal('presupuesto-modal')" class="btn-secondary">Cancelar</button><button onclick="guardarPresupuesto()" class="btn-primary">Guardar</button></div>
+                                <div class="modal-footer">
+                                    <button onclick="closeModal('presupuesto-modal')" class="btn-secondary">Cancelar</button>
+                                    <button onclick="guardarPresupuesto()" class="btn-primary">Guardar Presupuesto</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2898,30 +3036,66 @@
                                     <option value="anulado">Anulado</option>
                                 </select>
                             </div>
-                            <div style="overflow-x:auto;"><table class="table" id="remitos-table"><thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Ítems</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+                            <div style="overflow-x:auto;">
+                                <table class="table" id="remitos-table">
+                                    <thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Ítems</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
+
+                        <!-- Modal Remito -->
                         <div class="modal" id="remito-modal">
                             <div class="modal-content" style="max-width:750px;">
-                                <div class="modal-header"><h3 id="remito-modal-title">Nuevo Remito</h3><button onclick="closeModal('remito-modal')" class="modal-close">✕</button></div>
+                                <div class="modal-header">
+                                    <h3 id="remito-modal-title">Nuevo Remito</h3>
+                                    <button onclick="closeModal('remito-modal')" class="modal-close">✕</button>
+                                </div>
                                 <div class="modal-body">
                                     <div class="grid-2">
-                                        <div class="form-group"><label>Cliente *</label><select id="rem-cliente"></select></div>
-                                        <div class="form-group"><label>Fecha</label><input type="date" id="rem-fecha"></div>
-                                        <div class="form-group"><label>Dirección de entrega</label><input type="text" id="rem-direccion" placeholder="Dirección destino"></div>
-                                        <div class="form-group"><label>Estado</label><select id="rem-estado"><option value="pendiente">Pendiente</option><option value="entregado">Entregado</option></select></div>
+                                        <div class="form-group">
+                                            <label>Cliente *</label>
+                                            <select id="rem-cliente"></select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Fecha</label>
+                                            <input type="date" id="rem-fecha">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Dirección de entrega</label>
+                                            <input type="text" id="rem-direccion" placeholder="Dirección destino">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Estado</label>
+                                            <select id="rem-estado">
+                                                <option value="pendiente">Pendiente</option>
+                                                <option value="entregado">Entregado</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="form-group"><label>Observaciones</label><textarea id="rem-observaciones" rows="2" style="width:100%;padding:8px;border:1px solid var(--gray-300);border-radius:8px;"></textarea></div>
-                                    <h4 style="margin:16px 0 8px;">Ítems</h4>
+                                    <div class="form-group">
+                                        <label>Observaciones / Referencia</label>
+                                        <textarea id="rem-observaciones" rows="2" style="width:100%;padding:8px;border:1px solid var(--gray-300);border-radius:8px;"></textarea>
+                                    </div>
+                                    <h4 style="margin:16px 0 8px;">Ítems del Remito</h4>
                                     <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
                                         <select id="rem-item-producto" style="flex:2;min-width:160px;" onchange="autocompletarPrecioRemito()"></select>
                                         <input type="number" id="rem-item-cantidad" placeholder="Cant." min="1" value="1" style="width:80px;">
                                         <input type="number" id="rem-item-precio" placeholder="Precio unit." style="flex:1;min-width:100px;">
                                         <button class="btn-primary" onclick="agregarItemRemito()"><i class="fas fa-plus"></i></button>
                                     </div>
-                                    <table class="table" id="rem-items-table"><thead><tr><th>Producto</th><th>Cant.</th><th>P.Unit.</th><th>Subtotal</th><th></th></tr></thead><tbody id="rem-items-body"></tbody></table>
-                                    <div style="text-align:right;margin-top:12px;font-weight:700;">Total: <span id="rem-total-display">$0</span></div>
+                                    <table class="table" id="rem-items-table">
+                                        <thead><tr><th>Producto</th><th>Cant.</th><th>Precio Unit.</th><th>Subtotal</th><th></th></tr></thead>
+                                        <tbody id="rem-items-body"></tbody>
+                                    </table>
+                                    <div style="text-align:right;margin-top:12px;font-size:1.1rem;font-weight:700;">
+                                        Total: <span id="rem-total-display">$0</span>
+                                    </div>
                                 </div>
-                                <div class="modal-footer"><button onclick="closeModal('remito-modal')" class="btn-secondary">Cancelar</button><button onclick="guardarRemito()" class="btn-primary">Guardar</button></div>
+                                <div class="modal-footer">
+                                    <button onclick="closeModal('remito-modal')" class="btn-secondary">Cancelar</button>
+                                    <button onclick="guardarRemito()" class="btn-primary">Guardar Remito</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3239,6 +3413,237 @@
                         </div>
                     </div>
                 </div>
+
+                    <!-- COCKPIT CLÍNICO PAGE -->
+                    <div id="cockpit-clinica" class="page">
+                        <p style="color:var(--gray-500);font-size:13px;margin-bottom:16px;">Sistema clínico con métricas en tiempo real y recomendaciones operativas.</p>
+                        <div class="clinic-kpi-grid" id="cockpit-kpi-grid">
+                            <div class="clinic-kpi-card teal">
+                                <div class="kpi-label">Ocupación</div>
+                                <div class="kpi-value" id="ck-ocupacion">—</div>
+                                <div class="kpi-sub">turnos de hoy cubiertos</div>
+                                <div class="kpi-delta" id="ck-ocupacion-delta"></div>
+                            </div>
+                            <div class="clinic-kpi-card">
+                                <div class="kpi-label">Facturación MTD</div>
+                                <div class="kpi-value" id="ck-facturacion">$0</div>
+                                <div class="kpi-sub">facturación estimada</div>
+                            </div>
+                            <div class="clinic-kpi-card">
+                                <div class="kpi-label">No-Shows</div>
+                                <div class="kpi-value" id="ck-noshows">0</div>
+                                <div class="kpi-sub">riesgo en 24h</div>
+                            </div>
+                            <div class="clinic-kpi-card">
+                                <div class="kpi-label">Tareas SLA</div>
+                                <div class="kpi-value" id="ck-sla">—</div>
+                                <div class="kpi-sub">resueltas en tiempo</div>
+                            </div>
+                        </div>
+                        <div class="clinic-two-col">
+                            <div class="op-card">
+                                <div class="kpi-label">Progreso Operativo</div>
+                                <div class="op-big" id="ck-op-pct">75%</div>
+                                <div class="op-sub">Eficiencia operativa semanal</div>
+                                <div class="op-row"><span>Confirmaciones automáticas</span><span class="op-badge green" id="ck-conf">92%</span></div>
+                                <div class="op-row"><span>Ocupación de agenda</span><span class="op-badge blue" id="ck-agenda-ocu">81%</span></div>
+                                <div class="op-row"><span>Riesgo de fuga</span><span class="op-badge yellow">Moderado</span></div>
+                            </div>
+                            <div class="clinic-actions-panel">
+                                <h3>✦ Siguientes mejores acciones</h3>
+                                <p>Prioridad por impacto en ingresos y no-show.</p>
+                                <div class="clinic-action-item">
+                                    <h4>Confirmar citas de mañana</h4>
+                                    <p id="ck-pendientes-conf">Pacientes pendientes de respuesta</p>
+                                    <button class="clinic-action-btn" onclick="showPage('citas')">→ Ver agenda</button>
+                                </div>
+                                <div class="clinic-action-item">
+                                    <h4>Seguimiento de presupuestos +48h</h4>
+                                    <p id="ck-presup-follow">Presupuestos en estado enviado</p>
+                                    <button class="clinic-action-btn" onclick="showPage('presupuestos-clinica')">→ Ver presupuestos</button>
+                                </div>
+                                <div class="clinic-action-item">
+                                    <h4>Tareas vencidas</h4>
+                                    <p id="ck-tareas-venc">Tareas pendientes de hoy</p>
+                                    <button class="clinic-action-btn" onclick="showPage('tareas-clinica')">→ Ver tareas</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PACIENTES 360 PAGE -->
+                    <div id="pacientes360" class="page">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Vista 360 con búsqueda inteligente, estado y continuidad del tratamiento.</p>
+                            <button class="btn-primary" onclick="openModal('cliente-modal')"><i class="fas fa-plus"></i> Nuevo paciente</button>
+                        </div>
+                        <div class="search-bar" style="margin-bottom:16px;gap:10px;">
+                            <input type="text" id="p360-search" placeholder="Buscar por nombre, teléfono o correo..." oninput="renderPacientes360()" style="flex:1;">
+                            <select id="p360-state-filter" onchange="renderPacientes360()" style="min-width:160px;">
+                                <option value="">Estado: todos</option>
+                                <option value="activo">Activo</option>
+                                <option value="tratamiento">En tratamiento</option>
+                                <option value="seguimiento">Seguimiento</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="p360-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Teléfono</th>
+                                        <th>Última visita</th>
+                                        <th>Próxima cita</th>
+                                        <th>Estado</th>
+                                        <th>Etiquetas</th>
+                                        <th>Siguiente acción</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="p360-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PRESUPUESTOS CLÍNICA PAGE -->
+                    <div id="presupuestos-clinica" class="page">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Planes de tratamiento con trazabilidad, envío y seguimiento.</p>
+                            <button class="btn-primary" onclick="nuevoPresupuestoClinica()"><i class="fas fa-plus"></i> Nuevo presupuesto</button>
+                        </div>
+                        <div class="search-bar" style="margin-bottom:16px;gap:10px;">
+                            <input type="text" id="pq-search" placeholder="Buscar por paciente o número..." oninput="renderPresupuestosClinica()" style="flex:1;">
+                            <select id="pq-state-filter" onchange="renderPresupuestosClinica()" style="min-width:160px;">
+                                <option value="">Todos los estados</option>
+                                <option value="borrador">Borrador</option>
+                                <option value="enviado">Enviado</option>
+                                <option value="visto">Visto</option>
+                                <option value="confirmado">Confirmado</option>
+                                <option value="vencido">Vencido</option>
+                            </select>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 280px;gap:16px;">
+                            <div id="pq-list"></div>
+                            <div class="clinic-actions-panel">
+                                <h3>✦ Siguientes acciones</h3>
+                                <p>Seguimiento manual asistido para cerrar más tratamientos.</p>
+                                <div class="clinic-action-item">
+                                    <h4>Enviados +48h sin vista</h4>
+                                    <p id="pq-sin-vista">casos pendientes</p>
+                                    <button class="clinic-action-btn" onclick="document.getElementById('pq-state-filter').value='enviado';renderPresupuestosClinica()">→ Filtrar enviados</button>
+                                </div>
+                                <div class="clinic-action-item">
+                                    <h4>Vistos +72h sin aceptación</h4>
+                                    <p id="pq-sin-acept">casos pendientes</p>
+                                    <button class="clinic-action-btn" onclick="document.getElementById('pq-state-filter').value='visto';renderPresupuestosClinica()">→ Filtrar vistos</button>
+                                </div>
+                                <div class="clinic-action-item">
+                                    <h4>Confirmados este mes</h4>
+                                    <p id="pq-confirmados">—</p>
+                                    <button class="clinic-action-btn" onclick="document.getElementById('pq-state-filter').value='confirmado';renderPresupuestosClinica()">→ Ver confirmados</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMBUDO CLÍNICO PAGE -->
+                    <div id="embudo-clinica" class="page">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Kanban del embudo clínico. Arrastrá los casos entre etapas.</p>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn-secondary" onclick="nuevaEtapaKanban()"><i class="fas fa-plus"></i> Nueva etapa</button>
+                                <button class="btn-primary" onclick="nuevoCasoKanban()"><i class="fas fa-plus"></i> Nuevo caso</button>
+                            </div>
+                        </div>
+                        <div class="kanban-board" id="kanban-board"></div>
+                    </div>
+
+                    <!-- TAREAS CLÍNICA PAGE -->
+                    <div id="tareas-clinica" class="page">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+                            <div>
+                                <h2 style="font-size:20px;font-weight:700;margin-bottom:2px;">Tareas y Equipo</h2>
+                                <p style="color:var(--gray-500);font-size:13px;margin:0;">Asignación, recordatorios, plantillas y vista de hoy.</p>
+                            </div>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn-secondary" onclick="nuevaPlantillaTarea()"><i class="fas fa-layer-group"></i> Nueva plantilla</button>
+                                <button class="btn-primary" onclick="nuevaTareaClinica()"><i class="fas fa-plus"></i> Nueva tarea</button>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 240px;gap:16px;">
+                            <div id="tareas-clinica-list"></div>
+                            <div>
+                                <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-500);margin-bottom:10px;">Plantillas de tareas</p>
+                                <div id="task-templates-list"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COMUNICACIONES CLÍNICA PAGE -->
+                    <div id="comunicaciones-clinica" class="page">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                            <div>
+                                <h2 style="font-size:20px;font-weight:700;margin-bottom:2px;">Centro de mensajes</h2>
+                                <p style="color:var(--gray-500);font-size:13px;margin:0;">Historial centralizado de WhatsApp/SMS/correo, plantillas y redacción asistida por IA.</p>
+                            </div>
+                            <button class="btn-primary" onclick="nuevaPlantillaComm()"><i class="fas fa-plus"></i> Nueva plantilla</button>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;">
+                            <div>
+                                <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-500);margin-bottom:10px;">Plantillas</p>
+                                <div class="comm-template">
+                                    <div class="ct-left"><h4>Recordatorio</h4><p>Hola [paciente], te recordamos tu cita.</p></div>
+                                    <span class="comm-channel wa">whatsapp</span>
+                                </div>
+                                <div class="comm-template">
+                                    <div class="ct-left"><h4>Seguimiento</h4><p>Hola [paciente], revisamos tu presupuesto.</p></div>
+                                    <span class="comm-channel email">email</span>
+                                </div>
+                                <div class="comm-template">
+                                    <div class="ct-left"><h4>Reprogramación</h4><p>Hola [paciente], te proponemos nueva fecha: [fecha] [hora].</p></div>
+                                    <span class="comm-channel wa">whatsapp</span>
+                                </div>
+                                <div class="comm-template">
+                                    <div class="ct-left"><h4>No-show amable</h4><p>No pudimos verte hoy. ¿Querés reagendar?</p></div>
+                                    <span class="comm-channel sms">sms</span>
+                                </div>
+                                <div class="comm-template">
+                                    <div class="ct-left"><h4>Post tratamiento</h4><p>Gracias [paciente], aquí tus recomendaciones.</p></div>
+                                    <span class="comm-channel email">email</span>
+                                </div>
+                                <div id="comm-custom-templates"></div>
+                            </div>
+                            <div class="comm-draft-panel">
+                                <h3>✦ Redacción asistida por IA</h3>
+                                <div class="form-group">
+                                    <label style="font-size:12px;font-weight:600;">Paciente</label>
+                                    <input type="text" id="comm-paciente" placeholder="Nombre del paciente" style="padding:8px 12px;border-radius:8px;border:1px solid var(--gray-200);width:100%;font-size:13px;">
+                                </div>
+                                <div class="form-group" style="margin-top:10px;">
+                                    <label style="font-size:12px;font-weight:600;">Contexto</label>
+                                    <input type="text" id="comm-contexto" placeholder="ej: cita mañana 10:00" style="padding:8px 12px;border-radius:8px;border:1px solid var(--gray-200);width:100%;font-size:13px;">
+                                </div>
+                                <div style="display:flex;gap:8px;margin-top:10px;">
+                                    <select id="comm-tipo" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--gray-200);font-size:13px;">
+                                        <option>Confirmación</option>
+                                        <option>Recordatorio</option>
+                                        <option>Seguimiento</option>
+                                        <option>No-show</option>
+                                    </select>
+                                    <select id="comm-tono" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--gray-200);font-size:13px;">
+                                        <option>Profesional</option>
+                                        <option>Amigable</option>
+                                        <option>Formal</option>
+                                    </select>
+                                </div>
+                                <button class="btn-primary" style="width:100%;margin-top:12px;" onclick="generarBorradorComm()">✦ Generar borrador</button>
+                                <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-500);margin-top:14px;margin-bottom:4px;">Vista previa</p>
+                                <div class="comm-preview" id="comm-preview">Sin contenido</div>
+                            </div>
+                        </div>
+                    </div>
+
             </main>
         </div>
     </div>
@@ -3560,7 +3965,7 @@
                 categories: ["Consulta", "Laboratorio", "Medicamentos", "Insumos"],
                 customClientFields: [{ name: "obra_social", label: "Obra Social" }, { name: "num_afiliado", label: "Número Afiliado" }],
                 rubro: 'medicina', rubroName: 'Medicina',
-                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','gastos','empleados','nominas','citas','proveedores','config'],
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','gastos','empleados','nominas','citas','cockpit-clinica','pacientes360','presupuestos-clinica','embudo-clinica','tareas-clinica','comunicaciones-clinica','proveedores','config'],
                 dashboardStats: ['ventas','clientes','citas','gastos'],
                 dashboardLabels: { ventas: 'Consultas (7d)', clientes: 'Pacientes', productos: 'Insumos' }
             },
@@ -3592,7 +3997,7 @@
                 categories: ["Corte", "Color", "Tratamiento Facial", "Manicura", "Depilación", "Masajes"],
                 customClientFields: [{ name: "tipo_piel", label: "Tipo de Piel" }, { name: "alergias", label: "Alergias" }],
                 rubro: 'belleza', rubroName: 'Belleza / Estética',
-                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','citas','proveedores','config'],
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','citas','cockpit-clinica','pacientes360','presupuestos-clinica','embudo-clinica','tareas-clinica','comunicaciones-clinica','proveedores','config'],
                 dashboardStats: ['ventas','clientes','citas','gastos'],
                 dashboardLabels: { ventas: 'Ingresos (7d)', clientes: 'Clientes activos', productos: 'Servicios' }
             },
@@ -3647,7 +4052,7 @@
                 ],
                 rubro: 'odontologia', rubroName: 'Odontología',
                 esOdontologia: true,
-                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','gastos','empleados','nominas','citas','config'],
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','gastos','empleados','nominas','citas','config','cockpit-clinica','pacientes360','presupuestos-clinica','embudo-clinica','tareas-clinica','comunicaciones-clinica'],
                 dashboardStats: ['ventas','clientes','citas','gastos'],
                 dashboardLabels: { ventas: 'Consultas (7d)', clientes: 'Pacientes', productos: 'Insumos' }
             }
@@ -4601,15 +5006,25 @@
             const visibles = cfg.modulosVisibles || null;
             // Si no tiene modulosVisibles definido, mostrar todo
             if (!visibles) return;
+
+            // Mostrar/ocultar grupo clínica ANTES del forEach de botones
+            const clinicaRubros = ['medicina', 'belleza', 'odontologia'];
+            const isClinica = clinicaRubros.includes(cfg.rubro);
+            document.querySelectorAll('.menu-clinica').forEach(el => {
+                el.style.display = isClinica ? '' : 'none';
+            });
+
+            // Fix: usar [\w-]+ para soportar IDs con guiones (cockpit-clinica, etc.)
+            const siempreVisibles = ['dashboard','config','usuarios','mercadopago','whatsapp','ia'];
             const allButtons = document.querySelectorAll('.sidebar-menu button[onclick*="showPage"]');
             allButtons.forEach(btn => {
-                const match = btn.getAttribute('onclick').match(/showPage\('(\w+)'\)/);
+                const match = btn.getAttribute('onclick').match(/showPage\('([\w-]+)'\)/);
                 if (!match) return;
                 const page = match[1];
                 const li = btn.closest('li');
                 if (!li) return;
-                // Siempre visibles: dashboard, config, usuarios, mercadopago, whatsapp, ia
-                const siempreVisibles = ['dashboard','config','usuarios','mercadopago','whatsapp','ia'];
+                // Los items .menu-clinica ya fueron controlados arriba; no pisar con el forEach
+                if (li.classList.contains('menu-clinica')) return;
                 if (siempreVisibles.includes(page)) { li.style.display = ''; return; }
                 li.style.display = visibles.includes(page) ? '' : 'none';
             });
@@ -4670,6 +5085,11 @@
             }
             updatePageTitle(page);
             if (page === 'citas') renderCitas();
+            if (page === 'cockpit-clinica') renderCockpitClinica();
+            if (page === 'pacientes360') renderPacientes360();
+            if (page === 'presupuestos-clinica') renderPresupuestosClinica();
+            if (page === 'embudo-clinica') renderEmbudoClinica();
+            if (page === 'tareas-clinica') renderTareasClinica();
             if (page === 'config') { cargarConfiguracion(); renderRubroSelector(); }
             if (page === 'clientes') { try { actualizarPanelOdontologico(); actualizarPanelInmobiliario(); } catch(e){} }
             if (page === 'presupuestos') { try { renderPresupuestos(); } catch(e){} }
@@ -4690,6 +5110,12 @@
                 nominas: 'Nóminas',
                 sucursales: 'Sucursales',
                 citas: 'Citas / Agenda',
+                'cockpit-clinica': 'Cockpit Clínico',
+                'pacientes360': 'Pacientes 360',
+                'presupuestos-clinica': 'Presupuestos',
+                'embudo-clinica': 'Embudo Clínico',
+                'tareas-clinica': 'Tareas',
+                'comunicaciones-clinica': 'Comunicaciones',
                 proveedores: 'Proveedores',
                 presupuestos: 'Presupuestos',
                 remitos: 'Remitos / Albaranes',
@@ -5771,6 +6197,7 @@
                 alert('No hay empleados para generar nómina');
                 return;
             }
+            // Verificar duplicados: no generar si ya existe nómina para este mes
             const yaExiste = db.nominas.some(n => n.mes === mesActual);
             if (yaExiste) {
                 if (!confirm(`Ya existe una nómina para ${mesActual}. ¿Generar igualmente?`)) return;
@@ -6047,18 +6474,15 @@
 
         // MERCADOPAGO
         function conectarMercadoPago() {
-            const token = document.getElementById('mp-token').value.trim();
-            if (!token) { alert('Ingresa tu Access Token de MercadoPago'); return; }
-            if (!token.startsWith('APP_USR-') && !token.startsWith('TEST-')) {
-                alert('El token no parece válido. Debe comenzar con APP_USR- o TEST-'); return;
+            const token = document.getElementById('mp-token').value;
+            if (!token) {
+                alert('Ingresa tu token de MercadoPago');
+                return;
             }
             db.mercadopago.connected = true;
             db.mercadopago.token = token;
-            if (!db.account) db.account = {};
-            db.account.mpAccessToken = token;
             saveDB();
-            document.getElementById('mp-token').value = '';
-            alert('✅ MercadoPago conectado. Token guardado de forma segura en tu sesión.');
+            alert('MercadoPago conectado exitosamente');
         }
 
         function generarEnlaceMercadoPago() {
@@ -6080,26 +6504,38 @@
             alert(`QR generado para: ${formatCurrency(monto)}`);
         }
 
-        // ─── UTILIDADES DE SEGURIDAD ─────────────────────────────────────────────
+        // ─── UTILIDAD DE SEGURIDAD ────────────────────────────────────────────────
         function escapeHTML(str) {
             if (str === null || str === undefined) return '';
-            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-        }
-        function safeMaxId(arr) {
-            if (!Array.isArray(arr) || arr.length === 0) return 1;
-            return Math.max(...arr.map(i => Number(i.id) || 0)) + 1;
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
-        // ─── PRESUPUESTOS ─────────────────────────────────────────────────────────
+        function safeMaxId(array) {
+            if (!Array.isArray(array) || array.length === 0) return 1;
+            return Math.max(...array.map(item => Number(item.id) || 0)) + 1;
+        }
+
+        // ─── PRESUPUESTOS ──────────────────────────────────────────────────────────
         let _presItemsTemp = [];
+
         function openPresupuestoModal(id = null) {
             _presItemsTemp = [];
             const today = new Date().toISOString().split('T')[0];
-            const vence = new Date(Date.now() + 15*86400000).toISOString().split('T')[0];
-            document.getElementById('pres-cliente').innerHTML = db.clientes.map(c => `<option value="${escapeHTML(String(c.id))}">${escapeHTML(c.nombre)}</option>`).join('');
-            document.getElementById('pres-item-producto').innerHTML = db.productos.map(p => `<option value="${escapeHTML(String(p.id))}">${escapeHTML(p.nombre)}</option>`).join('');
+            const vence = new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0];
+
+            document.getElementById('pres-cliente').innerHTML =
+                db.clientes.map(c => `<option value="${escapeHTML(String(c.id))}">${escapeHTML(c.nombre)}</option>`).join('');
+            document.getElementById('pres-item-producto').innerHTML =
+                db.productos.map(p => `<option value="${escapeHTML(String(p.id))}">${escapeHTML(p.nombre)}</option>`).join('');
+
             if (id) {
-                const p = db.presupuestos.find(x => x.id === id); if (!p) return;
+                const p = db.presupuestos.find(x => x.id === id);
+                if (!p) return;
                 document.getElementById('presupuesto-modal-title').textContent = 'Editar Presupuesto';
                 document.getElementById('pres-cliente').value = p.clienteId;
                 document.getElementById('pres-fecha').value = p.fecha;
@@ -6116,90 +6552,148 @@
                 document.getElementById('pres-observaciones').value = '';
                 delete document.getElementById('presupuesto-modal').dataset.id;
             }
-            renderPresItemsTemp(); openModal('presupuesto-modal');
+            renderPresItemsTemp();
+            openModal('presupuesto-modal');
         }
+
         function autocompletarPrecioPresupuesto() {
-            const p = db.productos.find(p => p.id === parseInt(document.getElementById('pres-item-producto').value));
-            if (p) document.getElementById('pres-item-precio').value = p.precio || 0;
+            const prodId = parseInt(document.getElementById('pres-item-producto').value);
+            const prod = db.productos.find(p => p.id === prodId);
+            if (prod) document.getElementById('pres-item-precio').value = prod.precio || 0;
         }
+
         function agregarItemPresupuesto() {
             const prodId = parseInt(document.getElementById('pres-item-producto').value);
             const cant = parseFloat(document.getElementById('pres-item-cantidad').value) || 1;
             const precio = parseFloat(document.getElementById('pres-item-precio').value) || 0;
             const prod = db.productos.find(p => p.id === prodId);
             if (!prod) { alert('Seleccioná un producto'); return; }
-            _presItemsTemp.push({ productoId: prodId, nombre: prod.nombre, cantidad: cant, precioUnit: precio, subtotal: cant*precio });
+            _presItemsTemp.push({ productoId: prodId, nombre: prod.nombre, cantidad: cant, precioUnit: precio, subtotal: cant * precio });
             renderPresItemsTemp();
         }
+
         function renderPresItemsTemp() {
-            let html = '', total = 0;
+            let html = '';
+            let total = 0;
             _presItemsTemp.forEach((item, idx) => {
                 total += item.subtotal;
-                html += `<tr><td>${escapeHTML(item.nombre)}</td><td>${item.cantidad}</td><td>${formatCurrency(item.precioUnit)}</td><td>${formatCurrency(item.subtotal)}</td><td><button class="btn-sm btn-danger" onclick="_presItemsTemp.splice(${idx},1);renderPresItemsTemp()">✕</button></td></tr>`;
+                html += `<tr>
+                    <td>${escapeHTML(item.nombre)}</td>
+                    <td>${item.cantidad}</td>
+                    <td>${formatCurrency(item.precioUnit)}</td>
+                    <td>${formatCurrency(item.subtotal)}</td>
+                    <td><button class="btn-sm btn-danger" onclick="_presItemsTemp.splice(${idx},1);renderPresItemsTemp()">✕</button></td>
+                </tr>`;
             });
-            const tb = document.getElementById('pres-items-body');
-            if (tb) tb.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--gray-500);">Sin ítems</td></tr>';
-            const te = document.getElementById('pres-total-display');
-            if (te) te.textContent = formatCurrency(total);
+            const tbody = document.getElementById('pres-items-body');
+            if (tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--gray-500);">Sin ítems aún</td></tr>';
+            const totalEl = document.getElementById('pres-total-display');
+            if (totalEl) totalEl.textContent = formatCurrency(total);
         }
+
         function guardarPresupuesto() {
             const clienteId = parseInt(document.getElementById('pres-cliente').value);
             const fecha = document.getElementById('pres-fecha').value;
             const vencimiento = document.getElementById('pres-vencimiento').value;
             const estado = document.getElementById('pres-estado').value;
             const observaciones = document.getElementById('pres-observaciones').value;
+
             if (!clienteId || !fecha) { alert('Completá cliente y fecha'); return; }
             if (_presItemsTemp.length === 0) { alert('Agregá al menos un ítem'); return; }
-            const total = _presItemsTemp.reduce((s,i) => s+i.subtotal, 0);
+
+            const total = _presItemsTemp.reduce((s, i) => s + i.subtotal, 0);
             const id = document.getElementById('presupuesto-modal').dataset.id;
             const data = { clienteId, fecha, vencimiento, estado, observaciones, items: _presItemsTemp, total };
+
             if (id) {
                 const idx = db.presupuestos.findIndex(p => p.id === parseInt(id));
                 if (idx >= 0) db.presupuestos[idx] = { ...db.presupuestos[idx], ...data };
             } else {
                 data.id = safeMaxId(db.presupuestos);
-                data.numero = 'PRES-' + String(data.id).padStart(4,'0');
+                data.numero = 'PRES-' + String(data.id).padStart(4, '0');
                 db.presupuestos.push(data);
             }
-            saveDB(); closeModal('presupuesto-modal'); renderPresupuestos();
+            saveDB();
+            closeModal('presupuesto-modal');
+            renderPresupuestos();
         }
+
         function renderPresupuestos() {
             const search = (document.getElementById('presupuestos-search')?.value || '').toLowerCase();
-            const ef = document.getElementById('presupuestos-estado-filter')?.value || '';
-            const bc = { borrador:'secondary', enviado:'primary', aprobado:'success', rechazado:'danger', vencido:'warning' };
-            let html = '';
-            db.presupuestos.filter(p => {
-                const c = db.clientes.find(x => x.id === p.clienteId);
-                return (!search || (c?.nombre||'').toLowerCase().includes(search) || (p.numero||'').toLowerCase().includes(search)) && (!ef || p.estado === ef);
-            }).sort((a,b) => b.id-a.id).forEach(p => {
-                const c = db.clientes.find(x => x.id === p.clienteId);
-                html += `<tr><td>${escapeHTML(p.numero||String(p.id))}</td><td>${escapeHTML(c?.nombre||'Desconocido')}</td><td>${escapeHTML(p.fecha)}</td><td>${escapeHTML(p.vencimiento||'-')}</td><td>${(p.items||[]).length} ítem(s)</td><td>${formatCurrency(p.total)}</td><td><span class="badge badge-${bc[p.estado]||'secondary'}">${escapeHTML(p.estado)}</span></td><td><button class="btn-sm" onclick="openPresupuestoModal(${p.id})">Editar</button> <button class="btn-sm" onclick="convertirPresupuestoAVenta(${p.id})">→Venta</button> <button class="btn-sm btn-danger" onclick="eliminarPresupuesto(${p.id})">Elim.</button></td></tr>`;
+            const estadoFilter = document.getElementById('presupuestos-estado-filter')?.value || '';
+            let filtered = db.presupuestos.filter(p => {
+                const cliente = db.clientes.find(c => c.id === p.clienteId);
+                const matchSearch = !search || (cliente?.nombre || '').toLowerCase().includes(search) || (p.numero || '').toLowerCase().includes(search);
+                const matchEstado = !estadoFilter || p.estado === estadoFilter;
+                return matchSearch && matchEstado;
             });
-            const tb = document.querySelector('#presupuestos-table tbody');
-            if (tb) tb.innerHTML = html || '<tr><td colspan="8" style="text-align:center;">Sin presupuestos</td></tr>';
+            const badgeColors = { borrador:'gray', enviado:'blue', aprobado:'success', rechazado:'danger', vencido:'warning' };
+            let html = '';
+            filtered.sort((a,b) => b.id - a.id).forEach(p => {
+                const cliente = db.clientes.find(c => c.id === p.clienteId);
+                const color = badgeColors[p.estado] || 'gray';
+                html += `<tr>
+                    <td>${escapeHTML(p.numero || String(p.id))}</td>
+                    <td>${escapeHTML(cliente?.nombre || 'Desconocido')}</td>
+                    <td>${escapeHTML(p.fecha)}</td>
+                    <td>${escapeHTML(p.vencimiento || '-')}</td>
+                    <td>${(p.items || []).length} ítem(s)</td>
+                    <td>${formatCurrency(p.total)}</td>
+                    <td><span class="badge badge-${color}">${escapeHTML(p.estado)}</span></td>
+                    <td>
+                        <button class="btn-sm" onclick="openPresupuestoModal(${p.id})">Editar</button>
+                        <button class="btn-sm" onclick="convertirPresupuestoAVenta(${p.id})">→ Venta</button>
+                        <button class="btn-sm btn-danger" onclick="eliminarPresupuesto(${p.id})">Eliminar</button>
+                    </td>
+                </tr>`;
+            });
+            const tbody = document.querySelector('#presupuestos-table tbody');
+            if (tbody) tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center;">Sin presupuestos</td></tr>';
         }
+
         function eliminarPresupuesto(id) {
-            if (confirm('¿Eliminar este presupuesto?')) { db.presupuestos = db.presupuestos.filter(p => p.id !== id); saveDB(); renderPresupuestos(); }
+            if (confirm('¿Eliminar este presupuesto?')) {
+                db.presupuestos = db.presupuestos.filter(p => p.id !== id);
+                saveDB();
+                renderPresupuestos();
+            }
         }
+
         function convertirPresupuestoAVenta(id) {
-            const pres = db.presupuestos.find(p => p.id === id); if (!pres) return;
+            const pres = db.presupuestos.find(p => p.id === id);
+            if (!pres) return;
             if (!confirm('¿Convertir este presupuesto en una venta?')) return;
-            const venta = { id: safeMaxId(db.ventas), fecha: new Date().toISOString().split('T')[0], clienteId: pres.clienteId,
-                productos: pres.items.map(i=>({productoId:i.productoId,nombre:i.nombre,cantidad:i.cantidad,precio:i.precioUnit})),
-                total: pres.total, estado: 'completada', origen: 'presupuesto-' + pres.numero };
-            db.ventas.push(venta); pres.estado = 'aprobado'; saveDB(); renderPresupuestos();
+            const venta = {
+                id: safeMaxId(db.ventas),
+                fecha: new Date().toISOString().split('T')[0],
+                clienteId: pres.clienteId,
+                productos: pres.items.map(i => ({ productoId: i.productoId, nombre: i.nombre, cantidad: i.cantidad, precio: i.precioUnit })),
+                total: pres.total,
+                estado: 'completada',
+                origen: 'presupuesto-' + pres.numero
+            };
+            db.ventas.push(venta);
+            pres.estado = 'aprobado';
+            saveDB();
+            renderPresupuestos();
             alert('Presupuesto convertido a venta exitosamente.');
         }
 
-        // ─── REMITOS ─────────────────────────────────────────────────────────────
+        // ─── REMITOS ──────────────────────────────────────────────────────────────
         let _remItemsTemp = [];
+
         function openRemitoModal(id = null) {
             _remItemsTemp = [];
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('rem-cliente').innerHTML = db.clientes.map(c => `<option value="${escapeHTML(String(c.id))}">${escapeHTML(c.nombre)}</option>`).join('');
-            document.getElementById('rem-item-producto').innerHTML = db.productos.map(p => `<option value="${escapeHTML(String(p.id))}">${escapeHTML(p.nombre)}</option>`).join('');
+
+            document.getElementById('rem-cliente').innerHTML =
+                db.clientes.map(c => `<option value="${escapeHTML(String(c.id))}">${escapeHTML(c.nombre)}</option>`).join('');
+            document.getElementById('rem-item-producto').innerHTML =
+                db.productos.map(p => `<option value="${escapeHTML(String(p.id))}">${escapeHTML(p.nombre)}</option>`).join('');
+
             if (id) {
-                const r = db.remitos.find(x => x.id === id); if (!r) return;
+                const r = db.remitos.find(x => x.id === id);
+                if (!r) return;
                 document.getElementById('remito-modal-title').textContent = 'Editar Remito';
                 document.getElementById('rem-cliente').value = r.clienteId;
                 document.getElementById('rem-fecha').value = r.fecha;
@@ -6216,75 +6710,118 @@
                 document.getElementById('rem-observaciones').value = '';
                 delete document.getElementById('remito-modal').dataset.id;
             }
-            renderRemItemsTemp(); openModal('remito-modal');
+            renderRemItemsTemp();
+            openModal('remito-modal');
         }
+
         function autocompletarPrecioRemito() {
-            const p = db.productos.find(p => p.id === parseInt(document.getElementById('rem-item-producto').value));
-            if (p) document.getElementById('rem-item-precio').value = p.precio || 0;
+            const prodId = parseInt(document.getElementById('rem-item-producto').value);
+            const prod = db.productos.find(p => p.id === prodId);
+            if (prod) document.getElementById('rem-item-precio').value = prod.precio || 0;
         }
+
         function agregarItemRemito() {
             const prodId = parseInt(document.getElementById('rem-item-producto').value);
             const cant = parseFloat(document.getElementById('rem-item-cantidad').value) || 1;
             const precio = parseFloat(document.getElementById('rem-item-precio').value) || 0;
             const prod = db.productos.find(p => p.id === prodId);
             if (!prod) { alert('Seleccioná un producto'); return; }
-            _remItemsTemp.push({ productoId: prodId, nombre: prod.nombre, cantidad: cant, precioUnit: precio, subtotal: cant*precio });
+            _remItemsTemp.push({ productoId: prodId, nombre: prod.nombre, cantidad: cant, precioUnit: precio, subtotal: cant * precio });
             renderRemItemsTemp();
         }
+
         function renderRemItemsTemp() {
-            let html = '', total = 0;
+            let html = '';
+            let total = 0;
             _remItemsTemp.forEach((item, idx) => {
                 total += item.subtotal;
-                html += `<tr><td>${escapeHTML(item.nombre)}</td><td>${item.cantidad}</td><td>${formatCurrency(item.precioUnit)}</td><td>${formatCurrency(item.subtotal)}</td><td><button class="btn-sm btn-danger" onclick="_remItemsTemp.splice(${idx},1);renderRemItemsTemp()">✕</button></td></tr>`;
+                html += `<tr>
+                    <td>${escapeHTML(item.nombre)}</td>
+                    <td>${item.cantidad}</td>
+                    <td>${formatCurrency(item.precioUnit)}</td>
+                    <td>${formatCurrency(item.subtotal)}</td>
+                    <td><button class="btn-sm btn-danger" onclick="_remItemsTemp.splice(${idx},1);renderRemItemsTemp()">✕</button></td>
+                </tr>`;
             });
-            const tb = document.getElementById('rem-items-body');
-            if (tb) tb.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--gray-500);">Sin ítems</td></tr>';
-            const te = document.getElementById('rem-total-display');
-            if (te) te.textContent = formatCurrency(total);
+            const tbody = document.getElementById('rem-items-body');
+            if (tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--gray-500);">Sin ítems aún</td></tr>';
+            const totalEl = document.getElementById('rem-total-display');
+            if (totalEl) totalEl.textContent = formatCurrency(total);
         }
+
         function guardarRemito() {
             const clienteId = parseInt(document.getElementById('rem-cliente').value);
             const fecha = document.getElementById('rem-fecha').value;
             const direccion = document.getElementById('rem-direccion').value;
             const estado = document.getElementById('rem-estado').value;
             const observaciones = document.getElementById('rem-observaciones').value;
+
             if (!clienteId || !fecha) { alert('Completá cliente y fecha'); return; }
             if (_remItemsTemp.length === 0) { alert('Agregá al menos un ítem'); return; }
-            const total = _remItemsTemp.reduce((s,i) => s+i.subtotal, 0);
+
+            const total = _remItemsTemp.reduce((s, i) => s + i.subtotal, 0);
             const id = document.getElementById('remito-modal').dataset.id;
             const data = { clienteId, fecha, direccion, estado, observaciones, items: _remItemsTemp, total };
+
             if (id) {
                 const idx = db.remitos.findIndex(r => r.id === parseInt(id));
                 if (idx >= 0) db.remitos[idx] = { ...db.remitos[idx], ...data };
             } else {
                 data.id = safeMaxId(db.remitos);
-                data.numero = 'REM-' + String(data.id).padStart(4,'0');
+                data.numero = 'REM-' + String(data.id).padStart(4, '0');
                 db.remitos.push(data);
+                // Descontar stock
                 _remItemsTemp.forEach(item => {
                     const prod = db.productos.find(p => p.id === item.productoId);
-                    if (prod) prod.stock = Math.max(0, (prod.stock||0) - item.cantidad);
+                    if (prod) prod.stock = Math.max(0, (prod.stock || 0) - item.cantidad);
                 });
             }
-            saveDB(); closeModal('remito-modal'); renderRemitos();
+            saveDB();
+            closeModal('remito-modal');
+            renderRemitos();
         }
+
         function renderRemitos() {
             const search = (document.getElementById('remitos-search')?.value || '').toLowerCase();
-            const ef = document.getElementById('remitos-estado-filter')?.value || '';
-            const bc = { pendiente:'warning', entregado:'success', anulado:'danger' };
-            let html = '';
-            db.remitos.filter(r => {
-                const c = db.clientes.find(x => x.id === r.clienteId);
-                return (!search || (c?.nombre||'').toLowerCase().includes(search) || (r.numero||'').toLowerCase().includes(search)) && (!ef || r.estado === ef);
-            }).sort((a,b) => b.id-a.id).forEach(r => {
-                const c = db.clientes.find(x => x.id === r.clienteId);
-                html += `<tr><td>${escapeHTML(r.numero||String(r.id))}</td><td>${escapeHTML(c?.nombre||'Desconocido')}</td><td>${escapeHTML(r.fecha)}</td><td>${(r.items||[]).length} ítem(s)</td><td>${formatCurrency(r.total)}</td><td><span class="badge badge-${bc[r.estado]||'secondary'}">${escapeHTML(r.estado)}</span></td><td><button class="btn-sm" onclick="openRemitoModal(${r.id})">Ver/Editar</button> <button class="btn-sm btn-danger" onclick="eliminarRemito(${r.id})">Elim.</button></td></tr>`;
+            const estadoFilter = document.getElementById('remitos-estado-filter')?.value || '';
+            let filtered = db.remitos.filter(r => {
+                const cliente = db.clientes.find(c => c.id === r.clienteId);
+                const matchSearch = !search || (cliente?.nombre || '').toLowerCase().includes(search) || (r.numero || '').toLowerCase().includes(search);
+                const matchEstado = !estadoFilter || r.estado === estadoFilter;
+                return matchSearch && matchEstado;
             });
-            const tb = document.querySelector('#remitos-table tbody');
-            if (tb) tb.innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Sin remitos</td></tr>';
+            const badgeColors = { pendiente:'warning', entregado:'success', anulado:'danger' };
+            let html = '';
+            filtered.sort((a,b) => b.id - a.id).forEach(r => {
+                const cliente = db.clientes.find(c => c.id === r.clienteId);
+                const color = badgeColors[r.estado] || 'gray';
+                html += `<tr>
+                    <td>${escapeHTML(r.numero || String(r.id))}</td>
+                    <td>${escapeHTML(cliente?.nombre || 'Desconocido')}</td>
+                    <td>${escapeHTML(r.fecha)}</td>
+                    <td>${(r.items || []).length} ítem(s)</td>
+                    <td>${formatCurrency(r.total)}</td>
+                    <td><span class="badge badge-${color}">${escapeHTML(r.estado)}</span></td>
+                    <td>
+                        <button class="btn-sm" onclick="openRemitoModal(${r.id})">Ver/Editar</button>
+                        <button class="btn-sm btn-danger" onclick="eliminarRemito(${r.id})">Eliminar</button>
+                    </td>
+                </tr>`;
+            });
+            const tbody = document.querySelector('#remitos-table tbody');
+            if (tbody) tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Sin remitos</td></tr>';
         }
+
         function eliminarRemito(id) {
-            if (confirm('¿Eliminar este remito?')) { db.remitos = db.remitos.filter(r => r.id !== id); saveDB(); renderRemitos(); }
+            if (confirm('¿Eliminar este remito?')) {
+                db.remitos = db.remitos.filter(r => r.id !== id);
+                saveDB();
+                renderRemitos();
+            }
         }
+
+        // ─── HOOKS showPage para nuevos módulos ───────────────────────────────────
+        const _origShowPage = showPage;
 
         // IA ASSISTANT
         function enviarMensajeIA() {
@@ -8182,14 +8719,9 @@
                 }).catch(() => {});
             }
             try {
-                // Llamada directa a MercadoPago (token desde configuración, no hardcodeado)
-                const MP_ACCESS_TOKEN = db.mercadopago?.token || db.account?.mpAccessToken || '';
-                if (!MP_ACCESS_TOKEN) {
-                    const esp2 = document.getElementById('esperando-pago-modal');
-                    if (esp2) esp2.remove();
-                    alert('⚠️ Configurá tu Access Token en la sección MercadoPago antes de procesar pagos.');
-                    return;
-                }
+                // Llamada directa a MercadoPago para obtener init_point de forma síncrona
+                // El token se lee de la configuración de la cuenta (no hardcodeado en código)
+                const MP_ACCESS_TOKEN = db.mercadopago?.accessToken || db.account?.mpAccessToken || '';
                 const res = await fetch('https://api.mercadopago.com/checkout/preferences', {
                     method: 'POST',
                     headers: {
@@ -8276,6 +8808,398 @@
 
         // (pageRenderHooks integrados en showPage y showApp — ver funciones correspondientes)
 
-    </script>
+    
+        // ═══════════════════════════════════════════════════════════
+        // MÓDULOS CLÍNICA (ClinicFlow integration)
+        // ═══════════════════════════════════════════════════════════
+
+        function renderCockpitClinica() {
+            const clientes = Array.isArray(db.clientes) ? db.clientes : [];
+            const citas = Array.isArray(db.citas) ? db.citas : [];
+            const ventas = Array.isArray(db.ventas) ? db.ventas : [];
+            const tareas = Array.isArray(db.tareasClinica) ? db.tareasClinica : [];
+            const hoy = new Date().toISOString().slice(0,10);
+
+            // Ocupación: citas de hoy
+            const citasHoy = citas.filter(c => (c.fecha||'').slice(0,10) === hoy);
+            const confirmadas = citasHoy.filter(c => c.estado === 'confirmada' || c.estado === 'confirmado');
+            const ocupPct = citasHoy.length > 0 ? Math.round(confirmadas.length / citasHoy.length * 100) : 0;
+            const ckOcup = document.getElementById('ck-ocupacion');
+            if (ckOcup) ckOcup.textContent = ocupPct + '%';
+
+            // Facturación MTD
+            const mes = new Date().getMonth(); const anio = new Date().getFullYear();
+            const ventasMes = ventas.filter(v => { const d = new Date(v.fecha||v.date||0); return d.getMonth()===mes && d.getFullYear()===anio; });
+            const totalMes = ventasMes.reduce((a,v) => a + (parseFloat(v.total||v.monto||0)||0), 0);
+            const ckFact = document.getElementById('ck-facturacion');
+            if (ckFact) ckFact.textContent = '$' + totalMes.toLocaleString('es-AR', {maximumFractionDigits:0});
+
+            // No-shows (citas pendientes de mañana sin confirmar)
+            const maniana = new Date(); maniana.setDate(maniana.getDate()+1);
+            const manStr = maniana.toISOString().slice(0,10);
+            const sinConf = citas.filter(c => (c.fecha||'').slice(0,10) === manStr && c.estado !== 'confirmada' && c.estado !== 'confirmado');
+            const ckNS = document.getElementById('ck-noshows');
+            if (ckNS) ckNS.textContent = sinConf.length;
+
+            // SLA: tareas completadas
+            const tareasHechas = tareas.filter(t => t.estado === 'done');
+            const slaPct = tareas.length > 0 ? Math.round(tareasHechas.length / tareas.length * 100) : 0;
+            const ckSla = document.getElementById('ck-sla');
+            if (ckSla) ckSla.textContent = slaPct + '%';
+
+            // Ocupación agenda
+            const ckAgOcu = document.getElementById('ck-agenda-ocu');
+            if (ckAgOcu) ckAgOcu.textContent = ocupPct + '%';
+
+            // Action hints
+            const ckConf = document.getElementById('ck-pendientes-conf');
+            if (ckConf) ckConf.textContent = sinConf.length + ' pacientes pendientes de respuesta';
+            const presupuestos = Array.isArray(db.presupuestosClinica) ? db.presupuestosClinica : [];
+            const pqEnv = presupuestos.filter(p => p.estado === 'enviado');
+            const ckPQ = document.getElementById('ck-presup-follow');
+            if (ckPQ) ckPQ.textContent = pqEnv.length + ' presupuestos en estado enviado';
+            const tareasPend = tareas.filter(t => t.estado !== 'done');
+            const ckTV = document.getElementById('ck-tareas-venc');
+            if (ckTV) ckTV.textContent = tareasPend.length + ' tareas pendientes de hoy';
+        }
+
+        function renderPacientes360() {
+            const tbody = document.getElementById('p360-tbody');
+            if (!tbody) return;
+            const clientes = Array.isArray(db.clientes) ? db.clientes : [];
+            const searchVal = (document.getElementById('p360-search')?.value || '').toLowerCase();
+            const stateVal = document.getElementById('p360-state-filter')?.value || '';
+            const citas = Array.isArray(db.citas) ? db.citas : [];
+            const hoy = new Date().toISOString().slice(0,10);
+
+            let filtered = clientes.filter(cl => {
+                const matchSearch = !searchVal ||
+                    (cl.nombre||'').toLowerCase().includes(searchVal) ||
+                    (cl.telefono||'').includes(searchVal) ||
+                    (cl.email||'').toLowerCase().includes(searchVal);
+                const matchState = !stateVal || (cl.estadoClinica||'activo') === stateVal;
+                return matchSearch && matchState;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--gray-500);">No hay pacientes que coincidan con la búsqueda.</td></tr>';
+                return;
+            }
+
+            const stateMap = {
+                activo: '<span class="p360-state activo">Activo</span>',
+                tratamiento: '<span class="p360-state tratamiento">En tratamiento</span>',
+                seguimiento: '<span class="p360-state seguimiento">Seguimiento</span>',
+                inactivo: '<span class="p360-state inactivo">Inactivo</span>'
+            };
+            const actionMap = {
+                activo: '<span class="p360-next-action teal">Seguimiento rutinario</span>',
+                tratamiento: '<span class="p360-next-action orange">Confirmar cita pendiente</span>',
+                seguimiento: '<span class="p360-next-action blue">Preparar check-in</span>',
+                inactivo: '<span class="p360-next-action orange">Reactivar paciente</span>'
+            };
+
+            tbody.innerHTML = filtered.map(cl => {
+                const state = cl.estadoClinica || 'activo';
+                const tags = (cl.etiquetas || []).map(t => `<span class="p360-tag ${t.toLowerCase()}">${t}</span>`).join('');
+                // Última cita pasada
+                const citasPac = citas.filter(c => c.clienteId === cl.id || c.clienteNombre === cl.nombre);
+                const pasadas = citasPac.filter(c => (c.fecha||'') <= hoy).sort((a,b) => b.fecha < a.fecha ? -1 : 1);
+                const futuras = citasPac.filter(c => (c.fecha||'') > hoy).sort((a,b) => a.fecha < b.fecha ? -1 : 1);
+                const ultima = pasadas[0] ? new Date(pasadas[0].fecha).toLocaleDateString('es-AR') : '—';
+                const proxima = futuras[0] ? new Date(futuras[0].fecha).toLocaleDateString('es-AR') : '—';
+                return `<tr>
+                    <td><strong>${cl.nombre||'—'}</strong><br><span style="font-size:11px;color:var(--gray-500)">${cl.email||''}</span></td>
+                    <td>${cl.telefono||'—'}</td>
+                    <td>${ultima}</td>
+                    <td>${proxima}</td>
+                    <td>${stateMap[state]||stateMap.activo}</td>
+                    <td>${tags||'<span style="font-size:11px;color:var(--gray-400)">—</span>'}</td>
+                    <td>${actionMap[state]||''}</td>
+                    <td>
+                        <button class="btn-secondary" style="font-size:11px;padding:4px 8px;" onclick="editarCliente('${cl.id}')"><i class="fas fa-eye"></i></button>
+                        <button class="btn-secondary" style="font-size:11px;padding:4px 8px;margin-left:4px;" onclick="showPage('citas')"><i class="fas fa-calendar"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // Init clinic data structures
+        function initClinicData() {
+            if (!Array.isArray(db.presupuestosClinica)) db.presupuestosClinica = [];
+            if (!Array.isArray(db.kanbanClinica)) {
+                db.kanbanClinica = [
+                    { id:'lead', label:'Nuevo lead', cls:'lead', casos:[
+                        {id:'c1',titulo:'Caso 1',paciente:'Ana Rios'},{id:'c2',titulo:'Caso 6',paciente:'Elena Pardo'}
+                    ]},
+                    { id:'valora', label:'Valoración', cls:'valora', casos:[
+                        {id:'c3',titulo:'Caso 2',paciente:'Luis Mora'},{id:'c4',titulo:'Caso 7',paciente:'Mario León'}
+                    ]},
+                    { id:'presup', label:'Presupuesto enviado', cls:'presup', casos:[
+                        {id:'c5',titulo:'Caso 3',paciente:'Sofía Vega'},{id:'c6',titulo:'Caso 8',paciente:'Nora Gil'}
+                    ]},
+                    { id:'negoc', label:'Negociación', cls:'negoc', casos:[
+                        {id:'c7',titulo:'Caso 4',paciente:'Javier Sanz'}
+                    ]},
+                    { id:'ganado', label:'Ganado', cls:'ganado', casos:[
+                        {id:'c8',titulo:'Caso 5',paciente:'Sara Martín'}
+                    ]}
+                ];
+            }
+            if (!Array.isArray(db.tareasClinica)) {
+                db.tareasClinica = [
+                    {id:'t1',titulo:'Confirmar citas de mañana',asignado:'Recepción',vence:'Hoy',estado:'todo'},
+                    {id:'t2',titulo:'Llamar a paciente pendiente de presupuesto',asignado:'Comercial',vence:'Hoy',estado:'doing'},
+                    {id:'t3',titulo:'Enviar recordatorio post-tratamiento',asignado:'Recepción',vence:'Ayer',estado:'done'}
+                ];
+            }
+            if (!Array.isArray(db.plantillasTareas)) {
+                db.plantillasTareas = [
+                    {id:'pt1',titulo:'Confirmación cita',desc:'Confirmar cita'},
+                    {id:'pt2',titulo:'Seguimiento presupuesto',desc:'Llamar presupuesto'}
+                ];
+            }
+        }
+
+        function renderPresupuestosClinica() {
+            initClinicData();
+            const list = document.getElementById('pq-list');
+            if (!list) return;
+            const searchVal = (document.getElementById('pq-search')?.value||'').toLowerCase();
+            const stateVal = document.getElementById('pq-state-filter')?.value||'';
+            let pqs = db.presupuestosClinica || [];
+            let filtered = pqs.filter(p => {
+                const ms = !searchVal || (p.paciente||'').toLowerCase().includes(searchVal) || (p.numero||'').toLowerCase().includes(searchVal);
+                const mst = !stateVal || p.estado === stateVal;
+                return ms && mst;
+            });
+            // Stats
+            const enviados = pqs.filter(p=>p.estado==='enviado').length;
+            const vistos = pqs.filter(p=>p.estado==='visto').length;
+            const confirmados = pqs.filter(p=>p.estado==='confirmado').length;
+            const sv = document.getElementById('pq-sin-vista'); if(sv) sv.textContent = enviados + ' casos pendientes';
+            const sa = document.getElementById('pq-sin-acept'); if(sa) sa.textContent = vistos + ' casos pendientes';
+            const sc = document.getElementById('pq-confirmados'); if(sc) sc.textContent = confirmados + ' confirmados';
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--gray-500);border:2px dashed var(--gray-200);border-radius:14px;">
+                    <i class="fas fa-file-medical" style="font-size:32px;margin-bottom:10px;opacity:.3;display:block;"></i>
+                    No hay presupuestos. <button class="btn-primary" style="margin-top:10px;" onclick="nuevoPresupuestoClinica()">Crear el primero</button></div>`;
+                return;
+            }
+            list.innerHTML = filtered.map(p => `
+                <div class="quote-card">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+                        <div>
+                            <div class="q-num">${p.numero||'—'} - ${p.paciente||'Paciente'}</div>
+                            <div class="q-date">Creado: ${p.fecha||'—'}</div>
+                        </div>
+                        <span class="q-badge ${p.estado||'borrador'}">${(p.estado||'borrador').charAt(0).toUpperCase()+(p.estado||'borrador').slice(1)}</span>
+                    </div>
+                    <div class="q-amount" style="margin-top:8px;">$${parseFloat(p.monto||0).toLocaleString('es-AR',{maximumFractionDigits:0})}</div>
+                    <div class="quote-actions">
+                        <button onclick="verPresupuesto('${p.id}')">Abrir</button>
+                        <button onclick="cambiarEstadoPresupuesto('${p.id}','confirmado')">Confirmar</button>
+                        <button onclick="cambiarEstadoPresupuesto('${p.id}','enviado')">Enviar</button>
+                        <button onclick="duplicarPresupuesto('${p.id}')">Duplicar</button>
+                        <button class="btn-del" onclick="eliminarPresupuestoClinica('${p.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function nuevoPresupuestoClinica() {
+            initClinicData();
+            const paciente = prompt('Nombre del paciente:');
+            if (!paciente) return;
+            const monto = prompt('Monto del presupuesto ($):');
+            const id = 'pq_' + Date.now();
+            const num = 'PQ-' + new Date().getFullYear() + '-' + String(db.presupuestosClinica.length+1).padStart(3,'0');
+            db.presupuestosClinica.push({ id, numero: num, paciente, monto: parseFloat(monto)||0, estado: 'borrador', fecha: new Date().toLocaleDateString('es-AR') });
+            saveDB();
+            renderPresupuestosClinica();
+        }
+        function cambiarEstadoPresupuesto(id, nuevoEstado) {
+            initClinicData();
+            const p = db.presupuestosClinica.find(x=>x.id===id);
+            if(p) { p.estado = nuevoEstado; saveDB(); renderPresupuestosClinica(); }
+        }
+        function verPresupuesto(id) {
+            initClinicData();
+            const p = db.presupuestosClinica.find(x=>x.id===id);
+            if(!p) return;
+            alert(`Presupuesto: ${p.numero}
+Paciente: ${p.paciente}
+Monto: $${p.monto}
+Estado: ${p.estado}`);
+        }
+        function duplicarPresupuesto(id) {
+            initClinicData();
+            const p = db.presupuestosClinica.find(x=>x.id===id);
+            if(!p) return;
+            const newId = 'pq_' + Date.now();
+            const num = 'PQ-' + new Date().getFullYear() + '-' + String(db.presupuestosClinica.length+1).padStart(3,'0');
+            db.presupuestosClinica.push({...p, id:newId, numero:num, estado:'borrador'});
+            saveDB(); renderPresupuestosClinica();
+        }
+        function eliminarPresupuestoClinica(id) {
+            initClinicData();
+            if(!confirm('¿Eliminar este presupuesto?')) return;
+            db.presupuestosClinica = db.presupuestosClinica.filter(x=>x.id!==id);
+            saveDB(); renderPresupuestosClinica();
+        }
+
+        function renderEmbudoClinica() {
+            initClinicData();
+            const board = document.getElementById('kanban-board');
+            if (!board) return;
+            board.innerHTML = db.kanbanClinica.map(col => `
+                <div class="kanban-col">
+                    <div class="kanban-col-header ${col.cls}">${col.label} <span style="font-size:11px;font-weight:400;opacity:.7;">(${col.casos.length})</span></div>
+                    ${col.casos.map(caso => `
+                        <div class="kanban-card">
+                            <h5>${caso.titulo}</h5>
+                            <p>${caso.paciente}</p>
+                            <div style="display:flex;gap:6px;">
+                                <button class="kc-btn" onclick="moverCasoKanban('${caso.id}','${col.id}','prev')">← Atrás</button>
+                                <button class="kc-btn" onclick="crearTareaDesdeKanban('${caso.paciente}')">+ Tarea</button>
+                                <button class="kc-btn" onclick="moverCasoKanban('${caso.id}','${col.id}','next')">Adelante →</button>
+                            </div>
+                        </div>`).join('')}
+                    <div style="margin-top:8px;" onclick="addCasoToCol('${col.id}')" class="kanban-add-col">+ Agregar caso</div>
+                </div>`).join('');
+        }
+
+        function moverCasoKanban(casoId, colId, direction) {
+            initClinicData();
+            const cols = db.kanbanClinica;
+            const fromIdx = cols.findIndex(c=>c.id===colId);
+            if(fromIdx===-1) return;
+            const toIdx = direction==='next' ? fromIdx+1 : fromIdx-1;
+            if(toIdx<0||toIdx>=cols.length) return;
+            const casoIdx = cols[fromIdx].casos.findIndex(c=>c.id===casoId);
+            if(casoIdx===-1) return;
+            const [caso] = cols[fromIdx].casos.splice(casoIdx,1);
+            cols[toIdx].casos.push(caso);
+            saveDB(); renderEmbudoClinica();
+        }
+        function addCasoToCol(colId) {
+            initClinicData();
+            const titulo = prompt('Título del caso:'); if(!titulo) return;
+            const paciente = prompt('Paciente:'); if(!paciente) return;
+            const col = db.kanbanClinica.find(c=>c.id===colId);
+            if(col) { col.casos.push({id:'c'+Date.now(), titulo, paciente}); saveDB(); renderEmbudoClinica(); }
+        }
+        function nuevaEtapaKanban() {
+            initClinicData();
+            const label = prompt('Nombre de la nueva etapa:'); if(!label) return;
+            const id = 'col_' + Date.now();
+            db.kanbanClinica.push({id, label, cls:'negoc', casos:[]});
+            saveDB(); renderEmbudoClinica();
+        }
+        function nuevoCasoKanban() { addCasoToCol(db.kanbanClinica[0]?.id||'lead'); }
+        function crearTareaDesdeKanban(paciente) {
+            initClinicData();
+            const titulo = prompt('Título de la tarea para ' + paciente + ':'); if(!titulo) return;
+            db.tareasClinica.push({id:'t'+Date.now(), titulo, asignado: paciente, vence: 'Hoy', estado:'todo'});
+            saveDB(); showPage('tareas-clinica');
+        }
+
+        function renderTareasClinica() {
+            initClinicData();
+            const list = document.getElementById('tareas-clinica-list');
+            const tmpl = document.getElementById('task-templates-list');
+            if(!list) return;
+            const tareas = db.tareasClinica || [];
+            const tBadge = {todo:'todo',doing:'doing',done:'done'};
+            const tLabel = {todo:'Por hacer',doing:'En curso',done:'Hecha'};
+            list.innerHTML = tareas.length === 0
+                ? '<div style="text-align:center;padding:30px;color:var(--gray-500);">No hay tareas. Creá la primera.</div>'
+                : tareas.map(t => `
+                    <div class="task-row">
+                        <span class="t-title">${t.titulo}</span>
+                        <span class="t-assigned"><i class="fas fa-user" style="margin-right:4px;opacity:.5;"></i>${t.asignado||'—'}</span>
+                        <span class="t-due"><i class="fas fa-clock" style="margin-right:4px;opacity:.5;"></i>${t.vence||'—'}</span>
+                        <span class="t-badge ${tBadge[t.estado]||'todo'}">${tLabel[t.estado]||'Por hacer'}</span>
+                        <button class="btn-secondary" style="font-size:11px;padding:4px 8px;" onclick="toggleTareaEstado('${t.id}')">
+                            ${t.estado==='done'?'↺ Reabrir':'✓ Marcar hecha'}
+                        </button>
+                        <button class="btn-secondary" style="font-size:11px;padding:4px 8px;color:#ef4444;" onclick="eliminarTareaClinica('${t.id}')"><i class="fas fa-trash"></i></button>
+                    </div>`).join('');
+            if(tmpl) {
+                const plantillas = db.plantillasTareas||[];
+                tmpl.innerHTML = plantillas.map(p => `
+                    <div class="task-template-card" onclick="usarPlantillaTarea('${p.id}')">
+                        <h5>${p.titulo}</h5>
+                        <p>${p.desc}</p>
+                    </div>`).join('');
+            }
+        }
+        function toggleTareaEstado(id) {
+            initClinicData();
+            const t = db.tareasClinica.find(x=>x.id===id);
+            if(!t) return;
+            const cycle = {todo:'doing',doing:'done',done:'todo'};
+            t.estado = cycle[t.estado]||'todo';
+            saveDB(); renderTareasClinica();
+        }
+        function eliminarTareaClinica(id) {
+            initClinicData();
+            if(!confirm('¿Eliminar esta tarea?')) return;
+            db.tareasClinica = db.tareasClinica.filter(x=>x.id!==id);
+            saveDB(); renderTareasClinica();
+        }
+        function nuevaTareaClinica() {
+            initClinicData();
+            const titulo = prompt('Título de la tarea:'); if(!titulo) return;
+            const asignado = prompt('Asignado a:','Recepción')||'Recepción';
+            db.tareasClinica.push({id:'t'+Date.now(), titulo, asignado, vence:'Hoy', estado:'todo'});
+            saveDB(); renderTareasClinica();
+        }
+        function nuevaPlantillaTarea() {
+            initClinicData();
+            const titulo = prompt('Nombre de la plantilla:'); if(!titulo) return;
+            const desc = prompt('Descripción:',titulo)||titulo;
+            db.plantillasTareas.push({id:'pt'+Date.now(), titulo, desc});
+            saveDB(); renderTareasClinica();
+        }
+        function usarPlantillaTarea(id) {
+            initClinicData();
+            const p = db.plantillasTareas.find(x=>x.id===id);
+            if(!p) return;
+            const asignado = prompt('Asignado a:','Recepción')||'Recepción';
+            db.tareasClinica.push({id:'t'+Date.now(), titulo:p.titulo, asignado, vence:'Hoy', estado:'todo'});
+            saveDB(); renderTareasClinica();
+        }
+
+        function generarBorradorComm() {
+            const paciente = document.getElementById('comm-paciente')?.value || 'Paciente';
+            const contexto = document.getElementById('comm-contexto')?.value || '';
+            const tipo = document.getElementById('comm-tipo')?.value || 'Confirmación';
+            const tono = document.getElementById('comm-tono')?.value || 'Profesional';
+            const preview = document.getElementById('comm-preview');
+            if(!preview) return;
+            const borradores = {
+                'Confirmación': `Hola ${paciente}, te confirmamos tu cita. ${contexto}. Por favor confirmá respondiendo este mensaje. ¡Gracias!`,
+                'Recordatorio': `Hola ${paciente}, te recordamos que tenés una cita programada. ${contexto}. ¡Te esperamos!`,
+                'Seguimiento': `Hola ${paciente}, quisimos comunicarnos para hacer un seguimiento. ${contexto}. ¿Podemos ayudarte con algo más?`,
+                'No-show': `Hola ${paciente}, notamos que no pudiste asistir hoy. ${contexto}. ¿Querés que reagendemos tu cita?`
+            };
+            preview.textContent = (borradores[tipo]||'Sin contenido') + (tono==='Formal' ? ' Saludos cordiales.' : tono==='Amigable' ? ' 😊' : '');
+        }
+        function nuevaPlantillaComm() {
+            const titulo = prompt('Nombre de la plantilla:'); if(!titulo) return;
+            const msg = prompt('Mensaje de la plantilla:',`Hola [paciente], ${titulo.toLowerCase()}.`)||'';
+            const canal = prompt('Canal (whatsapp/email/sms):','whatsapp')||'whatsapp';
+            const container = document.getElementById('comm-custom-templates');
+            if(container) {
+                const div = document.createElement('div');
+                div.className = 'comm-template';
+                div.innerHTML = `<div class="ct-left"><h4>${titulo}</h4><p>${msg}</p></div><span class="comm-channel ${canal==='email'?'email':canal==='sms'?'sms':'wa'}">${canal}</span>`;
+                container.appendChild(div);
+            }
+        }
+        // ═══════════════════════════════════════════════════════════
+
+        </script>
 </body>
 </html>
