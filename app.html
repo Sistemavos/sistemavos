@@ -1828,7 +1828,9 @@
                     <li><button onclick="showPage('sucursales')"><i class="fas fa-map-pin"></i> <span>Sucursales</span></button></li>
                     <li><button onclick="showPage('citas')"><i class="fas fa-calendar-check"></i> <span>Citas / Agenda</span></button></li>
                     <li><button onclick="showPage('proveedores')"><i class="fas fa-handshake"></i> <span>Proveedores</span></button></li>
-                    <li><button onclick="showPage('usuarios')"><i class="fas fa-user-shield"></i> <span>Usuarios</span></button></li>
+                    <li><button onclick="showPage('presupuestos')"><i class="fas fa-file-invoice"></i> <span>Presupuestos</span></button></li>
+                    <li><button onclick="showPage('remitos')"><i class="fas fa-truck"></i> <span>Remitos</span></button></li>
+                    <li><button onclick="showPage('usuarios'"><i class="fas fa-user-shield"></i> <span>Usuarios</span></button></li>
                     <li><button onclick="showPage('mercadopago')"><i class="fas fa-credit-card"></i> <span>MercadoPago</span></button></li>
                     <li><button onclick="showPage('whatsapp')"><i class="fab fa-whatsapp"></i> <span>WhatsApp Business</span></button></li>
                     <li><button onclick="showPage('ia')"><i class="fas fa-robot"></i> <span>Asistente IA</span></button></li>
@@ -2833,6 +2835,97 @@
                         </div>
                     </div>
 
+
+                    <!-- PRESUPUESTOS PAGE -->
+                    <div id="presupuestos" class="page">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Presupuestos</h2>
+                                <button class="btn-primary" onclick="openPresupuestoModal()"><i class="fas fa-plus"></i> Nuevo Presupuesto</button>
+                            </div>
+                            <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+                                <input type="text" id="presupuestos-search" placeholder="Buscar presupuesto..." style="flex:1;min-width:200px;" oninput="renderPresupuestos()">
+                                <select id="presupuestos-estado-filter" onchange="renderPresupuestos()" style="min-width:160px;">
+                                    <option value="">Todos los estados</option>
+                                    <option value="borrador">Borrador</option>
+                                    <option value="enviado">Enviado</option>
+                                    <option value="aprobado">Aprobado</option>
+                                    <option value="rechazado">Rechazado</option>
+                                    <option value="vencido">Vencido</option>
+                                </select>
+                            </div>
+                            <div style="overflow-x:auto;"><table class="table" id="presupuestos-table"><thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Vence</th><th>Ítems</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+                        </div>
+                        <div class="modal" id="presupuesto-modal">
+                            <div class="modal-content" style="max-width:750px;">
+                                <div class="modal-header"><h3 id="presupuesto-modal-title">Nuevo Presupuesto</h3><button onclick="closeModal('presupuesto-modal')" class="modal-close">✕</button></div>
+                                <div class="modal-body">
+                                    <div class="grid-2">
+                                        <div class="form-group"><label>Cliente *</label><select id="pres-cliente"></select></div>
+                                        <div class="form-group"><label>Fecha emisión</label><input type="date" id="pres-fecha"></div>
+                                        <div class="form-group"><label>Fecha vencimiento</label><input type="date" id="pres-vencimiento"></div>
+                                        <div class="form-group"><label>Estado</label><select id="pres-estado"><option value="borrador">Borrador</option><option value="enviado">Enviado</option><option value="aprobado">Aprobado</option><option value="rechazado">Rechazado</option></select></div>
+                                    </div>
+                                    <div class="form-group"><label>Observaciones</label><textarea id="pres-observaciones" rows="2" style="width:100%;padding:8px;border:1px solid var(--gray-300);border-radius:8px;"></textarea></div>
+                                    <h4 style="margin:16px 0 8px;">Ítems</h4>
+                                    <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                                        <select id="pres-item-producto" style="flex:2;min-width:160px;" onchange="autocompletarPrecioPresupuesto()"></select>
+                                        <input type="number" id="pres-item-cantidad" placeholder="Cant." min="1" value="1" style="width:80px;">
+                                        <input type="number" id="pres-item-precio" placeholder="Precio unit." style="flex:1;min-width:100px;">
+                                        <button class="btn-primary" onclick="agregarItemPresupuesto()"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                    <table class="table" id="pres-items-table"><thead><tr><th>Producto</th><th>Cant.</th><th>P.Unit.</th><th>Subtotal</th><th></th></tr></thead><tbody id="pres-items-body"></tbody></table>
+                                    <div style="text-align:right;margin-top:12px;font-weight:700;">Total: <span id="pres-total-display">$0</span></div>
+                                </div>
+                                <div class="modal-footer"><button onclick="closeModal('presupuesto-modal')" class="btn-secondary">Cancelar</button><button onclick="guardarPresupuesto()" class="btn-primary">Guardar</button></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- REMITOS PAGE -->
+                    <div id="remitos" class="page">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Remitos / Albaranes</h2>
+                                <button class="btn-primary" onclick="openRemitoModal()"><i class="fas fa-plus"></i> Nuevo Remito</button>
+                            </div>
+                            <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+                                <input type="text" id="remitos-search" placeholder="Buscar remito..." style="flex:1;min-width:200px;" oninput="renderRemitos()">
+                                <select id="remitos-estado-filter" onchange="renderRemitos()" style="min-width:160px;">
+                                    <option value="">Todos los estados</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="entregado">Entregado</option>
+                                    <option value="anulado">Anulado</option>
+                                </select>
+                            </div>
+                            <div style="overflow-x:auto;"><table class="table" id="remitos-table"><thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Ítems</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+                        </div>
+                        <div class="modal" id="remito-modal">
+                            <div class="modal-content" style="max-width:750px;">
+                                <div class="modal-header"><h3 id="remito-modal-title">Nuevo Remito</h3><button onclick="closeModal('remito-modal')" class="modal-close">✕</button></div>
+                                <div class="modal-body">
+                                    <div class="grid-2">
+                                        <div class="form-group"><label>Cliente *</label><select id="rem-cliente"></select></div>
+                                        <div class="form-group"><label>Fecha</label><input type="date" id="rem-fecha"></div>
+                                        <div class="form-group"><label>Dirección de entrega</label><input type="text" id="rem-direccion" placeholder="Dirección destino"></div>
+                                        <div class="form-group"><label>Estado</label><select id="rem-estado"><option value="pendiente">Pendiente</option><option value="entregado">Entregado</option></select></div>
+                                    </div>
+                                    <div class="form-group"><label>Observaciones</label><textarea id="rem-observaciones" rows="2" style="width:100%;padding:8px;border:1px solid var(--gray-300);border-radius:8px;"></textarea></div>
+                                    <h4 style="margin:16px 0 8px;">Ítems</h4>
+                                    <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                                        <select id="rem-item-producto" style="flex:2;min-width:160px;" onchange="autocompletarPrecioRemito()"></select>
+                                        <input type="number" id="rem-item-cantidad" placeholder="Cant." min="1" value="1" style="width:80px;">
+                                        <input type="number" id="rem-item-precio" placeholder="Precio unit." style="flex:1;min-width:100px;">
+                                        <button class="btn-primary" onclick="agregarItemRemito()"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                    <table class="table" id="rem-items-table"><thead><tr><th>Producto</th><th>Cant.</th><th>P.Unit.</th><th>Subtotal</th><th></th></tr></thead><tbody id="rem-items-body"></tbody></table>
+                                    <div style="text-align:right;margin-top:12px;font-weight:700;">Total: <span id="rem-total-display">$0</span></div>
+                                </div>
+                                <div class="modal-footer"><button onclick="closeModal('remito-modal')" class="btn-secondary">Cancelar</button><button onclick="guardarRemito()" class="btn-primary">Guardar</button></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- WHATSAPP BUSINESS PAGE -->
                     <div id="whatsapp" class="page">
                         <div class="grid-2">
@@ -3427,6 +3520,8 @@
             facturas: [],
             arqueo: [],
             citas: [],
+            presupuestos: [],
+            remitos: [],
             documentos: {},
             mercadopago: { connected: false, token: null, transactions: [] },
             industryConfig: {}
@@ -3851,6 +3946,8 @@
             if (!Array.isArray(db.proveedores)) db.proveedores = [];
             if (!Array.isArray(db.arqueo)) db.arqueo = [];
             if (!Array.isArray(db.citas)) db.citas = [];
+            if (!Array.isArray(db.presupuestos)) db.presupuestos = [];
+            if (!Array.isArray(db.remitos)) db.remitos = [];
             if (!Array.isArray(db.usuarios)) db.usuarios = [];
             if (!db.odontologia) db.odontologia = {};
             if (!db.inmobiliaria) db.inmobiliaria = { propiedades: [], visitas: {} };
@@ -4575,6 +4672,8 @@
             if (page === 'citas') renderCitas();
             if (page === 'config') { cargarConfiguracion(); renderRubroSelector(); }
             if (page === 'clientes') { try { actualizarPanelOdontologico(); actualizarPanelInmobiliario(); } catch(e){} }
+            if (page === 'presupuestos') { try { renderPresupuestos(); } catch(e){} }
+            if (page === 'remitos') { try { renderRemitos(); } catch(e){} }
             setTimeout(aplicarModoLectura, 200);
         }
 
@@ -4592,6 +4691,8 @@
                 sucursales: 'Sucursales',
                 citas: 'Citas / Agenda',
                 proveedores: 'Proveedores',
+                presupuestos: 'Presupuestos',
+                remitos: 'Remitos / Albaranes',
                 usuarios: 'Usuarios',
                 mercadopago: 'MercadoPago',
                 whatsapp: 'WhatsApp Business',
@@ -4815,7 +4916,7 @@
                 const idx = db.clientes.findIndex(c => c.id === parseInt(id));
                 db.clientes[idx] = { ...db.clientes[idx], ...clienteData };
             } else {
-                clienteData.id = Math.max(...db.clientes.map(c => c.id), 0) + 1;
+                clienteData.id = safeMaxId(db.clientes);
                 clienteData.totalCompras = 0;
                 db.clientes.push(clienteData);
             }
@@ -4912,7 +5013,7 @@
                 const idx = db.productos.findIndex(p => p.id === parseInt(id));
                 db.productos[idx] = { ...db.productos[idx], ...productoData };
             } else {
-                productoData.id = Math.max(...db.productos.map(p => p.id), 0) + 1;
+                productoData.id = safeMaxId(db.productos);
                 db.productos.push(productoData);
             }
             saveDB();
@@ -5062,7 +5163,7 @@
             const total = subtotal + iva;
 
             const venta = {
-                id: Math.max(...db.ventas.map(v => v.id || 0), 0) + 1,
+                id: safeMaxId(db.ventas),
                 clienteId,
                 fecha: new Date().toISOString(),
                 items: [...ventaCarrito],
@@ -5204,7 +5305,7 @@
             const numeroCompleto = `${puntoVenta}-${nroFormateado}`;
 
             const factura = {
-                id: Math.max(...db.facturas.map(f => f.id || 0), 0) + 1,
+                id: safeMaxId(db.facturas),
                 tipo,
                 numero: nroFormateado,
                 puntoVenta,
@@ -5434,7 +5535,7 @@
             }
 
             const arqueo = {
-                id: Math.max(...db.arqueo.map(a => a.id || 0), 0) + 1,
+                id: safeMaxId(db.arqueo),
                 tipo,
                 descripcion,
                 monto,
@@ -5521,7 +5622,7 @@
                 const idx = db.gastos.findIndex(g => g.id === parseInt(id));
                 db.gastos[idx] = { ...db.gastos[idx], ...gastoData };
             } else {
-                gastoData.id = Math.max(...db.gastos.map(g => g.id || 0), 0) + 1;
+                gastoData.id = safeMaxId(db.gastos);
                 db.gastos.push(gastoData);
             }
             saveDB();
@@ -5618,7 +5719,7 @@
                 const idx = db.empleados.findIndex(e => e.id === parseInt(id));
                 db.empleados[idx] = { ...db.empleados[idx], ...empleadoData };
             } else {
-                empleadoData.id = Math.max(...db.empleados.map(e => e.id || 0), 0) + 1;
+                empleadoData.id = safeMaxId(db.empleados);
                 db.empleados.push(empleadoData);
             }
             saveDB();
@@ -5670,11 +5771,15 @@
                 alert('No hay empleados para generar nómina');
                 return;
             }
+            const yaExiste = db.nominas.some(n => n.mes === mesActual);
+            if (yaExiste) {
+                if (!confirm(`Ya existe una nómina para ${mesActual}. ¿Generar igualmente?`)) return;
+            }
 
             db.empleados.forEach(e => {
                 if (e.estado === 'activo') {
                     const nomina = {
-                        id: Math.max(...db.nominas.map(n => n.id || 0), 0) + 1,
+                        id: safeMaxId(db.nominas),
                         mes: mesActual,
                         empleadoId: e.id,
                         salarioBase: e.salario,
@@ -5748,7 +5853,7 @@
                 const idx = db.sucursales.findIndex(s => s.id === parseInt(id));
                 db.sucursales[idx] = { ...db.sucursales[idx], ...sucursalData };
             } else {
-                sucursalData.id = Math.max(...db.sucursales.map(s => s.id || 0), 0) + 1;
+                sucursalData.id = safeMaxId(db.sucursales);
                 db.sucursales.push(sucursalData);
             }
             saveDB();
@@ -5821,7 +5926,7 @@
                 const idx = db.proveedores.findIndex(p => p.id === parseInt(id));
                 db.proveedores[idx] = { ...db.proveedores[idx], ...proveedorData };
             } else {
-                proveedorData.id = Math.max(...db.proveedores.map(p => p.id || 0), 0) + 1;
+                proveedorData.id = safeMaxId(db.proveedores);
                 db.proveedores.push(proveedorData);
             }
             saveDB();
@@ -5904,7 +6009,7 @@
                 const idx = db.usuarios.findIndex(u => u.id === parseInt(id));
                 db.usuarios[idx] = { ...db.usuarios[idx], ...usuarioData };
             } else {
-                usuarioData.id = Math.max(...db.usuarios.map(u => u.id || 0), 0) + 1;
+                usuarioData.id = safeMaxId(db.usuarios);
                 db.usuarios.push(usuarioData);
             }
             saveDB();
@@ -5942,15 +6047,18 @@
 
         // MERCADOPAGO
         function conectarMercadoPago() {
-            const token = document.getElementById('mp-token').value;
-            if (!token) {
-                alert('Ingresa tu token de MercadoPago');
-                return;
+            const token = document.getElementById('mp-token').value.trim();
+            if (!token) { alert('Ingresa tu Access Token de MercadoPago'); return; }
+            if (!token.startsWith('APP_USR-') && !token.startsWith('TEST-')) {
+                alert('El token no parece válido. Debe comenzar con APP_USR- o TEST-'); return;
             }
             db.mercadopago.connected = true;
             db.mercadopago.token = token;
+            if (!db.account) db.account = {};
+            db.account.mpAccessToken = token;
             saveDB();
-            alert('MercadoPago conectado exitosamente');
+            document.getElementById('mp-token').value = '';
+            alert('✅ MercadoPago conectado. Token guardado de forma segura en tu sesión.');
         }
 
         function generarEnlaceMercadoPago() {
@@ -5972,6 +6080,212 @@
             alert(`QR generado para: ${formatCurrency(monto)}`);
         }
 
+        // ─── UTILIDADES DE SEGURIDAD ─────────────────────────────────────────────
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        }
+        function safeMaxId(arr) {
+            if (!Array.isArray(arr) || arr.length === 0) return 1;
+            return Math.max(...arr.map(i => Number(i.id) || 0)) + 1;
+        }
+
+        // ─── PRESUPUESTOS ─────────────────────────────────────────────────────────
+        let _presItemsTemp = [];
+        function openPresupuestoModal(id = null) {
+            _presItemsTemp = [];
+            const today = new Date().toISOString().split('T')[0];
+            const vence = new Date(Date.now() + 15*86400000).toISOString().split('T')[0];
+            document.getElementById('pres-cliente').innerHTML = db.clientes.map(c => `<option value="${escapeHTML(String(c.id))}">${escapeHTML(c.nombre)}</option>`).join('');
+            document.getElementById('pres-item-producto').innerHTML = db.productos.map(p => `<option value="${escapeHTML(String(p.id))}">${escapeHTML(p.nombre)}</option>`).join('');
+            if (id) {
+                const p = db.presupuestos.find(x => x.id === id); if (!p) return;
+                document.getElementById('presupuesto-modal-title').textContent = 'Editar Presupuesto';
+                document.getElementById('pres-cliente').value = p.clienteId;
+                document.getElementById('pres-fecha').value = p.fecha;
+                document.getElementById('pres-vencimiento').value = p.vencimiento;
+                document.getElementById('pres-estado').value = p.estado;
+                document.getElementById('pres-observaciones').value = p.observaciones || '';
+                _presItemsTemp = p.items ? JSON.parse(JSON.stringify(p.items)) : [];
+                document.getElementById('presupuesto-modal').dataset.id = id;
+            } else {
+                document.getElementById('presupuesto-modal-title').textContent = 'Nuevo Presupuesto';
+                document.getElementById('pres-fecha').value = today;
+                document.getElementById('pres-vencimiento').value = vence;
+                document.getElementById('pres-estado').value = 'borrador';
+                document.getElementById('pres-observaciones').value = '';
+                delete document.getElementById('presupuesto-modal').dataset.id;
+            }
+            renderPresItemsTemp(); openModal('presupuesto-modal');
+        }
+        function autocompletarPrecioPresupuesto() {
+            const p = db.productos.find(p => p.id === parseInt(document.getElementById('pres-item-producto').value));
+            if (p) document.getElementById('pres-item-precio').value = p.precio || 0;
+        }
+        function agregarItemPresupuesto() {
+            const prodId = parseInt(document.getElementById('pres-item-producto').value);
+            const cant = parseFloat(document.getElementById('pres-item-cantidad').value) || 1;
+            const precio = parseFloat(document.getElementById('pres-item-precio').value) || 0;
+            const prod = db.productos.find(p => p.id === prodId);
+            if (!prod) { alert('Seleccioná un producto'); return; }
+            _presItemsTemp.push({ productoId: prodId, nombre: prod.nombre, cantidad: cant, precioUnit: precio, subtotal: cant*precio });
+            renderPresItemsTemp();
+        }
+        function renderPresItemsTemp() {
+            let html = '', total = 0;
+            _presItemsTemp.forEach((item, idx) => {
+                total += item.subtotal;
+                html += `<tr><td>${escapeHTML(item.nombre)}</td><td>${item.cantidad}</td><td>${formatCurrency(item.precioUnit)}</td><td>${formatCurrency(item.subtotal)}</td><td><button class="btn-sm btn-danger" onclick="_presItemsTemp.splice(${idx},1);renderPresItemsTemp()">✕</button></td></tr>`;
+            });
+            const tb = document.getElementById('pres-items-body');
+            if (tb) tb.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--gray-500);">Sin ítems</td></tr>';
+            const te = document.getElementById('pres-total-display');
+            if (te) te.textContent = formatCurrency(total);
+        }
+        function guardarPresupuesto() {
+            const clienteId = parseInt(document.getElementById('pres-cliente').value);
+            const fecha = document.getElementById('pres-fecha').value;
+            const vencimiento = document.getElementById('pres-vencimiento').value;
+            const estado = document.getElementById('pres-estado').value;
+            const observaciones = document.getElementById('pres-observaciones').value;
+            if (!clienteId || !fecha) { alert('Completá cliente y fecha'); return; }
+            if (_presItemsTemp.length === 0) { alert('Agregá al menos un ítem'); return; }
+            const total = _presItemsTemp.reduce((s,i) => s+i.subtotal, 0);
+            const id = document.getElementById('presupuesto-modal').dataset.id;
+            const data = { clienteId, fecha, vencimiento, estado, observaciones, items: _presItemsTemp, total };
+            if (id) {
+                const idx = db.presupuestos.findIndex(p => p.id === parseInt(id));
+                if (idx >= 0) db.presupuestos[idx] = { ...db.presupuestos[idx], ...data };
+            } else {
+                data.id = safeMaxId(db.presupuestos);
+                data.numero = 'PRES-' + String(data.id).padStart(4,'0');
+                db.presupuestos.push(data);
+            }
+            saveDB(); closeModal('presupuesto-modal'); renderPresupuestos();
+        }
+        function renderPresupuestos() {
+            const search = (document.getElementById('presupuestos-search')?.value || '').toLowerCase();
+            const ef = document.getElementById('presupuestos-estado-filter')?.value || '';
+            const bc = { borrador:'secondary', enviado:'primary', aprobado:'success', rechazado:'danger', vencido:'warning' };
+            let html = '';
+            db.presupuestos.filter(p => {
+                const c = db.clientes.find(x => x.id === p.clienteId);
+                return (!search || (c?.nombre||'').toLowerCase().includes(search) || (p.numero||'').toLowerCase().includes(search)) && (!ef || p.estado === ef);
+            }).sort((a,b) => b.id-a.id).forEach(p => {
+                const c = db.clientes.find(x => x.id === p.clienteId);
+                html += `<tr><td>${escapeHTML(p.numero||String(p.id))}</td><td>${escapeHTML(c?.nombre||'Desconocido')}</td><td>${escapeHTML(p.fecha)}</td><td>${escapeHTML(p.vencimiento||'-')}</td><td>${(p.items||[]).length} ítem(s)</td><td>${formatCurrency(p.total)}</td><td><span class="badge badge-${bc[p.estado]||'secondary'}">${escapeHTML(p.estado)}</span></td><td><button class="btn-sm" onclick="openPresupuestoModal(${p.id})">Editar</button> <button class="btn-sm" onclick="convertirPresupuestoAVenta(${p.id})">→Venta</button> <button class="btn-sm btn-danger" onclick="eliminarPresupuesto(${p.id})">Elim.</button></td></tr>`;
+            });
+            const tb = document.querySelector('#presupuestos-table tbody');
+            if (tb) tb.innerHTML = html || '<tr><td colspan="8" style="text-align:center;">Sin presupuestos</td></tr>';
+        }
+        function eliminarPresupuesto(id) {
+            if (confirm('¿Eliminar este presupuesto?')) { db.presupuestos = db.presupuestos.filter(p => p.id !== id); saveDB(); renderPresupuestos(); }
+        }
+        function convertirPresupuestoAVenta(id) {
+            const pres = db.presupuestos.find(p => p.id === id); if (!pres) return;
+            if (!confirm('¿Convertir este presupuesto en una venta?')) return;
+            const venta = { id: safeMaxId(db.ventas), fecha: new Date().toISOString().split('T')[0], clienteId: pres.clienteId,
+                productos: pres.items.map(i=>({productoId:i.productoId,nombre:i.nombre,cantidad:i.cantidad,precio:i.precioUnit})),
+                total: pres.total, estado: 'completada', origen: 'presupuesto-' + pres.numero };
+            db.ventas.push(venta); pres.estado = 'aprobado'; saveDB(); renderPresupuestos();
+            alert('Presupuesto convertido a venta exitosamente.');
+        }
+
+        // ─── REMITOS ─────────────────────────────────────────────────────────────
+        let _remItemsTemp = [];
+        function openRemitoModal(id = null) {
+            _remItemsTemp = [];
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('rem-cliente').innerHTML = db.clientes.map(c => `<option value="${escapeHTML(String(c.id))}">${escapeHTML(c.nombre)}</option>`).join('');
+            document.getElementById('rem-item-producto').innerHTML = db.productos.map(p => `<option value="${escapeHTML(String(p.id))}">${escapeHTML(p.nombre)}</option>`).join('');
+            if (id) {
+                const r = db.remitos.find(x => x.id === id); if (!r) return;
+                document.getElementById('remito-modal-title').textContent = 'Editar Remito';
+                document.getElementById('rem-cliente').value = r.clienteId;
+                document.getElementById('rem-fecha').value = r.fecha;
+                document.getElementById('rem-direccion').value = r.direccion || '';
+                document.getElementById('rem-estado').value = r.estado;
+                document.getElementById('rem-observaciones').value = r.observaciones || '';
+                _remItemsTemp = r.items ? JSON.parse(JSON.stringify(r.items)) : [];
+                document.getElementById('remito-modal').dataset.id = id;
+            } else {
+                document.getElementById('remito-modal-title').textContent = 'Nuevo Remito';
+                document.getElementById('rem-fecha').value = today;
+                document.getElementById('rem-direccion').value = '';
+                document.getElementById('rem-estado').value = 'pendiente';
+                document.getElementById('rem-observaciones').value = '';
+                delete document.getElementById('remito-modal').dataset.id;
+            }
+            renderRemItemsTemp(); openModal('remito-modal');
+        }
+        function autocompletarPrecioRemito() {
+            const p = db.productos.find(p => p.id === parseInt(document.getElementById('rem-item-producto').value));
+            if (p) document.getElementById('rem-item-precio').value = p.precio || 0;
+        }
+        function agregarItemRemito() {
+            const prodId = parseInt(document.getElementById('rem-item-producto').value);
+            const cant = parseFloat(document.getElementById('rem-item-cantidad').value) || 1;
+            const precio = parseFloat(document.getElementById('rem-item-precio').value) || 0;
+            const prod = db.productos.find(p => p.id === prodId);
+            if (!prod) { alert('Seleccioná un producto'); return; }
+            _remItemsTemp.push({ productoId: prodId, nombre: prod.nombre, cantidad: cant, precioUnit: precio, subtotal: cant*precio });
+            renderRemItemsTemp();
+        }
+        function renderRemItemsTemp() {
+            let html = '', total = 0;
+            _remItemsTemp.forEach((item, idx) => {
+                total += item.subtotal;
+                html += `<tr><td>${escapeHTML(item.nombre)}</td><td>${item.cantidad}</td><td>${formatCurrency(item.precioUnit)}</td><td>${formatCurrency(item.subtotal)}</td><td><button class="btn-sm btn-danger" onclick="_remItemsTemp.splice(${idx},1);renderRemItemsTemp()">✕</button></td></tr>`;
+            });
+            const tb = document.getElementById('rem-items-body');
+            if (tb) tb.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--gray-500);">Sin ítems</td></tr>';
+            const te = document.getElementById('rem-total-display');
+            if (te) te.textContent = formatCurrency(total);
+        }
+        function guardarRemito() {
+            const clienteId = parseInt(document.getElementById('rem-cliente').value);
+            const fecha = document.getElementById('rem-fecha').value;
+            const direccion = document.getElementById('rem-direccion').value;
+            const estado = document.getElementById('rem-estado').value;
+            const observaciones = document.getElementById('rem-observaciones').value;
+            if (!clienteId || !fecha) { alert('Completá cliente y fecha'); return; }
+            if (_remItemsTemp.length === 0) { alert('Agregá al menos un ítem'); return; }
+            const total = _remItemsTemp.reduce((s,i) => s+i.subtotal, 0);
+            const id = document.getElementById('remito-modal').dataset.id;
+            const data = { clienteId, fecha, direccion, estado, observaciones, items: _remItemsTemp, total };
+            if (id) {
+                const idx = db.remitos.findIndex(r => r.id === parseInt(id));
+                if (idx >= 0) db.remitos[idx] = { ...db.remitos[idx], ...data };
+            } else {
+                data.id = safeMaxId(db.remitos);
+                data.numero = 'REM-' + String(data.id).padStart(4,'0');
+                db.remitos.push(data);
+                _remItemsTemp.forEach(item => {
+                    const prod = db.productos.find(p => p.id === item.productoId);
+                    if (prod) prod.stock = Math.max(0, (prod.stock||0) - item.cantidad);
+                });
+            }
+            saveDB(); closeModal('remito-modal'); renderRemitos();
+        }
+        function renderRemitos() {
+            const search = (document.getElementById('remitos-search')?.value || '').toLowerCase();
+            const ef = document.getElementById('remitos-estado-filter')?.value || '';
+            const bc = { pendiente:'warning', entregado:'success', anulado:'danger' };
+            let html = '';
+            db.remitos.filter(r => {
+                const c = db.clientes.find(x => x.id === r.clienteId);
+                return (!search || (c?.nombre||'').toLowerCase().includes(search) || (r.numero||'').toLowerCase().includes(search)) && (!ef || r.estado === ef);
+            }).sort((a,b) => b.id-a.id).forEach(r => {
+                const c = db.clientes.find(x => x.id === r.clienteId);
+                html += `<tr><td>${escapeHTML(r.numero||String(r.id))}</td><td>${escapeHTML(c?.nombre||'Desconocido')}</td><td>${escapeHTML(r.fecha)}</td><td>${(r.items||[]).length} ítem(s)</td><td>${formatCurrency(r.total)}</td><td><span class="badge badge-${bc[r.estado]||'secondary'}">${escapeHTML(r.estado)}</span></td><td><button class="btn-sm" onclick="openRemitoModal(${r.id})">Ver/Editar</button> <button class="btn-sm btn-danger" onclick="eliminarRemito(${r.id})">Elim.</button></td></tr>`;
+            });
+            const tb = document.querySelector('#remitos-table tbody');
+            if (tb) tb.innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Sin remitos</td></tr>';
+        }
+        function eliminarRemito(id) {
+            if (confirm('¿Eliminar este remito?')) { db.remitos = db.remitos.filter(r => r.id !== id); saveDB(); renderRemitos(); }
+        }
+
         // IA ASSISTANT
         function enviarMensajeIA() {
             const input = document.getElementById('chat-input');
@@ -5979,7 +6293,7 @@
             if (!mensaje) return;
 
             const messagesDiv = document.getElementById('chat-messages');
-            messagesDiv.innerHTML += `<div class="chat-message user"><div class="chat-bubble">${mensaje}</div></div>`;
+            messagesDiv.innerHTML += `<div class="chat-message user"><div class="chat-bubble">${escapeHTML(mensaje)}</div></div>`;
             input.value = '';
 
             const respuesta = generarRespuestaIA(mensaje, 'interno');
@@ -7868,8 +8182,14 @@
                 }).catch(() => {});
             }
             try {
-                // Llamada directa a MercadoPago para obtener init_point de forma síncrona
-                const MP_ACCESS_TOKEN = 'APP_USR-1118548784284560-040217-dc5514ac00a273506dca523129d5f4d7-3310907652';
+                // Llamada directa a MercadoPago (token desde configuración, no hardcodeado)
+                const MP_ACCESS_TOKEN = db.mercadopago?.token || db.account?.mpAccessToken || '';
+                if (!MP_ACCESS_TOKEN) {
+                    const esp2 = document.getElementById('esperando-pago-modal');
+                    if (esp2) esp2.remove();
+                    alert('⚠️ Configurá tu Access Token en la sección MercadoPago antes de procesar pagos.');
+                    return;
+                }
                 const res = await fetch('https://api.mercadopago.com/checkout/preferences', {
                     method: 'POST',
                     headers: {
