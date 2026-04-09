@@ -4421,6 +4421,35 @@
             storageKey: 'sistemavos_promo_uses'
         };
 
+        // ===== CODIGOS BETA TESTER (8 codigos, 1 uso cada uno) =====
+        // Cada codigo identifica a un beta tester con Plan Premium gratis de por vida
+        // y la flag isBetaTester=true en db.account para features exclusivas.
+        const BETA_CODES = [
+            'BETA-VOS-001','BETA-VOS-002','BETA-VOS-003','BETA-VOS-004',
+            'BETA-VOS-005','BETA-VOS-006','BETA-VOS-007','BETA-VOS-008'
+        ];
+        const BETA_STORAGE_KEY = 'sistemavos_beta_codes_used';
+
+        function getBetaUsed() {
+            try { return JSON.parse(localStorage.getItem(BETA_STORAGE_KEY) || '[]'); }
+            catch(e) { return []; }
+        }
+        function isBetaCode(code) {
+            return BETA_CODES.includes((code || '').trim().toUpperCase());
+        }
+        function isBetaCodeAvailable(code) {
+            const up = (code || '').trim().toUpperCase();
+            return isBetaCode(up) && !getBetaUsed().includes(up);
+        }
+        function markBetaCodeUsed(code) {
+            const up = (code || '').trim().toUpperCase();
+            const used = getBetaUsed();
+            if (!used.includes(up)) {
+                used.push(up);
+                localStorage.setItem(BETA_STORAGE_KEY, JSON.stringify(used));
+            }
+        }
+
         function getPromoUses() {
             try {
                 return parseInt(localStorage.getItem(PROMO_CONFIG.storageKey) || '0');
@@ -4442,7 +4471,17 @@
                 return;
             }
 
-            if (code === PROMO_CONFIG.code) {
+            if (isBetaCode(code)) {
+                if (isBetaCodeAvailable(code)) {
+                    feedback.innerHTML = '<span style="color: #8B5CF6; font-weight: 600;"><i class="fas fa-star"></i> Codigo BETA TESTER valido! Acceso <strong>Premium de por vida</strong> + features exclusivas de beta tester.</span>';
+                    document.querySelectorAll('.plan-card').forEach(e => e.classList.remove('selected'));
+                    const premiumCard = document.querySelectorAll('.plan-card')[2];
+                    if (premiumCard) premiumCard.classList.add('selected');
+                    db.selectedPlan = 'premium';
+                } else {
+                    feedback.innerHTML = '<span style="color: #EF4444;"><i class="fas fa-times-circle"></i> Este codigo beta ya fue utilizado.</span>';
+                }
+            } else if (code === PROMO_CONFIG.code) {
                 const uses = getPromoUses();
                 if (uses < PROMO_CONFIG.maxUses) {
                     const remaining = PROMO_CONFIG.maxUses - uses;
@@ -4495,11 +4534,26 @@
             }
 
             // Verificar codigo promocional
-            const promoCode = (document.getElementById('reg-promo-code')?.value || '').trim().toLowerCase();
+            const promoCodeRaw = (document.getElementById('reg-promo-code')?.value || '').trim();
+            const promoCode = promoCodeRaw.toLowerCase();
+            const promoCodeUpper = promoCodeRaw.toUpperCase();
             let isPromo = false;
             let promoExpired = false;
+            let isBetaTester = false;
+            let betaCodeUsed = null;
 
-            if (promoCode === PROMO_CONFIG.code) {
+            if (isBetaCode(promoCodeUpper)) {
+                if (isBetaCodeAvailable(promoCodeUpper)) {
+                    isBetaTester = true;
+                    isPromo = true;
+                    betaCodeUsed = promoCodeUpper;
+                    db.selectedPlan = 'premium';
+                    markBetaCodeUsed(promoCodeUpper);
+                } else {
+                    alert('El codigo beta tester ya fue utilizado. Selecciona un plan normalmente.');
+                    return;
+                }
+            } else if (promoCode === PROMO_CONFIG.code) {
                 const uses = getPromoUses();
                 if (uses < PROMO_CONFIG.maxUses) {
                     isPromo = true;
@@ -4552,8 +4606,10 @@
                 createdAt: new Date().toISOString(),
                 iva: 21,
                 currency: '$',
-                promoCode: isPromo ? promoCode : null,
+                promoCode: isPromo ? (betaCodeUsed || promoCode) : null,
                 promoFreeForever: isPromo,
+                isBetaTester: isBetaTester,
+                betaCode: betaCodeUsed,
                 subscriptionStatus: isPromo ? 'premium_lifetime' : 'trial_14d',
                 supabaseUserId: supabaseUserId,
                 referidosActivos: [],
@@ -9200,6 +9256,156 @@ Estado: ${p.estado}`);
         }
         // ═══════════════════════════════════════════════════════════
 
+
+        // ═══════════════════════════════════════════════════════════
+        // SISTEMA DE REPORTE DE BUGS — BETA TESTERS
+        // ═══════════════════════════════════════════════════════════
+        const WEBHOOK_BUGS_URL = 'https://hook.eu1.make.com/6ltbcrc83fcfg4vc4k2ig70kc1hdmmrf';
+
+        function abrirModalBug() {
+            document.getElementById('bug-report-modal').style.display = 'flex';
+            document.getElementById('bug-mensaje-input').focus();
+        }
+
+        function cerrarModalBug() {
+            document.getElementById('bug-report-modal').style.display = 'none';
+            document.getElementById('bug-mensaje-input').value = '';
+        }
+
+        async function enviarReporteBug() {
+            const mensajeRaw = document.getElementById('bug-mensaje-input').value.trim();
+            if (!mensajeRaw) {
+                document.getElementById('bug-mensaje-input').style.borderColor = '#ef4444';
+                return;
+            }
+            document.getElementById('bug-mensaje-input').style.borderColor = '';
+
+            const mensaje = escapeHTML(mensajeRaw);
+            const urlError = window.location.hash || window.location.pathname;
+
+            let userId = null;
+            try {
+                if (typeof supabaseClient !== 'undefined') {
+                    const { data: { user } } = await supabaseClient.auth.getUser();
+                    userId = user?.id || null;
+                }
+            } catch(e) { /* silencioso */ }
+
+            const btnEnviar = document.getElementById('bug-btn-enviar');
+            btnEnviar.disabled = true;
+            btnEnviar.textContent = 'Enviando...';
+
+            try {
+                await fetch(WEBHOOK_BUGS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, mensaje: mensaje, url_error: urlError })
+                });
+                cerrarModalBug();
+                mostrarToastBug('🐞 Reporte enviado. ¡Gracias por tu feedback!', 'success');
+            } catch(e) {
+                mostrarToastBug('❌ Error al enviar el reporte. Intentá de nuevo.', 'error');
+            } finally {
+                btnEnviar.disabled = false;
+                btnEnviar.textContent = 'Enviar reporte';
+            }
+        }
+
+        function mostrarToastBug(msg, tipo) {
+            let t = document.getElementById('bug-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'bug-toast';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.className = 'bug-toast-visible' + (tipo === 'error' ? ' bug-toast-error' : '');
+            setTimeout(() => { t.className = ''; }, 3500);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') cerrarModalBug();
+        });
+        // ═══════════════════════════════════════════════════════════
+
         </script>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SISTEMA REPORTE BUGS BETA — UI                            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<style>
+#bug-fab {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: #ef4444; color: #fff; font-size: 22px;
+    border: none; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(239,68,68,0.5);
+    z-index: 9998; display: flex; align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+#bug-fab:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(239,68,68,0.6); }
+#bug-report-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 9999;
+    align-items: center; justify-content: center;
+}
+#bug-modal-box {
+    background: #1e293b; border-radius: 16px; padding: 28px;
+    width: 90%; max-width: 460px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5); color: #f1f5f9;
+}
+#bug-modal-box h3 { margin: 0 0 6px; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+#bug-modal-box p { font-size: 13px; color: #94a3b8; margin: 0 0 16px; }
+#bug-mensaje-input {
+    width: 100%; min-height: 100px;
+    background: #0f172a; border: 1.5px solid #334155;
+    border-radius: 10px; color: #f1f5f9; font-size: 14px;
+    padding: 12px; resize: vertical; box-sizing: border-box;
+    outline: none; transition: border-color 0.2s;
+}
+#bug-mensaje-input:focus { border-color: #ef4444; }
+#bug-modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+#bug-btn-cancelar {
+    padding: 9px 20px; border-radius: 8px;
+    border: 1.5px solid #475569; background: transparent;
+    color: #94a3b8; cursor: pointer; font-size: 14px; transition: background 0.2s;
+}
+#bug-btn-cancelar:hover { background: #334155; }
+#bug-btn-enviar {
+    padding: 9px 22px; border-radius: 8px; border: none;
+    background: #ef4444; color: #fff; cursor: pointer;
+    font-size: 14px; font-weight: 600;
+    transition: background 0.2s, opacity 0.2s;
+}
+#bug-btn-enviar:hover { background: #dc2626; }
+#bug-btn-enviar:disabled { opacity: 0.6; cursor: not-allowed; }
+#bug-toast {
+    position: fixed; bottom: 90px; right: 24px;
+    background: #10b981; color: #fff; padding: 12px 20px;
+    border-radius: 10px; font-size: 14px; font-weight: 500;
+    z-index: 10000; opacity: 0; transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none; max-width: 300px;
+}
+#bug-toast.bug-toast-visible { opacity: 1; transform: translateY(0); }
+#bug-toast.bug-toast-error { background: #ef4444; }
+</style>
+
+<button id="bug-fab" onclick="abrirModalBug()" title="Reportar un bug">🐞</button>
+
+<div id="bug-report-modal" onclick="if(event.target===this)cerrarModalBug()">
+    <div id="bug-modal-box">
+        <h3>🐞 Reportar un bug</h3>
+        <p>Describí el problema que encontraste. Se enviará junto con la URL de la vista actual.</p>
+        <textarea id="bug-mensaje-input" placeholder="Ej: Al hacer clic en 'Guardar venta' aparece un error en blanco..."></textarea>
+        <div id="bug-modal-actions">
+            <button id="bug-btn-cancelar" onclick="cerrarModalBug()">Cancelar</button>
+            <button id="bug-btn-enviar" onclick="enviarReporteBug()">Enviar reporte</button>
+        </div>
+    </div>
+</div>
+<div id="bug-toast"></div>
+<!-- ═══════════ FIN REPORTE BUGS ═══════════ -->
+
 </body>
-</html>
