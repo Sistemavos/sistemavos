@@ -988,6 +988,42 @@
         }
         .scan-btn:hover { opacity: 0.9; }
 
+
+        /* PIPELINE CRM */
+        .pipeline-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+        .kanban-col-header.prospecto{color:#6C3AE1;border-color:#c4b5fd}
+        .kanban-col-header.contactado{color:#06b6d4;border-color:#a5f3fc}
+        .kanban-col-header.propuesta{color:#f59e0b;border-color:#fde68a}
+        .kanban-col-header.negociacion{color:#00C6A7;border-color:#99f6e4}
+        .kanban-col-header.perdido{color:#ef4444;border-color:#fecaca}
+        .pipeline-monto{font-size:12px;font-weight:700;color:var(--success);margin-top:4px}
+        .pipeline-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+        .pipeline-stat{background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:12px 16px;min-width:120px;text-align:center}
+        .pipeline-stat .ps-value{font-size:20px;font-weight:700;color:var(--primary)}
+        .pipeline-stat .ps-label{font-size:11px;color:var(--gray-500);margin-top:2px}
+
+        /* RFM SEGMENTACIÓN IA */
+        .rfm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+        .rfm-segment-card{border-radius:10px;padding:12px;text-align:center;border:2px solid}
+        .rfm-segment-card .rfm-emoji{font-size:22px;display:block;margin-bottom:4px}
+        .rfm-segment-card .rfm-name{font-size:12px;font-weight:700}
+        .rfm-segment-card .rfm-count{font-size:20px;font-weight:800;margin-top:2px}
+        .rfm-seg-campeon{background:#f0fdf4;border-color:#86efac;color:#166534}
+        .rfm-seg-leal{background:#eff6ff;border-color:#93c5fd;color:#1e3a8a}
+        .rfm-seg-prometedor{background:#faf5ff;border-color:#c4b5fd;color:#4c1d95}
+        .rfm-seg-nuevo{background:#ecfeff;border-color:#a5f3fc;color:#164e63}
+        .rfm-seg-riesgo{background:#fffbeb;border-color:#fcd34d;color:#78350f}
+        .rfm-seg-perdido{background:#fef2f2;border-color:#fca5a5;color:#7f1d1d}
+        .rfm-seg-ocasional{background:#f8fafc;border-color:#cbd5e1;color:#475569}
+        .rfm-badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600}
+        .rfm-badge-campeon{background:#dcfce7;color:#166534}
+        .rfm-badge-leal{background:#dbeafe;color:#1e3a8a}
+        .rfm-badge-prometedor{background:#f3e8ff;color:#4c1d95}
+        .rfm-badge-nuevo{background:#cffafe;color:#164e63}
+        .rfm-badge-riesgo{background:#fef9c3;color:#78350f}
+        .rfm-badge-perdido{background:#fee2e2;color:#7f1d1d}
+        .rfm-badge-ocasional{background:#f1f5f9;color:#475569}
+
         /* RESPONSIVE */
         /* ===== RESPONSIVE DESIGN ===== */
         .hamburger-btn {
@@ -1928,6 +1964,7 @@
                     <li class="menu-clinica" style="display:none"><button onclick="showPage('embudo-clinica')"><i class="fas fa-filter"></i> <span>Embudo Clínico</span></button></li>
                     <li class="menu-clinica" style="display:none"><button onclick="showPage('tareas-clinica')"><i class="fas fa-stethoscope"></i> <span>Tareas</span></button></li>
                     <li class="menu-clinica" style="display:none"><button onclick="showPage('comunicaciones-clinica')"><i class="fas fa-message"></i> <span>Comunicaciones</span></button></li>
+                    <li class="menu-pipeline" style="display:none"><button onclick="showPage('pipeline-ventas')"><i class="fas fa-funnel-dollar"></i> <span>Pipeline CRM</span></button></li>
                     <li><button onclick="showPage('proveedores')"><i class="fas fa-handshake"></i> <span>Proveedores</span></button></li>
                     <li><button onclick="showPage('presupuestos')"><i class="fas fa-file-invoice"></i> <span>Presupuestos</span></button></li>
                     <li><button onclick="showPage('remitos')"><i class="fas fa-truck"></i> <span>Remitos</span></button></li>
@@ -2020,6 +2057,55 @@
                                     </thead>
                                     <tbody></tbody>
                                 </table>
+                            </div>
+                        </div>
+
+
+                        <!-- RFM SEGMENTACIÓN IA (Sprint 1) -->
+                        <div class="card" id="rfm-card" style="margin-top:20px;">
+                            <div class="card-header">
+                                <h2><i class="fas fa-brain" style="color:var(--primary);margin-right:8px;"></i>Segmentación RFM <span style="font-size:12px;font-weight:400;color:var(--gray-500);">— Inteligencia de Clientes</span></h2>
+                                <button class="btn-primary" onclick="calcularYRenderRFM()"><i class="fas fa-sync-alt" style="margin-right:6px;"></i>Calcular</button>
+                            </div>
+                            <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">Clasificación automática por <strong>Recencia</strong>, <strong>Frecuencia</strong> y <strong>Monto</strong>. Detecta quién está en riesgo, quiénes son tus campeones y qué acción tomar.</p>
+                            <div id="rfm-resumen" class="rfm-grid"></div>
+                            <div id="rfm-tabla-container" style="display:none;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                                    <strong style="font-size:14px;">Detalle por Cliente</strong>
+                                    <select id="rfm-filtro-segmento" onchange="filtrarTablaRFM()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--gray-300);font-size:13px;">
+                                        <option value="">Todos los segmentos</option>
+                                        <option value="Campeones">🏆 Campeones</option>
+                                        <option value="Leales">⭐ Leales</option>
+                                        <option value="Prometedores">🌱 Prometedores</option>
+                                        <option value="Nuevos">🆕 Nuevos</option>
+                                        <option value="En Riesgo">⚠️ En Riesgo</option>
+                                        <option value="Perdidos">💔 Perdidos</option>
+                                        <option value="Ocasionales">🔄 Ocasionales</option>
+                                    </select>
+                                </div>
+                                <div style="overflow-x:auto;">
+                                    <table id="rfm-tabla" style="width:100%;border-collapse:collapse;font-size:13px;">
+                                        <thead style="background:var(--gray-50);border-bottom:2px solid var(--gray-200);">
+                                            <tr>
+                                                <th style="padding:10px;text-align:left;font-weight:600;color:var(--gray-700);">Cliente</th>
+                                                <th style="padding:10px;text-align:left;font-weight:600;color:var(--gray-700);">Última Compra</th>
+                                                <th style="padding:10px;text-align:center;font-weight:600;color:var(--gray-700);">Frecuencia</th>
+                                                <th style="padding:10px;text-align:right;font-weight:600;color:var(--gray-700);">Monto Total</th>
+                                                <th style="padding:10px;text-align:center;font-weight:600;color:var(--gray-700);">R</th>
+                                                <th style="padding:10px;text-align:center;font-weight:600;color:var(--gray-700);">F</th>
+                                                <th style="padding:10px;text-align:center;font-weight:600;color:var(--gray-700);">M</th>
+                                                <th style="padding:10px;text-align:left;font-weight:600;color:var(--gray-700);">Segmento</th>
+                                                <th style="padding:10px;text-align:left;font-weight:600;color:var(--gray-700);">Acción sugerida</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="rfm-tabla-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="rfm-empty" style="text-align:center;padding:32px;color:var(--gray-500);">
+                                <i class="fas fa-chart-pie" style="font-size:32px;margin-bottom:12px;display:block;opacity:.4;"></i>
+                                <p>Hacé clic en <strong>Calcular</strong> para analizar tus clientes con IA.</p>
+                                <p style="font-size:12px;margin-top:4px;">Necesitás al menos 2 clientes con ventas registradas.</p>
                             </div>
                         </div>
 
@@ -3100,6 +3186,73 @@
                         </div>
                     </div>
 
+
+                    <!-- PIPELINE CRM PAGE (Sprint 1) -->
+                    <div id="pipeline-ventas" class="page">
+                        <div class="pipeline-header">
+                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Gestioná prospectos y oportunidades. Usá los botones de cada tarjeta para mover entre etapas.</p>
+                            <button class="btn-primary" onclick="openOportunidadModal()"><i class="fas fa-plus"></i> Nueva Oportunidad</button>
+                        </div>
+                        <div class="pipeline-stats" id="pipeline-stats"></div>
+                        <div class="kanban-board" id="pipeline-board"></div>
+
+                        <!-- Modal Oportunidad -->
+                        <div class="modal" id="oportunidad-modal">
+                            <div class="modal-content" style="max-width:540px;">
+                                <div class="modal-header">
+                                    <h2 id="oportunidad-modal-title">Nueva Oportunidad</h2>
+                                    <button class="modal-close" onclick="closeModal('oportunidad-modal')">&times;</button>
+                                </div>
+                                <input type="hidden" id="op-id">
+                                <div class="grid-2">
+                                    <div class="form-group" style="grid-column:1/-1;">
+                                        <label>Título / Nombre de la Oportunidad *</label>
+                                        <input type="text" id="op-titulo" placeholder="Ej: Implementación de software para Empresa X">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Cliente</label>
+                                        <select id="op-cliente"></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Monto Estimado</label>
+                                        <input type="number" id="op-monto" placeholder="0" min="0" step="0.01">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Etapa</label>
+                                        <select id="op-etapa">
+                                            <option value="prospecto">Prospecto</option>
+                                            <option value="contactado">Contactado</option>
+                                            <option value="propuesta">Propuesta Enviada</option>
+                                            <option value="negociacion">En Negociación</option>
+                                            <option value="ganado">Ganado ✓</option>
+                                            <option value="perdido">Perdido ✗</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Probabilidad de Cierre (%)</label>
+                                        <input type="number" id="op-probabilidad" placeholder="50" min="0" max="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Fecha de Cierre Estimada</label>
+                                        <input type="date" id="op-fecha-cierre">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Responsable / Vendedor</label>
+                                        <input type="text" id="op-responsable" placeholder="Nombre del vendedor">
+                                    </div>
+                                    <div class="form-group" style="grid-column:1/-1;">
+                                        <label>Notas / Próximos pasos</label>
+                                        <textarea id="op-notas" rows="3" placeholder="Detalles relevantes, próximos pasos..."></textarea>
+                                    </div>
+                                </div>
+                                <div style="display:flex;gap:12px;margin-top:16px;">
+                                    <button class="btn-secondary" style="flex:1;" onclick="closeModal('oportunidad-modal')">Cancelar</button>
+                                    <button class="btn-primary" style="flex:1;" onclick="guardarOportunidad()"><i class="fas fa-save" style="margin-right:6px;"></i>Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- WHATSAPP BUSINESS PAGE -->
                     <div id="whatsapp" class="page">
                         <div class="grid-2">
@@ -3927,6 +4080,7 @@
             citas: [],
             presupuestos: [],
             remitos: [],
+            oportunidades: [],
             documentos: {},
             mercadopago: { connected: false, token: null, transactions: [] },
             industryConfig: {}
@@ -3942,7 +4096,7 @@
                 rubro: 'general',
                 rubroName: 'General',
                 // Módulos visibles por defecto para general
-                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','nominas','sucursales','citas','proveedores','config'],
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','nominas','sucursales','citas','proveedores','pipeline-ventas','config'],
                 dashboardStats: ['ventas','clientes','productos','gastos']
             },
             indumentaria: {
@@ -3954,7 +4108,7 @@
                 sizes: ["XS", "S", "M", "L", "XL", "XXL"],
                 colors: ["Negro", "Blanco", "Rojo", "Azul", "Verde", "Otros"],
                 rubro: 'indumentaria', rubroName: 'Indumentaria',
-                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','nominas','proveedores','config'],
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','nominas','proveedores','pipeline-ventas','config'],
                 dashboardStats: ['ventas','clientes','productos','gastos'],
                 dashboardExtra: { stat1Label: 'Stock bajo', stat1Fn: 'stockBajo' }
             },
@@ -3976,7 +4130,7 @@
                 categories: ["Filtros", "Aceites", "Frenos", "Neumáticos", "Electricidad", "Carrocería"],
                 customClientFields: [{ name: "patente", label: "Patente" }, { name: "marca", label: "Marca" }, { name: "modelo", label: "Modelo" }, { name: "año", label: "Año" }],
                 rubro: 'talleres', rubroName: 'Taller Mecánico',
-                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','proveedores','config'],
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','proveedores','pipeline-ventas','config'],
                 dashboardStats: ['ventas','clientes','productos','gastos'],
                 dashboardLabels: { ventas: 'Facturación (7d)', clientes: 'Vehículos', productos: 'Repuestos' }
             },
@@ -4035,7 +4189,7 @@
                 ],
                 rubro: 'inmobiliarias', rubroName: 'Inmobiliaria',
                 esInmobiliaria: true,
-                modulosVisibles: ['dashboard','clientes','ventas','facturacion','gastos','empleados','config'],
+                modulosVisibles: ['dashboard','clientes','ventas','facturacion','gastos','empleados','pipeline-ventas','config'],
                 dashboardStats: ['ventas','clientes','propiedades','gastos'],
                 dashboardLabels: { ventas: 'Operaciones (7d)', clientes: 'Interesados', productos: 'Propiedades' }
             },
@@ -4353,6 +4507,7 @@
             if (!Array.isArray(db.citas)) db.citas = [];
             if (!Array.isArray(db.presupuestos)) db.presupuestos = [];
             if (!Array.isArray(db.remitos)) db.remitos = [];
+            if (!Array.isArray(db.oportunidades)) db.oportunidades = [];
             if (!Array.isArray(db.usuarios)) db.usuarios = [];
             if (!db.odontologia) db.odontologia = {};
             if (!db.inmobiliaria) db.inmobiliaria = { propiedades: [], visitas: {} };
@@ -4809,6 +4964,7 @@
                 nominas: [],
                 sucursales: [],
                 proveedores: [],
+                oportunidades: [],
                 usuarios: [{ id: 1, name: 'Usuario Demo', email: 'demo@sistemavos.com', role: 'admin', pin: '1234' }],
                 arqueo: [],
                 odontologia: {},
@@ -4900,7 +5056,7 @@
                                 industryConfig: INDUSTRY_CONFIGS[meta.industry || 'general'] || INDUSTRY_CONFIGS['general'],
                                 clientes: [], productos: [], ventas: [], facturas: [],
                                 gastos: [], empleados: [], nominas: [], sucursales: [],
-                                proveedores: [], arqueo: [],
+                                proveedores: [], arqueo: [], oportunidades: [],
                                 odontologia: {}, inmobiliaria: { propiedades: [], visitas: {} }
                             };
                             localStorage.setItem('sistemavos_db', JSON.stringify(db));
@@ -5070,6 +5226,12 @@
                 el.style.display = isClinica ? '' : 'none';
             });
 
+            // Pipeline CRM: mostrar solo si el rubro lo tiene en modulosVisibles
+            const hasPipeline = Array.isArray(visibles) && visibles.includes('pipeline-ventas');
+            document.querySelectorAll('.menu-pipeline').forEach(el => {
+                el.style.display = hasPipeline ? '' : 'none';
+            });
+
             // Fix: usar [\w-]+ para soportar IDs con guiones (cockpit-clinica, etc.)
             const siempreVisibles = ['dashboard','config','usuarios','mercadopago','whatsapp','ia'];
             const allButtons = document.querySelectorAll('.sidebar-menu button[onclick*="showPage"]');
@@ -5150,6 +5312,7 @@
             if (page === 'clientes') { try { actualizarPanelOdontologico(); actualizarPanelInmobiliario(); } catch(e){} }
             if (page === 'presupuestos') { try { renderPresupuestos(); } catch(e){} }
             if (page === 'remitos') { try { renderRemitos(); } catch(e){} }
+            if (page === 'pipeline-ventas') { try { renderPipelineVentas(); } catch(e){} }
             setTimeout(aplicarModoLectura, 200);
         }
 
@@ -5179,6 +5342,7 @@
                 mercadopago: 'MercadoPago',
                 whatsapp: 'WhatsApp Business',
                 ia: 'Asistente IA',
+                'pipeline-ventas': 'Pipeline CRM',
                 config: 'Configuración'
             };
             document.getElementById('page-title').textContent = titles[page] || 'Página';
@@ -9271,6 +9435,290 @@ Estado: ${p.estado}`);
             document.getElementById('bug-report-modal').style.display = 'none';
             document.getElementById('bug-mensaje-input').value = '';
         }
+
+
+        // ═══════════════════════════════════════════════════════════
+        // SPRINT 1 — PIPELINE CRM
+        // ═══════════════════════════════════════════════════════════
+
+        const PIPELINE_ETAPAS = [
+            { key: 'prospecto',   label: 'Prospecto',          cls: 'prospecto',   prob: 10  },
+            { key: 'contactado',  label: 'Contactado',         cls: 'contactado',  prob: 25  },
+            { key: 'propuesta',   label: 'Propuesta Enviada',  cls: 'propuesta',   prob: 50  },
+            { key: 'negociacion', label: 'En Negociación',     cls: 'negociacion', prob: 75  },
+            { key: 'ganado',      label: 'Ganado ✓',           cls: 'ganado',      prob: 100 },
+            { key: 'perdido',     label: 'Perdido ✗',          cls: 'perdido',     prob: 0   }
+        ];
+
+        function renderPipelineVentas() {
+            if (!Array.isArray(db.oportunidades)) db.oportunidades = [];
+            _renderPipelineStats();
+            _renderPipelineBoard();
+        }
+
+        function _renderPipelineStats() {
+            const el = document.getElementById('pipeline-stats');
+            if (!el) return;
+            const moneda = db.account.currency || '$';
+            const activas = db.oportunidades.filter(o => !['ganado','perdido'].includes(o.etapa));
+            const ganadas = db.oportunidades.filter(o => o.etapa === 'ganado');
+            const totalPipeline = activas.reduce((s,o) => s + (parseFloat(o.monto)||0), 0);
+            const totalGanado   = ganadas.reduce((s,o) => s + (parseFloat(o.monto)||0), 0);
+            const valorPonderado = db.oportunidades
+                .filter(o => o.etapa !== 'perdido')
+                .reduce((s,o) => s + ((parseFloat(o.monto)||0) * (parseInt(o.probabilidad)||50) / 100), 0);
+            el.innerHTML = `
+                <div class="pipeline-stat"><div class="ps-value">${db.oportunidades.length}</div><div class="ps-label">Total Oportunidades</div></div>
+                <div class="pipeline-stat"><div class="ps-value">${activas.length}</div><div class="ps-label">En Progreso</div></div>
+                <div class="pipeline-stat"><div class="ps-value">${moneda}${Math.round(totalPipeline).toLocaleString('es-AR')}</div><div class="ps-label">Valor Pipeline</div></div>
+                <div class="pipeline-stat"><div class="ps-value">${moneda}${Math.round(valorPonderado).toLocaleString('es-AR')}</div><div class="ps-label">Valor Ponderado</div></div>
+                <div class="pipeline-stat"><div class="ps-value" style="color:var(--success);">${moneda}${Math.round(totalGanado).toLocaleString('es-AR')}</div><div class="ps-label">Total Ganado</div></div>
+            `;
+        }
+
+        function _renderPipelineBoard() {
+            const board = document.getElementById('pipeline-board');
+            if (!board) return;
+            const moneda = db.account.currency || '$';
+            board.innerHTML = PIPELINE_ETAPAS.map(etapa => {
+                const ops = db.oportunidades.filter(o => o.etapa === etapa.key);
+                const totalEtapa = ops.reduce((s,o) => s + (parseFloat(o.monto)||0), 0);
+                const btnsOtrasEtapas = PIPELINE_ETAPAS
+                    .filter(e => e.key !== etapa.key && e.key !== 'perdido')
+                    .slice(0, 2)
+                    .map(e => `<button class="kc-btn" onclick="event.stopPropagation();moverOportunidad(${'{op.id}'}, '${e.key}')">\u2192 ${e.label.split(' ')[0]}</button>`);
+                const cards = ops.map(op => {
+                    const cliente = db.clientes.find(c => c.id === op.clienteId);
+                    const nomCliente = cliente ? escapeHTML(cliente.nombre) : (op.clienteNombre ? escapeHTML(op.clienteNombre) : '\u2014');
+                    const btns = PIPELINE_ETAPAS
+                        .filter(e => e.key !== etapa.key && e.key !== 'perdido')
+                        .slice(0, 2)
+                        .map(e => `<button class="kc-btn" onclick="event.stopPropagation();moverOportunidad(${op.id},'${e.key}')">\u2192 ${e.label.split(' ')[0]}</button>`)
+                        .join('');
+                    return `
+                        <div class="kanban-card" onclick="openOportunidadModal(${op.id})">
+                            <h5>${escapeHTML(op.titulo)}</h5>
+                            <p>${nomCliente}</p>
+                            ${op.responsable ? `<p style="font-size:11px;"><i class="fas fa-user" style="margin-right:3px;opacity:.6;"></i>${escapeHTML(op.responsable)}</p>` : ''}
+                            <div class="pipeline-monto">${moneda}${Math.round(parseFloat(op.monto)||0).toLocaleString('es-AR')}</div>
+                            ${op.fechaCierre ? `<div style="font-size:10px;color:var(--gray-400);margin-top:2px;"><i class="fas fa-calendar"></i> ${op.fechaCierre}</div>` : ''}
+                            <div style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;">
+                                ${btns}
+                                <button class="kc-btn" style="color:#ef4444;border-color:#fecaca;" onclick="event.stopPropagation();eliminarOportunidad(${op.id})"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>`;
+                }).join('');
+                return `
+                    <div class="kanban-col">
+                        <div class="kanban-col-header ${etapa.cls}">
+                            ${etapa.label}
+                            <span style="font-size:11px;font-weight:400;opacity:.7;"> (${ops.length}) \u2014 ${moneda}${Math.round(totalEtapa).toLocaleString('es-AR')}</span>
+                        </div>
+                        ${cards || '<p style="font-size:12px;color:var(--gray-400);text-align:center;padding:16px 0;">Sin oportunidades</p>'}
+                    </div>`;
+            }).join('');
+        }
+
+        function openOportunidadModal(id) {
+            const sel = document.getElementById('op-cliente');
+            if (sel) {
+                sel.innerHTML = '<option value="">— Sin cliente —</option>' +
+                    (db.clientes || []).map(c => `<option value="${c.id}">${escapeHTML(c.nombre)}</option>`).join('');
+            }
+            if (id != null) {
+                const op = db.oportunidades.find(o => o.id === id);
+                if (!op) return;
+                document.getElementById('oportunidad-modal-title').textContent = 'Editar Oportunidad';
+                document.getElementById('op-id').value           = op.id;
+                document.getElementById('op-titulo').value       = op.titulo || '';
+                document.getElementById('op-cliente').value      = op.clienteId || '';
+                document.getElementById('op-monto').value        = op.monto || '';
+                document.getElementById('op-etapa').value        = op.etapa || 'prospecto';
+                document.getElementById('op-probabilidad').value = op.probabilidad != null ? op.probabilidad : 50;
+                document.getElementById('op-fecha-cierre').value = op.fechaCierre || '';
+                document.getElementById('op-responsable').value  = op.responsable || '';
+                document.getElementById('op-notas').value        = op.notas || '';
+            } else {
+                document.getElementById('oportunidad-modal-title').textContent = 'Nueva Oportunidad';
+                document.getElementById('op-id').value           = '';
+                document.getElementById('op-titulo').value       = '';
+                document.getElementById('op-cliente').value      = '';
+                document.getElementById('op-monto').value        = '';
+                document.getElementById('op-etapa').value        = 'prospecto';
+                document.getElementById('op-probabilidad').value = '50';
+                document.getElementById('op-fecha-cierre').value = '';
+                document.getElementById('op-responsable').value  = '';
+                document.getElementById('op-notas').value        = '';
+            }
+            document.getElementById('oportunidad-modal').classList.add('active');
+        }
+
+        function guardarOportunidad() {
+            const titulo = document.getElementById('op-titulo').value.trim();
+            if (!titulo) { alert('El título es requerido.'); return; }
+            const idVal    = document.getElementById('op-id').value;
+            const clienteId = document.getElementById('op-cliente').value;
+            const clienteObj = db.clientes.find(c => String(c.id) === String(clienteId));
+            const data = {
+                titulo,
+                clienteId:    clienteId ? parseInt(clienteId) : null,
+                clienteNombre: clienteObj ? clienteObj.nombre : '',
+                monto:        parseFloat(document.getElementById('op-monto').value) || 0,
+                etapa:        document.getElementById('op-etapa').value || 'prospecto',
+                probabilidad: parseInt(document.getElementById('op-probabilidad').value) || 50,
+                fechaCierre:  document.getElementById('op-fecha-cierre').value || '',
+                responsable:  document.getElementById('op-responsable').value.trim(),
+                notas:        document.getElementById('op-notas').value.trim(),
+                updatedAt:    new Date().toISOString()
+            };
+            if (idVal) {
+                const idx = db.oportunidades.findIndex(o => o.id === parseInt(idVal));
+                if (idx !== -1) db.oportunidades[idx] = { ...db.oportunidades[idx], ...data };
+            } else {
+                data.id        = safeMaxId(db.oportunidades);
+                data.createdAt = new Date().toISOString();
+                db.oportunidades.push(data);
+            }
+            saveDB();
+            closeModal('oportunidad-modal');
+            renderPipelineVentas();
+        }
+
+        function moverOportunidad(id, nuevaEtapa) {
+            const op = db.oportunidades.find(o => o.id === id);
+            if (!op) return;
+            op.etapa = nuevaEtapa;
+            const ec = PIPELINE_ETAPAS.find(e => e.key === nuevaEtapa);
+            if (ec) op.probabilidad = ec.prob;
+            op.updatedAt = new Date().toISOString();
+            saveDB();
+            renderPipelineVentas();
+        }
+
+        function eliminarOportunidad(id) {
+            if (!confirm('¿Eliminar esta oportunidad?')) return;
+            db.oportunidades = db.oportunidades.filter(o => o.id !== id);
+            saveDB();
+            renderPipelineVentas();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // SPRINT 1 — SEGMENTACIÓN RFM (IA de Clientes)
+        // ═══════════════════════════════════════════════════════════
+
+        let _rfmData = [];
+
+        function calcularYRenderRFM() {
+            _rfmData = _calcularRFM();
+            _renderRFMResumen(_rfmData);
+            _renderRFMTabla(_rfmData);
+            const hasData = _rfmData.length > 0;
+            document.getElementById('rfm-tabla-container').style.display = hasData ? 'block' : 'none';
+            document.getElementById('rfm-empty').style.display            = hasData ? 'none'  : 'block';
+        }
+
+        function _calcularRFM() {
+            if (!db.clientes || !db.ventas || db.clientes.length === 0) return [];
+            const hoy = new Date();
+
+            const metricas = db.clientes.map(cliente => {
+                const vs = db.ventas.filter(v => v.clienteId === cliente.id || v.clienteName === cliente.nombre);
+                if (vs.length === 0) return { cliente, recenciaDias: 9999, frecuencia: 0, monto: 0, ultimaFecha: null };
+                const fechas   = vs.map(v => new Date(v.fecha)).filter(f => !isNaN(f));
+                const ultimaFecha = fechas.length ? new Date(Math.max(...fechas)) : null;
+                const recenciaDias = ultimaFecha ? Math.floor((hoy - ultimaFecha) / 86400000) : 9999;
+                const frecuencia   = vs.length;
+                const monto        = vs.reduce((s,v) => s + (v.total || 0), 0);
+                return { cliente, recenciaDias, frecuencia, monto, ultimaFecha };
+            });
+
+            const conVentas = metricas.filter(m => m.frecuencia > 0);
+            if (conVentas.length < 2) return [];
+
+            const pct = (arr, p) => {
+                const s = [...arr].sort((a,b) => a-b);
+                return s[Math.floor((p/100)*(s.length-1))];
+            };
+            const rV = conVentas.map(m => m.recenciaDias);
+            const fV = conVentas.map(m => m.frecuencia);
+            const mV = conVentas.map(m => m.monto);
+            const rQ = [20,40,60,80].map(p => pct(rV,p));
+            const fQ = [20,40,60,80].map(p => pct(fV,p));
+            const mQ = [20,40,60,80].map(p => pct(mV,p));
+
+            const scoreR   = v => v <= rQ[0] ? 5 : v <= rQ[1] ? 4 : v <= rQ[2] ? 3 : v <= rQ[3] ? 2 : 1;
+            const scoreAsc = (v,q) => v >= q[3] ? 5 : v >= q[2] ? 4 : v >= q[1] ? 3 : v >= q[0] ? 2 : 1;
+
+            return metricas.map(m => {
+                if (m.frecuencia === 0) {
+                    return { ...m, scoreR:1, scoreF:1, scoreM:1, segmento:'Ocasionales', segKey:'ocasional', accion:'Activar con oferta de primera compra' };
+                }
+                const r  = scoreR(m.recenciaDias);
+                const f  = scoreAsc(m.frecuencia, fQ);
+                const mo = scoreAsc(m.monto, mQ);
+                return { ...m, scoreR: r, scoreF: f, scoreM: mo, ..._getSegmentoRFM(r, f, mo) };
+            });
+        }
+
+        function _getSegmentoRFM(r, f, m) {
+            if (r >= 4 && f >= 4 && m >= 4) return { segmento:'Campeones',   segKey:'campeon',    accion:'Recompensar: programa VIP / referidos' };
+            if (f >= 3 && m >= 3)           return { segmento:'Leales',       segKey:'leal',       accion:'Ofrecer upsell o suscripción premium' };
+            if (r >= 3 && f <= 2)           return { segmento:'Prometedores', segKey:'prometedor', accion:'Incentivar segunda compra con descuento' };
+            if (r >= 4 && f <= 1)           return { segmento:'Nuevos',       segKey:'nuevo',      accion:'Bienvenida y guía de valor del producto' };
+            if (r <= 2 && f >= 3)           return { segmento:'En Riesgo',    segKey:'riesgo',     accion:'¡Urgente! Campaña de reactivación WhatsApp' };
+            if (r <= 2 && f <= 2)           return { segmento:'Perdidos',     segKey:'perdido',    accion:'Win-back con descuento agresivo' };
+            return                                 { segmento:'Ocasionales',  segKey:'ocasional',  accion:'Newsletter o promoción estacional' };
+        }
+
+        function _renderRFMResumen(datos) {
+            const el = document.getElementById('rfm-resumen');
+            if (!el) return;
+            const segs = [
+                { key:'campeon',    emoji:'\uD83C\uDFC6', label:'Campeones',    cls:'rfm-seg-campeon'    },
+                { key:'leal',       emoji:'\u2B50',       label:'Leales',       cls:'rfm-seg-leal'       },
+                { key:'prometedor', emoji:'\uD83C\uDF31', label:'Prometedores', cls:'rfm-seg-prometedor' },
+                { key:'nuevo',      emoji:'\uD83C\uDD95', label:'Nuevos',       cls:'rfm-seg-nuevo'      },
+                { key:'riesgo',     emoji:'\u26A0\uFE0F', label:'En Riesgo',    cls:'rfm-seg-riesgo'     },
+                { key:'perdido',    emoji:'\uD83D\uDC94', label:'Perdidos',     cls:'rfm-seg-perdido'    },
+                { key:'ocasional',  emoji:'\uD83D\uDD04', label:'Ocasionales',  cls:'rfm-seg-ocasional'  }
+            ];
+            const ctr = {};
+            datos.forEach(d => { ctr[d.segKey] = (ctr[d.segKey] || 0) + 1; });
+            el.innerHTML = segs.map(s => `
+                <div class="rfm-segment-card ${s.cls}">
+                    <span class="rfm-emoji">${s.emoji}</span>
+                    <div class="rfm-name">${s.label}</div>
+                    <div class="rfm-count">${ctr[s.key] || 0}</div>
+                </div>`).join('');
+        }
+
+        function _renderRFMTabla(datos) {
+            const tbody = document.getElementById('rfm-tabla-body');
+            if (!tbody) return;
+            const moneda = db.account.currency || '$';
+            const badgeMap = {
+                campeon:'\uD83C\uDFC6 Campeones', leal:'\u2B50 Leales', prometedor:'\uD83C\uDF31 Prometedores',
+                nuevo:'\uD83C\uDD95 Nuevos', riesgo:'\u26A0\uFE0F En Riesgo', perdido:'\uD83D\uDC94 Perdidos', ocasional:'\uD83D\uDD04 Ocasionales'
+            };
+            tbody.innerHTML = datos.map(d => `
+                <tr style="border-bottom:1px solid var(--gray-200);">
+                    <td style="padding:10px;"><strong>${escapeHTML(d.cliente.nombre)}</strong></td>
+                    <td style="padding:10px;">${d.ultimaFecha ? d.ultimaFecha.toLocaleDateString('es-AR') : '\u2014'}</td>
+                    <td style="padding:10px;text-align:center;">${d.frecuencia}</td>
+                    <td style="padding:10px;text-align:right;">${moneda}${Math.round(d.monto||0).toLocaleString('es-AR')}</td>
+                    <td style="padding:10px;text-align:center;font-weight:700;">${d.scoreR}</td>
+                    <td style="padding:10px;text-align:center;font-weight:700;">${d.scoreF}</td>
+                    <td style="padding:10px;text-align:center;font-weight:700;">${d.scoreM}</td>
+                    <td style="padding:10px;"><span class="rfm-badge rfm-badge-${d.segKey}">${badgeMap[d.segKey] || d.segmento}</span></td>
+                    <td style="padding:10px;font-size:11px;color:var(--gray-600);">${escapeHTML(d.accion || '')}</td>
+                </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--gray-400);">Sin datos suficientes (mínimo 2 clientes con ventas).</td></tr>';
+        }
+
+        function filtrarTablaRFM() {
+            const filtro = document.getElementById('rfm-filtro-segmento').value;
+            _renderRFMTabla(filtro ? _rfmData.filter(d => d.segmento === filtro) : _rfmData);
+        }
+
 
         async function enviarReporteBug() {
             const mensajeRaw = document.getElementById('bug-mensaje-input').value.trim();
