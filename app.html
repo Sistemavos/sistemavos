@@ -1911,6 +1911,10 @@
                     <label>Contraseña</label>
                     <input type="password" id="login-password">
                 </div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                    <input type="checkbox" id="login-remember" style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary);">
+                    <label for="login-remember" style="font-size:13px;color:var(--gray-600);cursor:pointer;">Recordar mis datos</label>
+                </div>
                 <button type="button" class="btn-primary" style="width: 100%; margin-bottom: 12px;" onclick="performLogin()">Iniciar Sesión</button>
                 <div id="forgot-password-section" style="display:none; margin-bottom:16px; padding:16px; background:#F0F4FF; border-radius:10px; text-align:left;">
                     <p style="font-size:13px; color:var(--gray-700); margin-bottom:10px;"><i class="fas fa-envelope" style="color:var(--primary);"></i> Ingresa tu email para recuperar tu contraseña:</p>
@@ -1977,13 +1981,13 @@
                     <li><button onclick="showPage('nominas')"><i class="fas fa-file-contract"></i> <span>Nóminas</span></button></li>
 
                     <!-- MÓDULOS CLÍNICA -->
-                    <div class="sidebar-group-label menu-clinica" style="display:none">— Clínica —</div>
-                    <li class="menu-clinica" style="display:none"><button onclick="showPage('cockpit-clinica')"><i class="fas fa-chart-pulse"></i> <span>Cockpit Clínico</span></button></li>
-                    <li class="menu-clinica" style="display:none"><button onclick="showPage('pacientes360')"><i class="fas fa-user-injured"></i> <span>Pacientes 360</span></button></li>
-                    <li class="menu-clinica" style="display:none"><button onclick="showPage('presupuestos-clinica')"><i class="fas fa-file-medical"></i> <span>Presupuestos</span></button></li>
-                    <li class="menu-clinica" style="display:none"><button onclick="showPage('embudo-clinica')"><i class="fas fa-filter"></i> <span>Embudo Clínico</span></button></li>
-                    <li class="menu-clinica" style="display:none"><button onclick="showPage('tareas-clinica')"><i class="fas fa-stethoscope"></i> <span>Tareas</span></button></li>
-                    <li class="menu-clinica" style="display:none"><button onclick="showPage('comunicaciones-clinica')"><i class="fas fa-message"></i> <span>Comunicaciones</span></button></li>
+                    <div class="sidebar-group-label menu-agenda" style="display:none">— Agenda &amp; Turnos —</div>
+                    <li class="menu-agenda" style="display:none"><button onclick="showPage('cockpit-agenda')"><i class="fas fa-gauge-high"></i> <span>Cockpit Agenda</span></button></li>
+                    <li class="menu-agenda" style="display:none"><button onclick="showPage('reservas360')"><i class="fas fa-address-card"></i> <span>Reservas 360</span></button></li>
+                    <li class="menu-agenda" style="display:none"><button onclick="showPage('cotizaciones-agenda')"><i class="fas fa-file-invoice"></i> <span>Cotizaciones</span></button></li>
+                    <li class="menu-agenda" style="display:none"><button onclick="showPage('embudo-agenda')"><i class="fas fa-filter"></i> <span>Embudo Agenda</span></button></li>
+                    <li class="menu-agenda" style="display:none"><button onclick="showPage('tareas-agenda')"><i class="fas fa-list-check"></i> <span>Tareas</span></button></li>
+                    <li class="menu-agenda" style="display:none"><button onclick="showPage('comunicaciones-agenda')"><i class="fas fa-message"></i> <span>Comunicaciones</span></button></li>
 
                     <!-- INTEGRACIONES & IA -->
                     <li class="menu-section-title">INTEGRACIONES &amp; IA</li>
@@ -3483,6 +3487,8 @@
                             <button class="tab-button active" onclick="switchTab('config-general', this)">General</button>
                             <button class="tab-button" onclick="switchTab('config-branding', this)">Branding</button>
                             <button class="tab-button" onclick="switchTab('config-datos', this)">Datos</button>
+                            <button class="tab-button" onclick="switchTab('config-menu', this)">Mi Menú</button>
+                            <button class="tab-button" onclick="switchTab('config-seguridad', this)">Seguridad</button>
                         </div>
 
                         <!-- GENERAL CONFIG -->
@@ -3521,6 +3527,20 @@
                                     <div class="form-group">
                                         <label>WhatsApp</label>
                                         <input type="tel" id="config-whatsapp" placeholder="+54...">
+                                    </div>
+                                </div>
+                                <!-- WEBHOOK GOOGLE CALENDAR -->
+                                <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:12px;padding:14px 16px;margin-bottom:16px;border:1px solid #bae6fd;">
+                                    <h3 style="font-size:13px;font-weight:600;margin-bottom:8px;color:#0369a1;">
+                                        <i class="fas fa-calendar-days" style="margin-right:6px;"></i>
+                                        Google Calendar — Webhook Make.com
+                                    </h3>
+                                    <div class="form-group" style="margin:0;">
+                                        <label style="font-size:12px;">URL del Webhook (Make.com)</label>
+                                        <input type="url" id="config-webhook-gcal"
+                                            placeholder="https://hook.eu1.make.com/..."
+                                            style="font-size:12px;font-family:monospace;">
+                                        <small style="color:#0369a1;font-size:11px;">Dejá vacío para desactivar la sincronización automática de turnos.</small>
                                     </div>
                                 </div>
 
@@ -3639,9 +3659,126 @@
                     </div>
                 </div>
 
+
+                        <!-- MI MENÚ CONFIG -->
+                        <div id="config-menu" class="tab-content">
+                            <div class="card">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+                                    <i class="fas fa-sliders" style="font-size:20px;color:var(--primary);"></i>
+                                    <div>
+                                        <h2 style="margin:0;font-size:16px;">Personalizar mi Menú</h2>
+                                        <p style="margin:0;font-size:12px;color:var(--gray-500);">Mostrá solo los módulos que usás. Los cambios se aplican de inmediato.</p>
+                                    </div>
+                                </div>
+
+                                <div id="gestor-modulos-container" style="margin-top:16px;border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;">
+                                    <!-- Se renderiza dinámicamente por cargarGestorMenu() -->
+                                </div>
+
+                                <p class="always-visible-note">
+                                    <i class="fas fa-lock" style="margin-right:4px;"></i>
+                                    <strong>Dashboard, Configuración, Usuarios, IA, WhatsApp y MercadoPago</strong> son fijos y no se pueden ocultar.
+                                </p>
+                            </div>
+                        </div>
+
+
+                        <!-- SEGURIDAD CONFIG -->
+                        <div id="config-seguridad" class="tab-content">
+                            <div class="card">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                                    <i class="fas fa-shield-halved" style="font-size:20px;color:var(--primary);"></i>
+                                    <div>
+                                        <h2 style="margin:0;font-size:16px;">Autenticación de Dos Factores (2FA)</h2>
+                                        <p style="margin:0;font-size:12px;color:var(--gray-500);">Protegé tu cuenta con Google Authenticator, Authy u otra app TOTP.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Estado actual -->
+                                <div id="2fa-status-section" style="margin-bottom:16px;">
+                                    <span id="2fa-badge" class="security-status-badge inactive">
+                                        <i class="fas fa-lock-open"></i> 2FA Inactivo
+                                    </span>
+                                </div>
+
+                                <!-- Botón activar (visible si no está enrollado) -->
+                                <div id="2fa-enroll-trigger">
+                                    <button class="btn-primary" onclick="iniciarEnrolamiento2FA()">
+                                        <i class="fas fa-mobile-screen-button" style="margin-right:6px;"></i>
+                                        Activar Autenticación en 2 Pasos
+                                    </button>
+                                </div>
+
+                                <!-- Paso de enrolamiento (QR + verificación) -->
+                                <div id="2fa-enroll-section" style="display:none;">
+                                    <div class="qr-wrapper">
+                                        <p style="font-size:13px;color:var(--gray-600);margin:0;text-align:center;">
+                                            <strong>1.</strong> Abrí Google Authenticator o Authy<br>
+                                            <strong>2.</strong> Escaneá este código QR
+                                        </p>
+                                        <div id="2fa-qr-container"></div>
+                                        <div>
+                                            <p style="font-size:11px;color:var(--gray-500);margin:0 0 4px;text-align:center;">¿No podés escanear? Ingresá este código manualmente:</p>
+                                            <div class="secret-code-box" id="2fa-secret-display">—</div>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top:12px;">
+                                        <label style="font-size:13px;font-weight:600;color:var(--gray-700);display:block;margin-bottom:8px;">
+                                            <i class="fas fa-key" style="margin-right:4px;color:var(--primary);"></i>
+                                            <strong>3.</strong> Introducí el código de 6 dígitos de tu app:
+                                        </label>
+                                        <input type="text" id="2fa-enroll-code" class="otp-input"
+                                            maxlength="6" inputmode="numeric" pattern="[0-9]*"
+                                            placeholder="000000"
+                                            oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <div id="2fa-enroll-error" style="color:#ef4444;font-size:12px;margin-top:6px;display:none;"></div>
+                                    </div>
+
+                                    <div style="display:flex;gap:10px;margin-top:14px;">
+                                        <button class="btn-primary" style="flex:1;" onclick="verificarEnrolamiento2FA()">
+                                            <i class="fas fa-check-circle" style="margin-right:6px;"></i>Verificar y Activar
+                                        </button>
+                                        <button class="btn-secondary" onclick="cancelarEnrolamiento2FA()">Cancelar</button>
+                                    </div>
+                                </div>
+
+                                <!-- Sección post-activación (visible si está enrollado) -->
+                                <div id="2fa-active-section" style="display:none;">
+                                    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;margin-bottom:14px;">
+                                        <p style="font-size:13px;color:#15803d;margin:0;">
+                                            <i class="fas fa-circle-check" style="margin-right:6px;"></i>
+                                            <strong>2FA activo.</strong> Tu cuenta está protegida con autenticación de dos factores.
+                                        </p>
+                                    </div>
+                                    <button class="btn-danger" onclick="desactivar2FA()">
+                                        <i class="fas fa-trash-can" style="margin-right:6px;"></i>Desactivar 2FA
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                     <!-- COCKPIT CLÍNICO PAGE -->
-                    <div id="cockpit-clinica" class="page">
-                        <p style="color:var(--gray-500);font-size:13px;margin-bottom:16px;">Sistema clínico con métricas en tiempo real y recomendaciones operativas.</p>
+                    <div id="cockpit-agenda" class="page">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Dashboard de tu agenda: métricas de ocupación, turnos y rendimiento operativo en tiempo real.</p>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn-secondary" onclick="sincronizarGCal()" id="btn-sync-gcal" style="font-size:13px;">
+                                    <i class="fas fa-calendar-arrow-up" style="margin-right:6px;"></i>Sync Google Calendar
+                                </button>
+                                <button class="btn-primary" onclick="abrirModalNuevoTurno()" style="font-size:13px;">
+                                    <i class="fas fa-plus" style="margin-right:6px;"></i>Nuevo Turno
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Lista de próximos turnos -->
+                        <div class="card" style="margin-bottom:16px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                                <h3 style="font-size:14px;font-weight:600;margin:0;"><i class="fas fa-clock" style="color:var(--primary);margin-right:6px;"></i>Próximos Turnos</h3>
+                                <span id="turnos-count" style="font-size:12px;color:var(--gray-500);"></span>
+                            </div>
+                            <div id="proximos-turnos-list" style="font-size:13px;color:var(--gray-500);">Cargando...</div>
+                        </div>
                         <div class="clinic-kpi-grid" id="cockpit-kpi-grid">
                             <div class="clinic-kpi-card teal">
                                 <div class="kpi-label">Ocupación</div>
@@ -3678,36 +3815,36 @@
                                 <h3>✦ Siguientes mejores acciones</h3>
                                 <p>Prioridad por impacto en ingresos y no-show.</p>
                                 <div class="clinic-action-item">
-                                    <h4>Confirmar citas de mañana</h4>
-                                    <p id="ck-pendientes-conf">Pacientes pendientes de respuesta</p>
+                                    <h4>Confirmar turnos de mañana</h4>
+                                    <p id="ck-pendientes-conf">Clientes pendientes de respuesta</p>
                                     <button class="clinic-action-btn" onclick="showPage('citas')">→ Ver agenda</button>
                                 </div>
                                 <div class="clinic-action-item">
-                                    <h4>Seguimiento de presupuestos +48h</h4>
+                                    <h4>Seguimiento de cotizaciones +48h</h4>
                                     <p id="ck-presup-follow">Presupuestos en estado enviado</p>
-                                    <button class="clinic-action-btn" onclick="showPage('presupuestos-clinica')">→ Ver presupuestos</button>
+                                    <button class="clinic-action-btn" onclick="showPage('cotizaciones-agenda')">→ Ver cotizaciones</button>
                                 </div>
                                 <div class="clinic-action-item">
                                     <h4>Tareas vencidas</h4>
                                     <p id="ck-tareas-venc">Tareas pendientes de hoy</p>
-                                    <button class="clinic-action-btn" onclick="showPage('tareas-clinica')">→ Ver tareas</button>
+                                    <button class="clinic-action-btn" onclick="showPage('tareas-agenda')">→ Ver tareas del equipo</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- PACIENTES 360 PAGE -->
-                    <div id="pacientes360" class="page">
+                    <!-- RESERVAS 360 PAGE -->
+                    <div id="reservas360" class="page">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
-                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Vista 360 con búsqueda inteligente, estado y continuidad del tratamiento.</p>
-                            <button class="btn-primary" onclick="openModal('cliente-modal')"><i class="fas fa-plus"></i> Nuevo paciente</button>
+                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Vista 360 de clientes y reservas: búsqueda inteligente, estado y continuidad del servicio.</p>
+                            <button class="btn-primary" onclick="openModal('cliente-modal')"><i class="fas fa-plus"></i> Nuevo cliente</button>
                         </div>
                         <div class="search-bar" style="margin-bottom:16px;gap:10px;">
-                            <input type="text" id="p360-search" placeholder="Buscar por nombre, teléfono o correo..." oninput="renderPacientes360()" style="flex:1;">
-                            <select id="p360-state-filter" onchange="renderPacientes360()" style="min-width:160px;">
+                            <input type="text" id="p360-search" placeholder="Buscar por nombre, teléfono, servicio o email..." oninput="renderReservas360()" style="flex:1;">
+                            <select id="p360-state-filter" onchange="renderReservas360()" style="min-width:160px;">
                                 <option value="">Estado: todos</option>
                                 <option value="activo">Activo</option>
-                                <option value="tratamiento">En tratamiento</option>
+                                <option value="tratamiento">En proceso</option>
                                 <option value="seguimiento">Seguimiento</option>
                                 <option value="inactivo">Inactivo</option>
                             </select>
@@ -3719,7 +3856,7 @@
                                         <th>Nombre</th>
                                         <th>Teléfono</th>
                                         <th>Última visita</th>
-                                        <th>Próxima cita</th>
+                                        <th>Próximo turno</th>
                                         <th>Estado</th>
                                         <th>Etiquetas</th>
                                         <th>Siguiente acción</th>
@@ -3731,15 +3868,15 @@
                         </div>
                     </div>
 
-                    <!-- PRESUPUESTOS CLÍNICA PAGE -->
-                    <div id="presupuestos-clinica" class="page">
+                    <!-- COTIZACIONES AGENDA PAGE -->
+                    <div id="cotizaciones-agenda" class="page">
                         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
-                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Planes de tratamiento con trazabilidad, envío y seguimiento.</p>
-                            <button class="btn-primary" onclick="nuevoPresupuestoClinica()"><i class="fas fa-plus"></i> Nuevo presupuesto</button>
+                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Cotizaciones con trazabilidad: creación, envío, seguimiento y conversión.</p>
+                            <button class="btn-primary" onclick="nuevaCotizacionAgenda()"><i class="fas fa-plus"></i> Nueva cotización</button>
                         </div>
                         <div class="search-bar" style="margin-bottom:16px;gap:10px;">
-                            <input type="text" id="pq-search" placeholder="Buscar por paciente o número..." oninput="renderPresupuestosClinica()" style="flex:1;">
-                            <select id="pq-state-filter" onchange="renderPresupuestosClinica()" style="min-width:160px;">
+                            <input type="text" id="pq-search" placeholder="Buscar por cliente o número..." oninput="renderCotizacionesAgenda()" style="flex:1;">
+                            <select id="pq-state-filter" onchange="renderCotizacionesAgenda()" style="min-width:160px;">
                                 <option value="">Todos los estados</option>
                                 <option value="borrador">Borrador</option>
                                 <option value="enviado">Enviado</option>
@@ -3756,26 +3893,26 @@
                                 <div class="clinic-action-item">
                                     <h4>Enviados +48h sin vista</h4>
                                     <p id="pq-sin-vista">casos pendientes</p>
-                                    <button class="clinic-action-btn" onclick="document.getElementById('pq-state-filter').value='enviado';renderPresupuestosClinica()">→ Filtrar enviados</button>
+                                    <button class="clinic-action-btn" onclick="document.getElementById('pq-state-filter').value='enviado';renderCotizacionesAgenda()">→ Filtrar enviados</button>
                                 </div>
                                 <div class="clinic-action-item">
                                     <h4>Vistos +72h sin aceptación</h4>
                                     <p id="pq-sin-acept">casos pendientes</p>
-                                    <button class="clinic-action-btn" onclick="document.getElementById('pq-state-filter').value='visto';renderPresupuestosClinica()">→ Filtrar vistos</button>
+                                    <button class="clinic-action-btn" onclick="document.getElementById('pq-state-filter').value='visto';renderCotizacionesAgenda()">→ Filtrar vistos</button>
                                 </div>
                                 <div class="clinic-action-item">
                                     <h4>Confirmados este mes</h4>
                                     <p id="pq-confirmados">—</p>
-                                    <button class="clinic-action-btn" onclick="document.getElementById('pq-state-filter').value='confirmado';renderPresupuestosClinica()">→ Ver confirmados</button>
+                                    <button class="clinic-action-btn" onclick="document.getElementById('pq-state-filter').value='confirmado';renderCotizacionesAgenda()">→ Ver confirmados</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- EMBUDO CLÍNICO PAGE -->
-                    <div id="embudo-clinica" class="page">
+                    <!-- EMBUDO AGENDA PAGE -->
+                    <div id="embudo-agenda" class="page">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Kanban del embudo clínico. Arrastrá los casos entre etapas.</p>
+                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Kanban del embudo de negocio. Arrastrá las oportunidades entre etapas.</p>
                             <div style="display:flex;gap:8px;">
                                 <button class="btn-secondary" onclick="nuevaEtapaKanban()"><i class="fas fa-plus"></i> Nueva etapa</button>
                                 <button class="btn-primary" onclick="nuevoCasoKanban()"><i class="fas fa-plus"></i> Nuevo caso</button>
@@ -3784,8 +3921,8 @@
                         <div class="kanban-board" id="kanban-board"></div>
                     </div>
 
-                    <!-- TAREAS CLÍNICA PAGE -->
-                    <div id="tareas-clinica" class="page">
+                    <!-- TAREAS AGENDA PAGE -->
+                    <div id="tareas-agenda" class="page">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
                             <div>
                                 <h2 style="font-size:20px;font-weight:700;margin-bottom:2px;">Tareas y Equipo</h2>
@@ -3793,11 +3930,11 @@
                             </div>
                             <div style="display:flex;gap:8px;">
                                 <button class="btn-secondary" onclick="nuevaPlantillaTarea()"><i class="fas fa-layer-group"></i> Nueva plantilla</button>
-                                <button class="btn-primary" onclick="nuevaTareaClinica()"><i class="fas fa-plus"></i> Nueva tarea</button>
+                                <button class="btn-primary" onclick="nuevaTareaAgenda()"><i class="fas fa-plus"></i> Nueva tarea</button>
                             </div>
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 240px;gap:16px;">
-                            <div id="tareas-clinica-list"></div>
+                            <div id="tareas-agenda-list"></div>
                             <div>
                                 <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-500);margin-bottom:10px;">Plantillas de tareas</p>
                                 <div id="task-templates-list"></div>
@@ -3805,8 +3942,8 @@
                         </div>
                     </div>
 
-                    <!-- COMUNICACIONES CLÍNICA PAGE -->
-                    <div id="comunicaciones-clinica" class="page">
+                    <!-- COMUNICACIONES AGENDA PAGE -->
+                    <div id="comunicaciones-agenda" class="page">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
                             <div>
                                 <h2 style="font-size:20px;font-weight:700;margin-bottom:2px;">Centro de mensajes</h2>
@@ -3818,15 +3955,15 @@
                             <div>
                                 <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-500);margin-bottom:10px;">Plantillas</p>
                                 <div class="comm-template">
-                                    <div class="ct-left"><h4>Recordatorio</h4><p>Hola [paciente], te recordamos tu cita.</p></div>
+                                    <div class="ct-left"><h4>Recordatorio</h4><p>Hola [cliente], te recordamos tu cita.</p></div>
                                     <span class="comm-channel wa">whatsapp</span>
                                 </div>
                                 <div class="comm-template">
-                                    <div class="ct-left"><h4>Seguimiento</h4><p>Hola [paciente], revisamos tu presupuesto.</p></div>
+                                    <div class="ct-left"><h4>Seguimiento</h4><p>Hola [cliente], revisamos tu presupuesto.</p></div>
                                     <span class="comm-channel email">email</span>
                                 </div>
                                 <div class="comm-template">
-                                    <div class="ct-left"><h4>Reprogramación</h4><p>Hola [paciente], te proponemos nueva fecha: [fecha] [hora].</p></div>
+                                    <div class="ct-left"><h4>Reprogramación</h4><p>Hola [cliente], te proponemos nueva fecha: [fecha] [hora].</p></div>
                                     <span class="comm-channel wa">whatsapp</span>
                                 </div>
                                 <div class="comm-template">
@@ -3834,7 +3971,7 @@
                                     <span class="comm-channel sms">sms</span>
                                 </div>
                                 <div class="comm-template">
-                                    <div class="ct-left"><h4>Post tratamiento</h4><p>Gracias [paciente], aquí tus recomendaciones.</p></div>
+                                    <div class="ct-left"><h4>Post tratamiento</h4><p>Gracias [cliente], aquí tus recomendaciones.</p></div>
                                     <span class="comm-channel email">email</span>
                                 </div>
                                 <div id="comm-custom-templates"></div>
@@ -4182,7 +4319,9 @@
             oportunidades: [],
             documentos: {},
             mercadopago: { connected: false, token: null, transactions: [] },
-            industryConfig: {}
+            industryConfig: {},
+            config: { modulosOcultos: [], webhookGCal: 'https://hook.eu1.make.com/uflsn3dizm1qmfyj2y63t3ysmclavo9j' },
+            agenda: { turnos: [] }
         };
 
         const INDUSTRY_CONFIGS = {
@@ -4218,7 +4357,7 @@
                 categories: ["Consulta", "Laboratorio", "Medicamentos", "Insumos"],
                 customClientFields: [{ name: "obra_social", label: "Obra Social" }, { name: "num_afiliado", label: "Número Afiliado" }],
                 rubro: 'medicina', rubroName: 'Medicina',
-                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','gastos','empleados','nominas','citas','cockpit-clinica','pacientes360','presupuestos-clinica','embudo-clinica','tareas-clinica','comunicaciones-clinica','proveedores','config'],
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','gastos','empleados','nominas','citas','cockpit-agenda','reservas360','cotizaciones-agenda','embudo-agenda','tareas-agenda','comunicaciones-agenda','proveedores','config'],
                 dashboardStats: ['ventas','clientes','citas','gastos'],
                 dashboardLabels: { ventas: 'Consultas (7d)', clientes: 'Pacientes', productos: 'Insumos' }
             },
@@ -4229,7 +4368,7 @@
                 categories: ["Filtros", "Aceites", "Frenos", "Neumáticos", "Electricidad", "Carrocería"],
                 customClientFields: [{ name: "patente", label: "Patente" }, { name: "marca", label: "Marca" }, { name: "modelo", label: "Modelo" }, { name: "año", label: "Año" }],
                 rubro: 'talleres', rubroName: 'Taller Mecánico',
-                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','proveedores','pipeline-ventas','config'],
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','citas','cockpit-agenda','reservas360','cotizaciones-agenda','tareas-agenda','comunicaciones-agenda','proveedores','pipeline-ventas','config'],
                 dashboardStats: ['ventas','clientes','productos','gastos'],
                 dashboardLabels: { ventas: 'Facturación (7d)', clientes: 'Vehículos', productos: 'Repuestos' }
             },
@@ -4250,7 +4389,7 @@
                 categories: ["Corte", "Color", "Tratamiento Facial", "Manicura", "Depilación", "Masajes"],
                 customClientFields: [{ name: "tipo_piel", label: "Tipo de Piel" }, { name: "alergias", label: "Alergias" }],
                 rubro: 'belleza', rubroName: 'Belleza / Estética',
-                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','citas','cockpit-clinica','pacientes360','presupuestos-clinica','embudo-clinica','tareas-clinica','comunicaciones-clinica','proveedores','config'],
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','arqueo','gastos','empleados','citas','cockpit-agenda','reservas360','cotizaciones-agenda','embudo-agenda','tareas-agenda','comunicaciones-agenda','proveedores','config'],
                 dashboardStats: ['ventas','clientes','citas','gastos'],
                 dashboardLabels: { ventas: 'Ingresos (7d)', clientes: 'Clientes activos', productos: 'Servicios' }
             },
@@ -4305,7 +4444,7 @@
                 ],
                 rubro: 'odontologia', rubroName: 'Odontología',
                 esOdontologia: true,
-                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','gastos','empleados','nominas','citas','config','cockpit-clinica','pacientes360','presupuestos-clinica','embudo-clinica','tareas-clinica','comunicaciones-clinica'],
+                modulosVisibles: ['dashboard','clientes','inventario','ventas','facturacion','gastos','empleados','nominas','citas','config','cockpit-agenda','reservas360','cotizaciones-agenda','embudo-agenda','tareas-agenda','comunicaciones-agenda'],
                 dashboardStats: ['ventas','clientes','citas','gastos'],
                 dashboardLabels: { ventas: 'Consultas (7d)', clientes: 'Pacientes', productos: 'Insumos' }
             }
@@ -4324,6 +4463,11 @@
             if (stored) {
                 db = JSON.parse(stored);
             }
+            // Asegurar estructura db.config
+            if (!db.config) db.config = { modulosOcultos: [], webhookGCal: '' };
+            if (!db.config.modulosOcultos) db.config.modulosOcultos = [];
+            if (!db.config.webhookGCal) db.config.webhookGCal = 'https://hook.eu1.make.com/uflsn3dizm1qmfyj2y63t3ysmclavo9j';
+            if (!db.agenda) db.agenda = { turnos: [] };
         }
 
         // ===== DOCUMENTO SYSTEM =====
@@ -4504,12 +4648,13 @@
             const urlParams = new URLSearchParams(window.location.search);
             const wantsLogin = urlParams.get('login') === '1';
 
-            // Intentar restaurar sesión de Supabase existente
-            if (navigator.onLine) {
-                try {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (session && session.user && !wantsLogin) {
-                        // Hay sesión activa — descargar datos de la nube
+            // Restaurar sesión de Supabase — funciona online y offline
+            // getSession() lee del localStorage de Supabase, no requiere red
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session && session.user && !wantsLogin) {
+                    // Hay sesión activa — intentar sincronizar con la nube si hay red
+                    if (navigator.onLine) {
                         try {
                             const { data: cloudData } = await supabaseClient
                                 .from('usuarios_datos')
@@ -4520,24 +4665,27 @@
                             if (cloudData && cloudData.db_json) {
                                 localStorage.setItem('sistemavos_db', JSON.stringify(cloudData.db_json));
                                 db = cloudData.db_json;
+                                // Re-asegurar db.config después de cargar de la nube
+                                if (!db.config) db.config = { modulosOcultos: [] };
+                                if (!db.config.modulosOcultos) db.config.modulosOcultos = [];
                             }
                         } catch (e) {
-                            console.warn('No se pudieron cargar datos de la nube:', e);
-                        }
-
-                        if (db.account && db.account.email) {
-                            currentUser = {
-                                email: session.user.email,
-                                name: db.account.ownerName || 'Usuario',
-                                role: 'admin'
-                            };
-                            showApp();
-                            return;
+                            console.warn('No se pudieron sincronizar datos de la nube, usando datos locales:', e);
                         }
                     }
-                } catch (e) {
-                    console.warn('No se pudo verificar sesión de Supabase:', e);
+
+                    // Sesión válida: mostrar la app con datos locales o de nube
+                    // No requerir db.account.email — la sesión Supabase es suficiente
+                    currentUser = {
+                        email: session.user.email,
+                        name: (db.account && db.account.ownerName) || session.user.email.split('@')[0],
+                        role: 'admin'
+                    };
+                    showApp();
+                    return;
                 }
+            } catch (e) {
+                console.warn('No se pudo verificar sesión de Supabase:', e);
             }
 
             // Si quedaron datos demo en localStorage y el usuario viene a loguearse, limpiar
@@ -4573,6 +4721,15 @@
             document.getElementById('registration-page').style.display = 'none';
             document.getElementById('login-page').style.display = 'flex';
             document.getElementById('app-page').style.display = 'none';
+
+            // Autocompletar email si el usuario marcó "Recordar mis datos"
+            const savedEmail = localStorage.getItem('vos_remember_email');
+            if (savedEmail) {
+                const emailInput = document.getElementById('login-email');
+                const rememberCb = document.getElementById('login-remember');
+                if (emailInput) emailInput.value = savedEmail;
+                if (rememberCb) rememberCb.checked = true;
+            }
 
             // Mostrar datos del negocio si ya hay cuenta registrada
             const hasAccount = db.account && db.account.email;
@@ -5113,6 +5270,14 @@
                     if (!authError && authData.user) {
                         clearLoginError();
 
+                        // Guardar email si "Recordar mis datos" está marcado
+                        const rememberCb = document.getElementById('login-remember');
+                        if (rememberCb && rememberCb.checked) {
+                            localStorage.setItem('vos_remember_email', email);
+                        } else {
+                            localStorage.removeItem('vos_remember_email');
+                        }
+
                         // Limpiar datos de demo si había sesión demo previa
                         if (db.account?.email === DEMO_CREDENTIALS.email || currentUser?.role === 'demo') {
                             localStorage.removeItem('sistemavos_db');
@@ -5172,6 +5337,19 @@
                             role: 'admin'
                         };
                         if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Iniciar Sesión'; }
+
+                        // ── FASE 2: Check 2FA requirement ──
+                        try {
+                            const { data: aalData } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                            if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
+                                // Usuario tiene 2FA activo — requiere verificación TOTP
+                                await mostrar2FAlogin();
+                                return; // No llames showApp() todavía
+                            }
+                        } catch (e) {
+                            console.warn('No se pudo verificar AAL, continuando sin 2FA:', e);
+                        }
+
                         showApp();
                         return;
                     }
@@ -5319,10 +5497,20 @@
             if (!visibles) return;
 
             // Mostrar/ocultar grupo clínica ANTES del forEach de botones
-            const clinicaRubros = ['medicina', 'belleza', 'odontologia'];
-            const isClinica = clinicaRubros.includes(cfg.rubro);
-            document.querySelectorAll('.menu-clinica').forEach(el => {
-                el.style.display = isClinica ? '' : 'none';
+            const agendaRubros = ['medicina', 'belleza', 'odontologia', 'talleres'];
+            const isAgenda = agendaRubros.includes(cfg.rubro);
+            document.querySelectorAll('.menu-agenda').forEach(el => {
+                if (!isAgenda) { el.style.display = 'none'; return; }
+                // Verificar si el usuario lo ocultó manualmente
+                const modulosOcultos2 = (db.config && db.config.modulosOcultos) ? db.config.modulosOcultos : [];
+                if (el.tagName === 'LI') {
+                    const btn = el.querySelector('button[onclick]');
+                    if (btn) {
+                        const m = btn.getAttribute('onclick').match(/showPage\('([\w-]+)'\)/);
+                        if (m && modulosOcultos2.includes(m[1])) { el.style.display = 'none'; return; }
+                    }
+                }
+                el.style.display = '';
             });
 
             // Pipeline CRM: mostrar solo si el rubro lo tiene en modulosVisibles
@@ -5331,8 +5519,10 @@
                 el.style.display = hasPipeline ? '' : 'none';
             });
 
-            // Fix: usar [\w-]+ para soportar IDs con guiones (cockpit-clinica, etc.)
+            // Fix: usar [\w-]+ para soportar IDs con guiones (cockpit-agenda, etc.)
             const siempreVisibles = ['dashboard','config','usuarios','mercadopago','whatsapp','ia'];
+            // Preferencias del usuario (módulos ocultados manualmente)
+            const modulosOcultos = (db.config && db.config.modulosOcultos) ? db.config.modulosOcultos : [];
             const allButtons = document.querySelectorAll('.sidebar-menu button[onclick*="showPage"]');
             allButtons.forEach(btn => {
                 const match = btn.getAttribute('onclick').match(/showPage\('([\w-]+)'\)/);
@@ -5340,10 +5530,14 @@
                 const page = match[1];
                 const li = btn.closest('li');
                 if (!li) return;
-                // Los items .menu-clinica ya fueron controlados arriba; no pisar con el forEach
-                if (li.classList.contains('menu-clinica')) return;
+                // Los items .menu-agenda ya fueron controlados arriba; no pisar con el forEach
+                if (li.classList.contains('menu-agenda')) return;
                 if (siempreVisibles.includes(page)) { li.style.display = ''; return; }
-                li.style.display = visibles.includes(page) ? '' : 'none';
+                // Filtro 1: permitido por rubro?
+                const permitidoPorRubro = visibles.includes(page);
+                // Filtro 2: ocultado por el usuario?
+                const ocultadoPorUsuario = modulosOcultos.includes(page);
+                li.style.display = (permitidoPorRubro && !ocultadoPorUsuario) ? '' : 'none';
             });
             // Actualizar labels del sidebar según el rubro
             const menuClientes = document.getElementById('menu-clientes');
@@ -5416,11 +5610,11 @@
             }
             updatePageTitle(page);
             if (page === 'citas') renderCitas();
-            if (page === 'cockpit-clinica') renderCockpitClinica();
-            if (page === 'pacientes360') renderPacientes360();
-            if (page === 'presupuestos-clinica') renderPresupuestosClinica();
-            if (page === 'embudo-clinica') renderEmbudoClinica();
-            if (page === 'tareas-clinica') renderTareasClinica();
+            if (page === 'cockpit-agenda') { renderCockpitAgenda(); renderProximosTurnos(); }
+            if (page === 'reservas360') renderReservas360();
+            if (page === 'cotizaciones-agenda') renderCotizacionesAgenda();
+            if (page === 'embudo-agenda') renderEmbudoAgenda();
+            if (page === 'tareas-agenda') renderTareasAgenda();
             if (page === 'config') { cargarConfiguracion(); renderRubroSelector(); }
             if (page === 'clientes') { try { renderClientes(); actualizarPanelOdontologico(); actualizarPanelInmobiliario(); } catch(e){} }
             if (page === 'presupuestos') { try { renderPresupuestos(); } catch(e){} }
@@ -5442,12 +5636,12 @@
                 nominas: 'Nóminas',
                 sucursales: 'Sucursales',
                 citas: 'Citas / Agenda',
-                'cockpit-clinica': 'Cockpit Clínico',
-                'pacientes360': 'Pacientes 360',
-                'presupuestos-clinica': 'Presupuestos',
-                'embudo-clinica': 'Embudo Clínico',
-                'tareas-clinica': 'Tareas',
-                'comunicaciones-clinica': 'Comunicaciones',
+                'cockpit-agenda': 'Cockpit Agenda',
+                'reservas360': 'Reservas 360',
+                'cotizaciones-agenda': 'Cotizaciones',
+                'embudo-agenda': 'Embudo Agenda',
+                'tareas-agenda': 'Tareas',
+                'comunicaciones-agenda': 'Comunicaciones',
                 proveedores: 'Proveedores',
                 presupuestos: 'Presupuestos',
                 remitos: 'Remitos / Albaranes',
@@ -6183,7 +6377,141 @@
                 .growth-footer { margin-top:24px; padding:14px 20px; background:#f0ecfc; border-radius:8px; text-align:center; font-size:12px; color:#4c1d95; border:1px dashed #6C3AE1; }
                 .growth-footer strong { font-size:13px; }
                 .btn-print { display:inline-block; margin:16px auto 0; padding:10px 28px; background:#6C3AE1; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
-            </style></head><body>
+    
+        /* ── Gestor de Visibilidad: toggle iOS ── */
+        .module-toggle-list { display: flex; flex-direction: column; gap: 0; }
+        .module-toggle-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 11px 14px; border-bottom: 1px solid var(--gray-100);
+            transition: background .15s;
+        }
+        .module-toggle-item:last-child { border-bottom: none; }
+        .module-toggle-item:hover { background: var(--gray-50); }
+        .module-toggle-info { display: flex; align-items: center; gap: 10px; }
+        .module-toggle-icon { font-size: 14px; color: var(--primary); width: 18px; text-align: center; }
+        .module-toggle-label { font-size: 13px; font-weight: 500; color: var(--gray-700); }
+        .module-toggle-group { font-size: 11px; color: var(--gray-400); margin-left: 2px; }
+        /* Switch */
+        .ios-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+        .ios-switch input { opacity: 0; width: 0; height: 0; }
+        .ios-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background: #cbd5e1; border-radius: 24px; transition: .25s;
+        }
+        .ios-slider:before {
+            content: ""; position: absolute;
+            height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background: #fff; border-radius: 50%; transition: .25s;
+            box-shadow: 0 1px 3px rgba(0,0,0,.2);
+        }
+        .ios-switch input:checked + .ios-slider { background: var(--primary); }
+        .ios-switch input:checked + .ios-slider:before { transform: translateX(20px); }
+        .ios-switch input:disabled + .ios-slider { opacity: .45; cursor: not-allowed; }
+        .module-toggle-group-header {
+            padding: 8px 14px 4px; font-size: 10px; font-weight: 700; letter-spacing: .08em;
+            color: var(--gray-400); text-transform: uppercase; background: var(--gray-50);
+        }
+        .always-visible-note {
+            font-size: 11px; color: var(--gray-400); margin-top: 10px; padding: 8px 12px;
+            background: var(--gray-50); border-radius: 8px;
+        }
+
+        /* ── Responsive extra: tablas, KPIs y formularios móvil ── */
+        @media (max-width: 768px) {
+            /* Todas las tablas dentro de cards scrollean horizontalmente */
+            .card { overflow-x: auto; }
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                width: 100%;
+                min-width: 0;
+            }
+            thead, tbody, tr { width: auto; }
+
+            /* KPI / stats en 2 columnas en móvil */
+            .clinic-kpi-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            /* Formularios de modales: campos a 1 columna */
+            .modal-content .grid-2,
+            .modal-content .grid-3,
+            .modal-content .grid-4 {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Botones de acción en tablas: compactos */
+            td .btn-icon, td button { padding: 5px 8px; font-size: 12px; }
+
+            /* Títulos de página */
+            .page-title { font-size: 18px !important; }
+
+            /* Kanban embudo: columnas una debajo de otra */
+            .kanban-board { flex-direction: column !important; gap: 12px !important; }
+            .kanban-col { min-width: 100% !important; width: 100% !important; }
+
+            /* Tabs: scroll horizontal si hay muchas */
+            .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; flex-wrap: nowrap !important; }
+            .tab-button { flex-shrink: 0; }
+        }
+
+        @media (max-width: 480px) {
+            /* En móvil muy pequeño, KPIs en 1 columna */
+            .clinic-kpi-grid,
+            .stats-grid,
+            .dashboard-stats {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Cards con menos padding */
+            .card { padding: 12px !important; }
+        }
+
+        /* ── 2FA / Seguridad ── */
+        .security-status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+        }
+        .security-status-badge.active   { background: #dcfce7; color: #15803d; }
+        .security-status-badge.inactive { background: #fef9c3; color: #92400e; }
+        .qr-wrapper {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 12px; padding: 20px; background: #f8fafc;
+            border: 1px dashed #cbd5e1; border-radius: 12px; margin: 16px 0;
+        }
+        .qr-wrapper svg { max-width: 180px; max-height: 180px; }
+        .secret-code-box {
+            background: #f1f5f9; border-radius: 8px; padding: 8px 14px;
+            font-family: monospace; font-size: 13px; letter-spacing: 2px;
+            color: #334155; user-select: all; cursor: text; text-align: center;
+        }
+        /* Modal 2FA en login */
+        #modal-2fa-login {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.65); z-index: 9999;
+            align-items: center; justify-content: center;
+        }
+        #modal-2fa-login.active { display: flex; }
+        .mfa-login-box {
+            background: #fff; border-radius: 20px; padding: 32px 28px;
+            width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+            text-align: center;
+        }
+        .mfa-login-box .mfa-icon {
+            width: 56px; height: 56px; background: linear-gradient(135deg,#6C3AE1,#8B5CF6);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; font-size: 22px; color: #fff;
+        }
+        .otp-input {
+            text-align: center; font-size: 26px; letter-spacing: 8px;
+            font-family: monospace; font-weight: 700; padding: 12px;
+            border: 2px solid #e2e8f0; border-radius: 12px; width: 100%;
+            outline: none; transition: border .2s;
+        }
+        .otp-input:focus { border-color: var(--primary); }
+        </style></head><body>
             <div class="factura-wrap">
                 <div class="factura-header">
                     <div>
@@ -6248,7 +6576,85 @@
             <div style="text-align:center;" class="no-print">
                 <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
             </div>
-            </body></html>`);
+            
+    <!-- MODAL 2FA LOGIN -->
+    <div id="modal-2fa-login">
+        <div class="mfa-login-box">
+            <div class="mfa-icon"><i class="fas fa-shield-halved"></i></div>
+            <h2 style="font-size:18px;margin-bottom:6px;">Verificación en 2 pasos</h2>
+            <p style="font-size:13px;color:#64748b;margin-bottom:20px;">
+                Introducí el código de 6 dígitos<br>de tu aplicación autenticadora.
+            </p>
+            <input type="text" id="mfa-login-code" class="otp-input"
+                maxlength="6" inputmode="numeric" pattern="[0-9]*"
+                placeholder="000000"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                onkeydown="if(event.key==='Enter') verificar2FAlogin()">
+            <div id="mfa-login-error" style="color:#ef4444;font-size:12px;margin-top:8px;min-height:18px;"></div>
+            <button class="btn-primary" style="width:100%;margin-top:14px;" onclick="verificar2FAlogin()">
+                <i class="fas fa-unlock-keyhole" style="margin-right:6px;"></i>Verificar
+            </button>
+            <button style="background:none;border:none;color:#64748b;font-size:12px;cursor:pointer;margin-top:12px;text-decoration:underline;"
+                onclick="cancelar2FAlogin()">Volver al inicio de sesión</button>
+        </div>
+    </div>
+
+
+                    <!-- MODAL NUEVO TURNO CON SYNC GCAL -->
+                    <div id="turno-modal" class="modal" style="display:none;">
+                        <div class="modal-overlay" onclick="closeModal('turno-modal')"></div>
+                        <div class="modal-content" style="max-width:520px;">
+                            <div class="modal-header">
+                                <h3><i class="fas fa-calendar-plus" style="color:var(--primary);margin-right:8px;"></i>Nuevo Turno</h3>
+                                <button class="modal-close" onclick="closeModal('turno-modal')">×</button>
+                            </div>
+                            <div class="modal-body" style="padding:20px;">
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label>Fecha y hora de inicio *</label>
+                                        <input type="datetime-local" id="turno-fecha-inicio">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Fecha y hora de fin *</label>
+                                        <input type="datetime-local" id="turno-fecha-fin">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Cliente *</label>
+                                    <select id="turno-cliente">
+                                        <option value="">— Seleccionar cliente —</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Servicio / Motivo *</label>
+                                    <input type="text" id="turno-servicio" placeholder="Ej: Corte de Pelo, Consulta, Revisión...">
+                                </div>
+                                <div class="form-group">
+                                    <label>Responsable</label>
+                                    <select id="turno-responsable">
+                                        <option value="">— Sin asignar —</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email cliente (para invitación GCal)</label>
+                                    <input type="email" id="turno-email-cliente" placeholder="cliente@email.com">
+                                </div>
+                                <div class="form-group">
+                                    <label>Notas</label>
+                                    <textarea id="turno-notas" rows="2" placeholder="Observaciones adicionales..."></textarea>
+                                </div>
+                                <div id="turno-gcal-status" style="font-size:12px;color:#0369a1;min-height:18px;margin-top:4px;"></div>
+                                <div style="display:flex;gap:10px;margin-top:8px;">
+                                    <button class="btn-primary" style="flex:1;" onclick="guardarTurnoAgenda()">
+                                        <i class="fas fa-calendar-check" style="margin-right:6px;"></i>Guardar Turno
+                                    </button>
+                                    <button class="btn-secondary" onclick="closeModal('turno-modal')">Cancelar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+</body></html>`);
             win.document.close();
         }
 
@@ -7831,6 +8237,12 @@
 
         // CONFIGURACIÓN
         function guardarConfigGeneral() {
+            // Guardar webhook GCal en db.config
+            const wh = document.getElementById('config-webhook-gcal');
+            if (wh) {
+                if (!db.config) db.config = { modulosOcultos: [], webhookGCal: '' };
+                db.config.webhookGCal = wh.value.trim();
+            }
             db.account.businessName = document.getElementById('config-business-name').value;
             db.account.ownerName = document.getElementById('config-owner-name').value;
             db.account.email = document.getElementById('config-email').value;
@@ -7931,7 +8343,562 @@
             }
         }
 
+
+
+        // ═══════════════════════════════════════════════════════════
+        // 2FA / TOTP — Supabase MFA
+        // ═══════════════════════════════════════════════════════════
+
+        // Estado en memoria durante el enrolamiento
+        let _mfa_enroll_factor_id = null;
+        let _mfa_login_factor_id  = null;
+        let _mfa_login_challenge_id = null;
+
+        // ── Cargar estado 2FA al abrir pestaña Seguridad ──
+        async function cargarSecuridad() {
+            const badge = document.getElementById('2fa-badge');
+            const enrollTrigger = document.getElementById('2fa-enroll-trigger');
+            const activeSection = document.getElementById('2fa-active-section');
+            const enrollSection = document.getElementById('2fa-enroll-section');
+            if (!badge) return;
+
+            try {
+                const { data } = await supabaseClient.auth.mfa.listFactors();
+                const factores = (data && data.totp) ? data.totp.filter(f => f.status === 'verified') : [];
+
+                if (factores.length > 0) {
+                    // 2FA activo
+                    badge.className = 'security-status-badge active';
+                    badge.innerHTML = '<i class="fas fa-lock"></i> 2FA Activo';
+                    enrollTrigger.style.display = 'none';
+                    activeSection.style.display = 'block';
+                    enrollSection.style.display = 'none';
+                    // Guardar factorId para desactivar
+                    _mfa_enroll_factor_id = factores[0].id;
+                } else {
+                    // 2FA inactivo
+                    badge.className = 'security-status-badge inactive';
+                    badge.innerHTML = '<i class="fas fa-lock-open"></i> 2FA Inactivo';
+                    enrollTrigger.style.display = 'block';
+                    activeSection.style.display = 'none';
+                    enrollSection.style.display = 'none';
+                }
+            } catch(e) {
+                console.warn('No se pudo verificar estado 2FA:', e);
+            }
+        }
+
+        // ── Iniciar enrolamiento: pedir QR a Supabase ──
+        async function iniciarEnrolamiento2FA() {
+            const enrollTrigger = document.getElementById('2fa-enroll-trigger');
+            const enrollSection = document.getElementById('2fa-enroll-section');
+            const qrContainer   = document.getElementById('2fa-qr-container');
+            const secretDisplay = document.getElementById('2fa-secret-display');
+
+            const btn = enrollTrigger.querySelector('button');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando QR...'; }
+
+            try {
+                const { data, error } = await supabaseClient.auth.mfa.enroll({ factorType: 'totp' });
+                if (error) throw error;
+
+                _mfa_enroll_factor_id = data.id;
+
+                // El qr_code es un SVG listo para inyectar
+                qrContainer.innerHTML = data.totp.qr_code;
+                secretDisplay.textContent = data.totp.secret || '—';
+
+                enrollTrigger.style.display = 'none';
+                enrollSection.style.display = 'block';
+
+                // Focus al input
+                setTimeout(() => {
+                    const inp = document.getElementById('2fa-enroll-code');
+                    if (inp) inp.focus();
+                }, 100);
+
+            } catch(e) {
+                console.error('Error al generar QR 2FA:', e);
+                mostrarToastBug('No se pudo generar el QR. Intentá de nuevo.', 'error');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-mobile-screen-button" style="margin-right:6px;"></i>Activar Autenticación en 2 Pasos'; }
+            }
+        }
+
+        // ── Verificar enrolamiento: challenge + verify ──
+        async function verificarEnrolamiento2FA() {
+            const code = document.getElementById('2fa-enroll-code').value.trim();
+            const errDiv = document.getElementById('2fa-enroll-error');
+            errDiv.style.display = 'none';
+
+            if (code.length !== 6 || !/^[0-9]{6}$/.test(code)) {
+                errDiv.textContent = 'Ingresá el código de 6 dígitos de tu app.';
+                errDiv.style.display = 'block';
+                return;
+            }
+
+            const btn = document.querySelector('#2fa-enroll-section .btn-primary');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...'; }
+
+            try {
+                // 1. Crear challenge
+                const { data: chData, error: chErr } = await supabaseClient.auth.mfa.challenge({
+                    factorId: _mfa_enroll_factor_id
+                });
+                if (chErr) throw chErr;
+
+                // 2. Verificar con el código TOTP
+                const { error: verErr } = await supabaseClient.auth.mfa.verify({
+                    factorId: _mfa_enroll_factor_id,
+                    challengeId: chData.id,
+                    code
+                });
+                if (verErr) throw verErr;
+
+                // ✅ Éxito
+                mostrarToastBug('✅ 2FA activado correctamente. Tu cuenta ahora está protegida.', 'success');
+                await cargarSecuridad();
+
+            } catch(e) {
+                console.error('Error al verificar 2FA:', e);
+                const msg = (e.message || '').toLowerCase();
+                errDiv.textContent = (msg.includes('invalid') || msg.includes('expired'))
+                    ? 'Código incorrecto o expirado. Verificá tu app y volvé a intentarlo.'
+                    : 'Error al verificar. Intentá de nuevo.';
+                errDiv.style.display = 'block';
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle" style="margin-right:6px;"></i>Verificar y Activar'; }
+            }
+        }
+
+        // ── Cancelar enrolamiento ──
+        async function cancelarEnrolamiento2FA() {
+            // Si había un factor no-verificado, limpiarlo
+            if (_mfa_enroll_factor_id) {
+                try {
+                    await supabaseClient.auth.mfa.unenroll({ factorId: _mfa_enroll_factor_id });
+                } catch(e) { /* ignore */ }
+                _mfa_enroll_factor_id = null;
+            }
+            document.getElementById('2fa-enroll-section').style.display = 'none';
+            document.getElementById('2fa-enroll-trigger').style.display = 'block';
+            document.getElementById('2fa-enroll-code').value = '';
+        }
+
+        // ── Desactivar 2FA ──
+        async function desactivar2FA() {
+            if (!confirm('¿Estás seguro de que querés desactivar el 2FA? Tu cuenta quedará menos protegida.')) return;
+            try {
+                await supabaseClient.auth.mfa.unenroll({ factorId: _mfa_enroll_factor_id });
+                mostrarToastBug('2FA desactivado.', 'success');
+                _mfa_enroll_factor_id = null;
+                await cargarSecuridad();
+            } catch(e) {
+                mostrarToastBug('No se pudo desactivar el 2FA. Intentá de nuevo.', 'error');
+            }
+        }
+
+        // ── FASE 2: Mostrar modal 2FA en login ──
+        async function mostrar2FAlogin() {
+            // Obtener factorId
+            const { data } = await supabaseClient.auth.mfa.listFactors();
+            const factores = (data && data.totp) ? data.totp.filter(f => f.status === 'verified') : [];
+            if (factores.length === 0) { showApp(); return; } // Sin factores, dejar pasar
+
+            _mfa_login_factor_id = factores[0].id;
+
+            // Crear challenge
+            const { data: chData, error: chErr } = await supabaseClient.auth.mfa.challenge({
+                factorId: _mfa_login_factor_id
+            });
+            if (chErr) { console.error(chErr); showApp(); return; }
+            _mfa_login_challenge_id = chData.id;
+
+            // Mostrar modal y ocultar login
+            document.getElementById('login-page').style.display = 'none';
+            const modal = document.getElementById('modal-2fa-login');
+            modal.classList.add('active');
+
+            setTimeout(() => {
+                const inp = document.getElementById('mfa-login-code');
+                if (inp) { inp.value = ''; inp.focus(); }
+                const err = document.getElementById('mfa-login-error');
+                if (err) err.textContent = '';
+            }, 100);
+        }
+
+        // ── FASE 2: Verificar código en modal de login ──
+        async function verificar2FAlogin() {
+            const code = (document.getElementById('mfa-login-code').value || '').trim();
+            const errDiv = document.getElementById('mfa-login-error');
+            errDiv.textContent = '';
+
+            if (code.length !== 6 || !/^[0-9]{6}$/.test(code)) {
+                errDiv.textContent = 'Ingresá el código de 6 dígitos.';
+                return;
+            }
+
+            const btn = document.querySelector('#modal-2fa-login .btn-primary');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...'; }
+
+            try {
+                const { error } = await supabaseClient.auth.mfa.verify({
+                    factorId: _mfa_login_factor_id,
+                    challengeId: _mfa_login_challenge_id,
+                    code
+                });
+
+                if (error) throw error;
+
+                // ✅ Verificación correcta — cerrar modal y entrar al sistema
+                document.getElementById('modal-2fa-login').classList.remove('active');
+                showApp();
+
+            } catch(e) {
+                const msg = (e.message || '').toLowerCase();
+                errDiv.textContent = (msg.includes('invalid') || msg.includes('expired'))
+                    ? 'Código incorrecto o expirado. Generá uno nuevo en tu app.'
+                    : 'Error al verificar. Intentá de nuevo.';
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-unlock-keyhole" style="margin-right:6px;"></i>Verificar'; }
+                // Renovar challenge si expiró
+                try {
+                    const { data: ch2 } = await supabaseClient.auth.mfa.challenge({ factorId: _mfa_login_factor_id });
+                    if (ch2) _mfa_login_challenge_id = ch2.id;
+                } catch(_) {}
+            }
+        }
+
+        // ── FASE 2: Cancelar y volver al login ──
+        function cancelar2FAlogin() {
+            document.getElementById('modal-2fa-login').classList.remove('active');
+            _mfa_login_factor_id   = null;
+            _mfa_login_challenge_id = null;
+            // Cerrar sesión Supabase parcial (AAL1 sin completar) y mostrar login
+            supabaseClient.auth.signOut().catch(() => {});
+            showLogin();
+        }
+
+
+        // ═══════════════════════════════════════════════════════════
+        // MÓDULO AGENDA & TURNOS — Webhook Google Calendar (Make.com)
+        // ═══════════════════════════════════════════════════════════
+
+        function abrirModalNuevoTurno() {
+            // Poblar select de clientes
+            const selCliente = document.getElementById('turno-cliente');
+            const selResp = document.getElementById('turno-responsable');
+            if (selCliente) {
+                selCliente.innerHTML = '<option value="">— Seleccionar cliente —</option>' +
+                    db.clientes.map(c => `<option value="${c.id}">${escapeHTML(c.nombre)}</option>`).join('');
+            }
+            if (selResp) {
+                selResp.innerHTML = '<option value="">— Sin asignar —</option>' +
+                    db.empleados.map(e => `<option value="${e.id}">${escapeHTML(e.nombre)}</option>`).join('');
+            }
+            // Autocompletar email del cliente al seleccionar
+            selCliente && selCliente.addEventListener('change', function() {
+                const cl = db.clientes.find(c => c.id == this.value);
+                const emailIn = document.getElementById('turno-email-cliente');
+                if (cl && emailIn) emailIn.value = cl.email || '';
+            }, { once: false });
+
+            // Prefill fechas con "ahora + 1h"
+            const now = new Date();
+            const pad = n => String(n).padStart(2,'0');
+            const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            const fin = new Date(now.getTime() + 60 * 60 * 1000);
+            document.getElementById('turno-fecha-inicio').value = fmt(now);
+            document.getElementById('turno-fecha-fin').value    = fmt(fin);
+
+            document.getElementById('turno-servicio').value = '';
+            document.getElementById('turno-notas').value    = '';
+            document.getElementById('turno-gcal-status').textContent = '';
+
+            openModal('turno-modal');
+        }
+
+        async function guardarTurnoAgenda() {
+            const fechaInicio  = document.getElementById('turno-fecha-inicio').value;
+            const fechaFin     = document.getElementById('turno-fecha-fin').value;
+            const clienteId    = document.getElementById('turno-cliente').value;
+            const servicio     = document.getElementById('turno-servicio').value.trim();
+            const emailCliente = document.getElementById('turno-email-cliente').value.trim();
+            const notasVal     = document.getElementById('turno-notas').value.trim();
+            const respId       = document.getElementById('turno-responsable').value;
+            const statusEl     = document.getElementById('turno-gcal-status');
+
+            if (!fechaInicio || !fechaFin || !clienteId || !servicio) {
+                statusEl.style.color = '#ef4444';
+                statusEl.textContent = 'Completá los campos obligatorios: fecha, cliente y servicio.';
+                return;
+            }
+
+            // Obtener datos completos del cliente y responsable
+            const cliente     = db.clientes.find(c => c.id == clienteId) || {};
+            const responsable = db.empleados.find(e => e.id == respId) || {};
+
+            if (!db.citas) db.citas = [];
+            const nuevoTurno = {
+                id:             safeMaxId(db.citas) + 1,
+                fecha:          fechaInicio.split('T')[0],
+                hora:           fechaInicio.split('T')[1] || '09:00',
+                fecha_fin:      fechaFin,
+                clienteId:      parseInt(clienteId),
+                cliente:        cliente.nombre || '',
+                servicio:       servicio,
+                responsable:    responsable.nombre || '',
+                responsableId:  respId ? parseInt(respId) : null,
+                email_cliente:  emailCliente || cliente.email || '',
+                email_responsable: responsable.email || db.account?.email || '',
+                notas:          notasVal,
+                estado:         'confirmado',
+                creadoEn:       new Date().toISOString(),
+                sincGCal:       false
+            };
+
+            db.citas.push(nuevoTurno);
+            saveDB();
+
+            // ── Webhook Make.com → Google Calendar ──
+            const webhookUrl = (db.config && db.config.webhookGCal) ? db.config.webhookGCal.trim() : '';
+            if (webhookUrl) {
+                statusEl.style.color = '#0369a1';
+                statusEl.textContent = '⏳ Sincronizando con Google Calendar...';
+                try {
+                    const payload = {
+                        fecha_inicio:      fechaInicio,          // ISO datetime local
+                        fecha_fin:         fechaFin,
+                        titulo_evento:     `Turno: ${servicio} - ${cliente.nombre || 'Sin cliente'}`,
+                        email_cliente:     nuevoTurno.email_cliente,
+                        email_responsable: nuevoTurno.email_responsable,
+                        notas:             notasVal,
+                        turno_id:          nuevoTurno.id
+                    };
+                    const res = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        nuevoTurno.sincGCal = true;
+                        saveDB();
+                        statusEl.style.color = '#15803d';
+                        statusEl.textContent = '✅ Turno guardado y sincronizado con Google Calendar.';
+                    } else {
+                        statusEl.style.color = '#d97706';
+                        statusEl.textContent = '⚠️ Turno guardado. Error en sync GCal (verifica el webhook).';
+                    }
+                } catch(e) {
+                    console.warn('Error webhook GCal:', e);
+                    statusEl.style.color = '#d97706';
+                    statusEl.textContent = '⚠️ Turno guardado. Sin conexión al webhook GCal.';
+                }
+            } else {
+                statusEl.style.color = '#15803d';
+                statusEl.textContent = '✅ Turno guardado. (Webhook GCal no configurado)';
+            }
+
+            // Refrescar lista
+            renderProximosTurnos();
+
+            // Cerrar modal tras 1.5s
+            setTimeout(() => closeModal('turno-modal'), 1600);
+        }
+
+        function renderProximosTurnos() {
+            const container = document.getElementById('proximos-turnos-list');
+            const counter   = document.getElementById('turnos-count');
+            if (!container) return;
+
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            const en7 = new Date(hoy.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+            const proximos = (db.citas || [])
+                .filter(t => {
+                    const d = new Date(t.fecha_fin || t.fecha);
+                    return d >= hoy && d <= en7;
+                })
+                .sort((a, b) => new Date(a.fecha + 'T' + (a.hora || '00:00')) - new Date(b.fecha + 'T' + (b.hora || '00:00')));
+
+            if (counter) counter.textContent = proximos.length ? `${proximos.length} turno${proximos.length > 1 ? 's' : ''} en 7 días` : '';
+
+            if (proximos.length === 0) {
+                container.innerHTML = '<p style="color:var(--gray-400);font-style:italic;padding:8px 0;">No hay turnos programados para los próximos 7 días.</p>';
+                return;
+            }
+
+            container.innerHTML = proximos.map(t => {
+                const gcalBadge = t.sincGCal
+                    ? '<span style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 6px;border-radius:10px;margin-left:6px;"><i class="fas fa-calendar-check"></i> GCal</span>'
+                    : '';
+                return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray-100);">
+                    <div style="min-width:54px;text-align:center;background:var(--primary);color:#fff;border-radius:8px;padding:4px 6px;">
+                        <div style="font-size:11px;">${t.fecha ? t.fecha.substring(5).replace('-','/') : '—'}</div>
+                        <div style="font-size:13px;font-weight:700;">${t.hora || '—'}</div>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600;color:var(--dark);">${escapeHTML(t.servicio || '—')}${gcalBadge}</div>
+                        <div style="color:var(--gray-500);font-size:12px;">${escapeHTML(t.cliente || 'Sin cliente')}${t.responsable ? ' · ' + escapeHTML(t.responsable) : ''}</div>
+                    </div>
+                    <span style="font-size:11px;padding:3px 8px;border-radius:8px;background:${t.estado === 'confirmado' ? '#dcfce7' : '#fef9c3'};color:${t.estado === 'confirmado' ? '#15803d' : '#92400e'};">${t.estado || 'pendiente'}</span>
+                </div>`;
+            }).join('');
+        }
+
+        async function sincronizarGCal() {
+            const webhookUrl = (db.config && db.config.webhookGCal) ? db.config.webhookGCal.trim() : '';
+            if (!webhookUrl) {
+                mostrarToastBug('⚠️ Configurá primero el Webhook en Configuración > General.', 'error');
+                return;
+            }
+            const btn = document.getElementById('btn-sync-gcal');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...'; }
+
+            const pendientes = (db.citas || []).filter(t => !t.sincGCal);
+            if (pendientes.length === 0) {
+                mostrarToastBug('✅ Todos los turnos ya están sincronizados.', 'success');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-calendar-arrow-up" style="margin-right:6px;"></i>Sync Google Calendar'; }
+                return;
+            }
+
+            let ok = 0, err = 0;
+            for (const t of pendientes) {
+                try {
+                    const payload = {
+                        fecha_inicio:      `${t.fecha}T${t.hora || '09:00'}`,
+                        fecha_fin:         t.fecha_fin || `${t.fecha}T${t.hora || '10:00'}`,
+                        titulo_evento:     `Turno: ${t.servicio} - ${t.cliente}`,
+                        email_cliente:     t.email_cliente || '',
+                        email_responsable: t.email_responsable || db.account?.email || '',
+                        notas:             t.notas || '',
+                        turno_id:          t.id
+                    };
+                    const res = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) { t.sincGCal = true; ok++; } else { err++; }
+                } catch(_) { err++; }
+            }
+            saveDB();
+            mostrarToastBug(
+                err === 0
+                    ? `✅ ${ok} turno${ok > 1 ? 's' : ''} sincronizado${ok > 1 ? 's' : ''} con Google Calendar.`
+                    : `⚠️ ${ok} sincronizados, ${err} con error.`,
+                err === 0 ? 'success' : 'error'
+            );
+            renderProximosTurnos();
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-calendar-arrow-up" style="margin-right:6px;"></i>Sync Google Calendar'; }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // GESTOR DE VISIBILIDAD DE MÓDULOS
+        // ═══════════════════════════════════════════════════════
+
+        const MODULOS_CONFIG = [
+            { grupo: 'CRM & Clientes', items: [
+                { id: 'pipeline-ventas', label: 'Pipeline CRM',       icon: 'fa-funnel-dollar',      clase: 'menu-pipeline' },
+                { id: 'clientes',        label: 'Clientes',            icon: 'fa-users'                                     },
+                { id: 'citas',           label: 'Citas / Agenda',      icon: 'fa-calendar-check'                            },
+            ]},
+            { grupo: 'Operaciones', items: [
+                { id: 'inventario',  label: 'Inventario',    icon: 'fa-boxes'    },
+                { id: 'proveedores', label: 'Proveedores',   icon: 'fa-handshake'},
+                { id: 'sucursales',  label: 'Sucursales',    icon: 'fa-map-pin'  },
+            ]},
+            { grupo: 'Ventas y Finanzas', items: [
+                { id: 'ventas',       label: 'Ventas',            icon: 'fa-shopping-cart'      },
+                { id: 'facturacion',  label: 'Facturación AFIP',  icon: 'fa-file-invoice-dollar'},
+                { id: 'arqueo',       label: 'Arqueo de Caja',    icon: 'fa-cash-register'      },
+                { id: 'gastos',       label: 'Gastos',            icon: 'fa-money-bill-wave'    },
+                { id: 'presupuestos', label: 'Presupuestos',      icon: 'fa-file-invoice'       },
+                { id: 'remitos',      label: 'Remitos',           icon: 'fa-truck'              },
+            ]},
+            { grupo: 'Recursos Humanos', items: [
+                { id: 'empleados', label: 'Empleados', icon: 'fa-people-group'  },
+                { id: 'nominas',   label: 'Nóminas',   icon: 'fa-file-contract' },
+            ]},
+            { grupo: 'Módulos Agenda', items: [
+                { id: 'cockpit-agenda',        label: 'Cockpit Agenda',   icon: 'fa-gauge-high',    agenda: true },
+                { id: 'reservas360',           label: 'Reservas 360',     icon: 'fa-address-card',  agenda: true },
+                { id: 'cotizaciones-agenda',   label: 'Cotizaciones',     icon: 'fa-file-invoice',  agenda: true },
+                { id: 'embudo-agenda',         label: 'Embudo Agenda',    icon: 'fa-filter',        agenda: true },
+                { id: 'tareas-agenda',         label: 'Tareas',           icon: 'fa-list-check',    agenda: true },
+                { id: 'comunicaciones-agenda', label: 'Comunicaciones',   icon: 'fa-message',       agenda: true },
+            ]},
+        ];
+
+        function cargarGestorMenu() {
+            if (!db.config) db.config = { modulosOcultos: [] };
+            if (!db.config.modulosOcultos) db.config.modulosOcultos = [];
+
+            const cfg = db.industryConfig || INDUSTRY_CONFIGS['general'];
+            const visibles = cfg.modulosVisibles || [];
+            const agendaRubros = ['medicina', 'belleza', 'odontologia'];
+            const esAgenda = agendaRubros.includes(cfg.rubro);
+            const modulosOcultos = db.config.modulosOcultos;
+
+            const container = document.getElementById('gestor-modulos-container');
+            if (!container) return;
+
+            let html = '';
+            MODULOS_CONFIG.forEach(grupo => {
+                // Si es grupo clínica y no es rubro clínico, ocultar todo el grupo
+                const esGrupoAgenda = grupo.grupo === 'Módulos Agenda';
+                if (esGrupoAgenda && !esAgenda) return;
+
+                html += `<div class="module-toggle-group-header">${grupo.grupo}</div>`;
+                html += `<div class="module-toggle-list">`;
+
+                grupo.items.forEach(mod => {
+                    const permitidoPorRubro = visibles.includes(mod.id) || mod.id === 'pipeline-ventas' || esGrupoAgenda;
+                    const isChecked = permitidoPorRubro && !modulosOcultos.includes(mod.id);
+                    const isDisabled = !permitidoPorRubro;
+                    const opacityStyle = isDisabled ? 'opacity:0.4;' : '';
+
+                    html += `
+                    <div class="module-toggle-item" style="${opacityStyle}">
+                        <div class="module-toggle-info">
+                            <i class="fas ${mod.icon} module-toggle-icon"></i>
+                            <div>
+                                <div class="module-toggle-label">${mod.label}</div>
+                                ${isDisabled ? '<div class="module-toggle-group">No disponible en tu rubro</div>' : ''}
+                            </div>
+                        </div>
+                        <label class="ios-switch">
+                            <input type="checkbox" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}
+                                onchange="toggleModuloOculto('${mod.id}', this.checked)">
+                            <span class="ios-slider"></span>
+                        </label>
+                    </div>`;
+                });
+
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleModuloOculto(moduleId, isVisible) {
+            if (!db.config) db.config = { modulosOcultos: [] };
+            if (!db.config.modulosOcultos) db.config.modulosOcultos = [];
+
+            if (isVisible) {
+                // Quitar de la lista de ocultos
+                db.config.modulosOcultos = db.config.modulosOcultos.filter(id => id !== moduleId);
+            } else {
+                // Agregar a la lista de ocultos (sin duplicados)
+                if (!db.config.modulosOcultos.includes(moduleId)) {
+                    db.config.modulosOcultos.push(moduleId);
+                }
+            }
+            saveDB();
+            aplicarVisibilidadModulos();
+        }
+
         function cargarConfiguracion() {
+            cargarGestorMenu();
+            cargarSecuridad();
             if (db.account) {
                 document.getElementById('config-business-name').value = db.account.businessName || '';
                 document.getElementById('config-owner-name').value = db.account.ownerName || '';
@@ -7941,6 +8908,7 @@
                 document.getElementById('config-iva').value = db.account.iva || 21;
                 document.getElementById('config-instagram').value = db.account.instagram || '';
                 document.getElementById('config-whatsapp').value = db.account.whatsapp || '';
+                document.getElementById('config-webhook-gcal').value = (db.config && db.config.webhookGCal) || '';
                 document.getElementById('config-color').value = db.account.color || '#6C3AE1';
 
                 // Numeración personalizada
@@ -9276,7 +10244,7 @@
         // MÓDULOS CLÍNICA (ClinicFlow integration)
         // ═══════════════════════════════════════════════════════════
 
-        function renderCockpitClinica() {
+        function renderCockpitAgenda() {
             const clientes = Array.isArray(db.clientes) ? db.clientes : [];
             const citas = Array.isArray(db.citas) ? db.citas : [];
             const ventas = Array.isArray(db.ventas) ? db.ventas : [];
@@ -9326,7 +10294,7 @@
             if (ckTV) ckTV.textContent = tareasPend.length + ' tareas pendientes de hoy';
         }
 
-        function renderPacientes360() {
+        function renderReservas360() {
             const tbody = document.getElementById('p360-tbody');
             if (!tbody) return;
             const clientes = Array.isArray(db.clientes) ? db.clientes : [];
@@ -9424,7 +10392,7 @@
             }
         }
 
-        function renderPresupuestosClinica() {
+        function renderCotizacionesAgenda() {
             initClinicData();
             const list = document.getElementById('pq-list');
             if (!list) return;
@@ -9447,7 +10415,7 @@
             if (filtered.length === 0) {
                 list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--gray-500);border:2px dashed var(--gray-200);border-radius:14px;">
                     <i class="fas fa-file-medical" style="font-size:32px;margin-bottom:10px;opacity:.3;display:block;"></i>
-                    No hay presupuestos. <button class="btn-primary" style="margin-top:10px;" onclick="nuevoPresupuestoClinica()">Crear el primero</button></div>`;
+                    No hay presupuestos. <button class="btn-primary" style="margin-top:10px;" onclick="nuevaCotizacionAgenda()">Crear el primero</button></div>`;
                 return;
             }
             list.innerHTML = filtered.map(p => `
@@ -9470,7 +10438,7 @@
                 </div>`).join('');
         }
 
-        function nuevoPresupuestoClinica() {
+        function nuevaCotizacionAgenda() {
             initClinicData();
             const paciente = prompt('Nombre del paciente:');
             if (!paciente) return;
@@ -9479,12 +10447,12 @@
             const num = 'PQ-' + new Date().getFullYear() + '-' + String(db.presupuestosClinica.length+1).padStart(3,'0');
             db.presupuestosClinica.push({ id, numero: num, paciente, monto: parseFloat(monto)||0, estado: 'borrador', fecha: new Date().toLocaleDateString('es-AR') });
             saveDB();
-            renderPresupuestosClinica();
+            renderCotizacionesAgenda();
         }
         function cambiarEstadoPresupuesto(id, nuevoEstado) {
             initClinicData();
             const p = db.presupuestosClinica.find(x=>x.id===id);
-            if(p) { p.estado = nuevoEstado; saveDB(); renderPresupuestosClinica(); }
+            if(p) { p.estado = nuevoEstado; saveDB(); renderCotizacionesAgenda(); }
         }
         function verPresupuesto(id) {
             initClinicData();
@@ -9502,16 +10470,16 @@ Estado: ${p.estado}`);
             const newId = 'pq_' + Date.now();
             const num = 'PQ-' + new Date().getFullYear() + '-' + String(db.presupuestosClinica.length+1).padStart(3,'0');
             db.presupuestosClinica.push({...p, id:newId, numero:num, estado:'borrador'});
-            saveDB(); renderPresupuestosClinica();
+            saveDB(); renderCotizacionesAgenda();
         }
         function eliminarPresupuestoClinica(id) {
             initClinicData();
             if(!confirm('¿Eliminar este presupuesto?')) return;
             db.presupuestosClinica = db.presupuestosClinica.filter(x=>x.id!==id);
-            saveDB(); renderPresupuestosClinica();
+            saveDB(); renderCotizacionesAgenda();
         }
 
-        function renderEmbudoClinica() {
+        function renderEmbudoAgenda() {
             initClinicData();
             const board = document.getElementById('kanban-board');
             if (!board) return;
@@ -9543,33 +10511,33 @@ Estado: ${p.estado}`);
             if(casoIdx===-1) return;
             const [caso] = cols[fromIdx].casos.splice(casoIdx,1);
             cols[toIdx].casos.push(caso);
-            saveDB(); renderEmbudoClinica();
+            saveDB(); renderEmbudoAgenda();
         }
         function addCasoToCol(colId) {
             initClinicData();
             const titulo = prompt('Título del caso:'); if(!titulo) return;
             const paciente = prompt('Paciente:'); if(!paciente) return;
             const col = db.kanbanClinica.find(c=>c.id===colId);
-            if(col) { col.casos.push({id:'c'+Date.now(), titulo, paciente}); saveDB(); renderEmbudoClinica(); }
+            if(col) { col.casos.push({id:'c'+Date.now(), titulo, paciente}); saveDB(); renderEmbudoAgenda(); }
         }
         function nuevaEtapaKanban() {
             initClinicData();
             const label = prompt('Nombre de la nueva etapa:'); if(!label) return;
             const id = 'col_' + Date.now();
             db.kanbanClinica.push({id, label, cls:'negoc', casos:[]});
-            saveDB(); renderEmbudoClinica();
+            saveDB(); renderEmbudoAgenda();
         }
         function nuevoCasoKanban() { addCasoToCol(db.kanbanClinica[0]?.id||'lead'); }
         function crearTareaDesdeKanban(paciente) {
             initClinicData();
             const titulo = prompt('Título de la tarea para ' + paciente + ':'); if(!titulo) return;
             db.tareasClinica.push({id:'t'+Date.now(), titulo, asignado: paciente, vence: 'Hoy', estado:'todo'});
-            saveDB(); showPage('tareas-clinica');
+            saveDB(); showPage('tareas-agenda');
         }
 
-        function renderTareasClinica() {
+        function renderTareasAgenda() {
             initClinicData();
-            const list = document.getElementById('tareas-clinica-list');
+            const list = document.getElementById('tareas-agenda-list');
             const tmpl = document.getElementById('task-templates-list');
             if(!list) return;
             const tareas = db.tareasClinica || [];
@@ -9603,27 +10571,27 @@ Estado: ${p.estado}`);
             if(!t) return;
             const cycle = {todo:'doing',doing:'done',done:'todo'};
             t.estado = cycle[t.estado]||'todo';
-            saveDB(); renderTareasClinica();
+            saveDB(); renderTareasAgenda();
         }
         function eliminarTareaClinica(id) {
             initClinicData();
             if(!confirm('¿Eliminar esta tarea?')) return;
             db.tareasClinica = db.tareasClinica.filter(x=>x.id!==id);
-            saveDB(); renderTareasClinica();
+            saveDB(); renderTareasAgenda();
         }
-        function nuevaTareaClinica() {
+        function nuevaTareaAgenda() {
             initClinicData();
             const titulo = prompt('Título de la tarea:'); if(!titulo) return;
             const asignado = prompt('Asignado a:','Recepción')||'Recepción';
             db.tareasClinica.push({id:'t'+Date.now(), titulo, asignado, vence:'Hoy', estado:'todo'});
-            saveDB(); renderTareasClinica();
+            saveDB(); renderTareasAgenda();
         }
         function nuevaPlantillaTarea() {
             initClinicData();
             const titulo = prompt('Nombre de la plantilla:'); if(!titulo) return;
             const desc = prompt('Descripción:',titulo)||titulo;
             db.plantillasTareas.push({id:'pt'+Date.now(), titulo, desc});
-            saveDB(); renderTareasClinica();
+            saveDB(); renderTareasAgenda();
         }
         function usarPlantillaTarea(id) {
             initClinicData();
@@ -9631,7 +10599,7 @@ Estado: ${p.estado}`);
             if(!p) return;
             const asignado = prompt('Asignado a:','Recepción')||'Recepción';
             db.tareasClinica.push({id:'t'+Date.now(), titulo:p.titulo, asignado, vence:'Hoy', estado:'todo'});
-            saveDB(); renderTareasClinica();
+            saveDB(); renderTareasAgenda();
         }
 
         function generarBorradorComm() {
@@ -9651,7 +10619,7 @@ Estado: ${p.estado}`);
         }
         function nuevaPlantillaComm() {
             const titulo = prompt('Nombre de la plantilla:'); if(!titulo) return;
-            const msg = prompt('Mensaje de la plantilla:',`Hola [paciente], ${titulo.toLowerCase()}.`)||'';
+            const msg = prompt('Mensaje de la plantilla:',`Hola [cliente], ${titulo.toLowerCase()}.`)||'';
             const canal = prompt('Canal (whatsapp/email/sms):','whatsapp')||'whatsapp';
             const container = document.getElementById('comm-custom-templates');
             if(container) {
