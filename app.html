@@ -6141,7 +6141,7 @@
 
             const itemsHtml = (factura.items || []).map(item =>
                 `<tr>
-                    <td style="padding:6px 8px;">${item.nombre}</td>
+                    <td style="padding:6px 8px;">${item.descripcion || item.nombre || '—'}</td>
                     <td style="padding:6px 8px;text-align:center;">${item.cantidad}</td>
                     <td style="padding:6px 8px;text-align:right;">${formatCurrency(item.precio)}</td>
                     <td style="padding:6px 8px;text-align:right;">${formatCurrency(item.subtotal)}</td>
@@ -6404,7 +6404,7 @@
         function renderGastos() {
             const search = document.getElementById('gastos-search')?.value.toLowerCase() || '';
             const category = document.getElementById('gastos-category')?.value || '';
-            const filtered = db.gastos.filter(g => (!category || g.categoria === category) && g.descripcion.toLowerCase().includes(search));
+            const filtered = db.gastos.filter(g => (!category || g.categoria === category) && ((g.descripcion || '').toLowerCase().includes(search)));
 
             const categorySelect = document.getElementById('gastos-category');
             if (categorySelect) {
@@ -6425,6 +6425,14 @@
                     </td>
                 </tr>`;
             });
+            const totalGastos = filtered.reduce((s, g) => s + (parseFloat(g.monto) || 0), 0);
+            if (totalGastos > 0) {
+                html += `<tr style="font-weight:600;background:var(--gray-100);">
+                    <td colspan="3" style="text-align:right;padding:8px 12px;">Total filtrado:</td>
+                    <td style="padding:8px 12px;">${formatCurrency(totalGastos)}</td>
+                    <td colspan="2"></td>
+                </tr>`;
+            }
             const tbody = document.querySelector('#gastos-table tbody');
             if (tbody) {
                 tbody.innerHTML = html || '<tr><td colspan="6" style="text-align: center;">Sin gastos</td></tr>';
