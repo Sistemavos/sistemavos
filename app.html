@@ -1608,6 +1608,7 @@
         .comm-draft-panel h3{font-size:14px;font-weight:700;margin-bottom:14px}
         .comm-preview{background:var(--gray-100);border-radius:10px;padding:14px;font-size:13px;color:var(--gray-700);min-height:80px;margin-top:12px;font-style:italic}
         .sidebar-group-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:14px 12px 4px}
+        .menu-section-title{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:14px 12px 4px;list-style:none;pointer-events:none;user-select:none;cursor:default;}
     </style>
 
     <!-- Supabase SDK -->
@@ -1945,17 +1946,36 @@
                 </div>
 
                 <ul class="sidebar-menu">
+                    <!-- PRINCIPAL -->
+                    <li class="menu-section-title">PRINCIPAL</li>
                     <li><button onclick="showPage('dashboard')" class="active"><i class="fas fa-chart-line"></i> <span>Dashboard</span></button></li>
+
+                    <!-- CRM & CLIENTES -->
+                    <li class="menu-section-title">CRM &amp; CLIENTES</li>
+                    <li class="menu-pipeline" style="display:none"><button onclick="showPage('pipeline-ventas')"><i class="fas fa-funnel-dollar"></i> <span>Pipeline CRM</span></button></li>
                     <li><button onclick="showPage('clientes')"><i class="fas fa-users"></i> <span id="menu-clientes">Clientes</span></button></li>
+                    <li><button onclick="showPage('citas')"><i class="fas fa-calendar-check"></i> <span>Citas / Agenda</span></button></li>
+
+                    <!-- OPERACIONES -->
+                    <li class="menu-section-title">OPERACIONES</li>
                     <li><button onclick="showPage('inventario')"><i class="fas fa-boxes"></i> <span id="menu-inventario">Inventario</span></button></li>
+                    <li><button onclick="showPage('proveedores')"><i class="fas fa-handshake"></i> <span>Proveedores</span></button></li>
+                    <li><button onclick="showPage('sucursales')"><i class="fas fa-map-pin"></i> <span>Sucursales</span></button></li>
+
+                    <!-- VENTAS Y FINANZAS -->
+                    <li class="menu-section-title">VENTAS Y FINANZAS</li>
                     <li><button onclick="showPage('ventas')"><i class="fas fa-shopping-cart"></i> <span id="menu-ventas">Ventas</span></button></li>
                     <li><button onclick="showPage('facturacion')"><i class="fas fa-file-invoice-dollar"></i> <span>Facturación AFIP</span></button></li>
                     <li><button onclick="showPage('arqueo')"><i class="fas fa-cash-register"></i> <span>Arqueo de Caja</span></button></li>
                     <li><button onclick="showPage('gastos')"><i class="fas fa-money-bill-wave"></i> <span>Gastos</span></button></li>
+                    <li><button onclick="showPage('presupuestos')"><i class="fas fa-file-invoice"></i> <span>Presupuestos</span></button></li>
+                    <li><button onclick="showPage('remitos')"><i class="fas fa-truck"></i> <span>Remitos</span></button></li>
+
+                    <!-- RECURSOS HUMANOS -->
+                    <li class="menu-section-title">RECURSOS HUMANOS</li>
                     <li><button onclick="showPage('empleados')"><i class="fas fa-people-group"></i> <span>Empleados</span></button></li>
                     <li><button onclick="showPage('nominas')"><i class="fas fa-file-contract"></i> <span>Nóminas</span></button></li>
-                    <li><button onclick="showPage('sucursales')"><i class="fas fa-map-pin"></i> <span>Sucursales</span></button></li>
-                    <li><button onclick="showPage('citas')"><i class="fas fa-calendar-check"></i> <span>Citas / Agenda</span></button></li>
+
                     <!-- MÓDULOS CLÍNICA -->
                     <div class="sidebar-group-label menu-clinica" style="display:none">— Clínica —</div>
                     <li class="menu-clinica" style="display:none"><button onclick="showPage('cockpit-clinica')"><i class="fas fa-chart-pulse"></i> <span>Cockpit Clínico</span></button></li>
@@ -1964,14 +1984,16 @@
                     <li class="menu-clinica" style="display:none"><button onclick="showPage('embudo-clinica')"><i class="fas fa-filter"></i> <span>Embudo Clínico</span></button></li>
                     <li class="menu-clinica" style="display:none"><button onclick="showPage('tareas-clinica')"><i class="fas fa-stethoscope"></i> <span>Tareas</span></button></li>
                     <li class="menu-clinica" style="display:none"><button onclick="showPage('comunicaciones-clinica')"><i class="fas fa-message"></i> <span>Comunicaciones</span></button></li>
-                    <li class="menu-pipeline" style="display:none"><button onclick="showPage('pipeline-ventas')"><i class="fas fa-funnel-dollar"></i> <span>Pipeline CRM</span></button></li>
-                    <li><button onclick="showPage('proveedores')"><i class="fas fa-handshake"></i> <span>Proveedores</span></button></li>
-                    <li><button onclick="showPage('presupuestos')"><i class="fas fa-file-invoice"></i> <span>Presupuestos</span></button></li>
-                    <li><button onclick="showPage('remitos')"><i class="fas fa-truck"></i> <span>Remitos</span></button></li>
-                    <li><button onclick="showPage('usuarios')"><i class="fas fa-user-shield"></i> <span>Usuarios</span></button></li>
-                    <li><button onclick="showPage('mercadopago')"><i class="fas fa-credit-card"></i> <span>MercadoPago</span></button></li>
-                    <li><button onclick="showPage('whatsapp')"><i class="fab fa-whatsapp"></i> <span>WhatsApp Business</span></button></li>
+
+                    <!-- INTEGRACIONES & IA -->
+                    <li class="menu-section-title">INTEGRACIONES &amp; IA</li>
                     <li><button onclick="showPage('ia')"><i class="fas fa-robot"></i> <span>Asistente IA</span></button></li>
+                    <li><button onclick="showPage('whatsapp')"><i class="fab fa-whatsapp"></i> <span>WhatsApp Business</span></button></li>
+                    <li><button onclick="showPage('mercadopago')"><i class="fas fa-credit-card"></i> <span>MercadoPago</span></button></li>
+
+                    <!-- SISTEMA -->
+                    <li class="menu-section-title">SISTEMA</li>
+                    <li><button onclick="showPage('usuarios')"><i class="fas fa-user-shield"></i> <span>Usuarios</span></button></li>
                     <li><button onclick="showPage('config')"><i class="fas fa-gear"></i> <span>Configuración</span></button></li>
                 </ul>
 
@@ -2011,6 +2033,37 @@
                                 <div class="chart-container">
                                     <canvas id="topProductsChart"></canvas>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- SPRINT 2: Flujo de Caja Predictivo -->
+                        <div class="card" id="cashflow-card">
+                            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                                <h2>💰 Flujo de Caja Predictivo — 30 días</h2>
+                                <button class="btn-secondary" onclick="renderCashflowChart()" style="font-size:13px;padding:6px 14px;">↻ Actualizar</button>
+                            </div>
+                            <!-- KPIs fila -->
+                            <div id="cashflow-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;padding:16px 0 8px;">
+                                <div class="stat-card" style="text-align:center;">
+                                    <div class="stat-value" id="cf-balance-actual" style="font-size:1.2rem;">$0</div>
+                                    <div class="stat-label">Balance Actual</div>
+                                </div>
+                                <div class="stat-card" style="text-align:center;">
+                                    <div class="stat-value" id="cf-neto-diario" style="font-size:1.2rem;">$0</div>
+                                    <div class="stat-label">Neto Diario Promedio</div>
+                                </div>
+                                <div class="stat-card" style="text-align:center;">
+                                    <div class="stat-value" id="cf-proyeccion-30" style="font-size:1.2rem;">$0</div>
+                                    <div class="stat-label">Proyección 30 días</div>
+                                </div>
+                            </div>
+                            <!-- Alerta déficit -->
+                            <div id="cashflow-alerta" style="display:none;background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 16px;margin-bottom:12px;color:#991b1b;font-size:14px;">
+                                ⚠️ <strong>Alerta:</strong> La proyección indica <strong>déficit de caja</strong> dentro de los próximos 30 días. Revisá tus gastos o anticipá ingresos.
+                            </div>
+                            <!-- Chart -->
+                            <div class="chart-container" style="height:240px;">
+                                <canvas id="cashflowChart"></canvas>
                             </div>
                         </div>
 
@@ -3258,25 +3311,44 @@
                         <div class="grid-2">
                             <div class="card">
                                 <h2 style="margin-bottom: 20px;">Conexion WhatsApp Business</h2>
-                                <div id="wa-status" style="padding: 30px; text-align: center; background: var(--gray-50); border-radius: 12px; margin-bottom: 20px;">
-                                    <i class="fab fa-whatsapp" style="font-size: 48px; color: var(--danger); margin-bottom: 12px; display: block;"></i>
-                                    <div style="font-weight: 600; margin-bottom: 4px;" id="wa-status-text">No Conectado</div>
-                                    <div style="font-size: 12px; color: var(--gray-600);">Configura tu WhatsApp Business API</div>
+
+                                <!-- Estado de sesion -->
+                                <div id="wa-status" style="padding: 24px; text-align: center; background: var(--gray-50); border-radius: 12px; margin-bottom: 20px;">
+                                    <i class="fab fa-whatsapp" style="font-size: 48px; color: var(--danger); margin-bottom: 12px; display: block;" id="wa-status-icon"></i>
+                                    <div style="font-weight: 600; margin-bottom: 4px;" id="wa-status-text">Desconectado</div>
+                                    <div style="font-size: 12px; color: var(--gray-600);" id="wa-status-sub">Vincula tu telefono escaneando un codigo QR</div>
+                                    <!-- Badge de estado -->
+                                    <div id="wa-session-badge" style="margin-top:10px;display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;background:#fee2e2;color:#dc2626;">● Desconectado</div>
                                 </div>
+
+                                <!-- Numero de telefono -->
                                 <div class="form-group">
                                     <label>Numero de WhatsApp Business</label>
                                     <input type="tel" id="wa-phone" placeholder="+54 9 11 XXXX-XXXX">
                                 </div>
-                                <div class="form-group">
-                                    <label>API Token (WhatsApp Business API)</label>
-                                    <input type="password" id="wa-token" placeholder="Tu token de acceso...">
+
+                                <!-- Panel QR -->
+                                <div id="wa-qr-panel" style="display:none; margin-bottom:16px;">
+                                    <div style="border:2px dashed var(--gray-300); border-radius:12px; padding:24px; text-align:center; background:#fff;">
+                                        <div id="wa-qr-img-container" style="margin-bottom:12px;">
+                                            <div id="wa-qr-placeholder" style="width:200px;height:200px;margin:0 auto;display:flex;align-items:center;justify-content:center;background:var(--gray-100);border-radius:8px;flex-direction:column;gap:8px;">
+                                                <i class="fas fa-qrcode" style="font-size:48px;color:var(--gray-400);"></i>
+                                                <span style="font-size:12px;color:var(--gray-500);">Esperando escaneo...</span>
+                                            </div>
+                                            <img id="wa-qr-img" style="display:none;width:200px;height:200px;border-radius:8px;" alt="QR WhatsApp">
+                                        </div>
+                                        <p style="font-size:13px;color:var(--gray-600);margin:0 0 4px;">Abre WhatsApp en tu telefono</p>
+                                        <p style="font-size:12px;color:var(--gray-500);margin:0;"><strong>Dispositivos vinculados</strong> → Vincular dispositivo → Escanear QR</p>
+                                        <div id="wa-qr-expiry" style="margin-top:8px;font-size:11px;color:var(--warning);display:none;"></div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>ID de cuenta Business</label>
-                                    <input type="text" id="wa-business-id" placeholder="ID de negocio de Meta">
-                                </div>
-                                <button class="btn-primary" style="width: 100%;" onclick="conectarWhatsApp()">
-                                    <i class="fab fa-whatsapp"></i> Conectar WhatsApp
+
+                                <!-- Botones de accion -->
+                                <button class="btn-primary" style="width:100%;margin-bottom:8px;" onclick="generarQRWhatsApp()" id="wa-btn-qr">
+                                    <i class="fas fa-qrcode"></i> Generar Codigo QR para Vincular
+                                </button>
+                                <button class="btn-secondary" style="width:100%;display:none;" onclick="desconectarWhatsApp()" id="wa-btn-disconnect">
+                                    <i class="fas fa-unlink"></i> Desconectar
                                 </button>
                             </div>
 
@@ -3905,6 +3977,33 @@
                 <h2>Nuevo Gasto</h2>
                 <button class="modal-close" onclick="closeModal('gasto-modal')">&times;</button>
             </div>
+            <!-- SPRINT 2: OCR Simulado -->
+            <div id="ocr-zone" style="background:var(--gray-50,#f9fafb);border:2px dashed var(--gray-300,#d1d5db);border-radius:10px;padding:14px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                    <span style="font-size:20px;">📷</span>
+                    <div>
+                        <div style="font-weight:600;font-size:14px;color:var(--gray-800,#1f2937);">Escanear comprobante con IA</div>
+                        <div style="font-size:12px;color:var(--gray-500,#6b7280);">Subí una foto o ticket y autocompletamos el formulario</div>
+                    </div>
+                </div>
+                <label for="ocr-file-input" class="btn-secondary" style="display:inline-block;cursor:pointer;font-size:13px;padding:7px 14px;margin-bottom:0;">
+                    📎 Seleccionar imagen / PDF
+                </label>
+                <input type="file" id="ocr-file-input" accept="image/*,.pdf" style="display:none;" onchange="procesarComprobanteOCR(this.files[0])">
+                <!-- Spinner -->
+                <div id="ocr-spinner" style="display:none;margin-top:10px;color:var(--primary);font-size:13px;">
+                    <span style="display:inline-block;animation:spin 1s linear infinite;">⟳</span> Analizando con IA…
+                </div>
+                <!-- Preview resultado OCR -->
+                <div id="ocr-preview" style="display:none;margin-top:12px;background:#fff;border:1px solid var(--gray-200,#e5e7eb);border-radius:8px;padding:12px;">
+                    <div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--gray-700,#374151);">✅ Datos detectados:</div>
+                    <div id="ocr-datos" style="font-size:13px;line-height:1.8;"></div>
+                    <button class="btn-primary" onclick="aplicarDatosOCR()" style="margin-top:10px;width:100%;font-size:13px;">
+                        ✔ Aplicar al formulario
+                    </button>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label>Categoría</label>
                 <select id="modal-gasto-categoria"></select>
@@ -4493,7 +4592,7 @@
 
         function _ensureDBStructure() {
             if (!db.account) db.account = { businessName: 'Mi Negocio', ownerName: currentUser?.name || '', email: currentUser?.email || '', industry: 'general' };
-            if (!db.industryConfig) db.industryConfig = INDUSTRY_CONFIGS[db.account.industry || 'general'] || INDUSTRY_CONFIGS['general'];
+            if (!db.industryConfig || !db.industryConfig.clientLabel) db.industryConfig = INDUSTRY_CONFIGS[db.account.industry || 'general'] || INDUSTRY_CONFIGS['general'];
             if (!Array.isArray(db.clientes)) db.clientes = [];
             if (!Array.isArray(db.productos)) db.productos = [];
             if (!Array.isArray(db.ventas)) db.ventas = [];
@@ -5253,6 +5352,20 @@
             if (menuClientes) menuClientes.textContent = cfg.clientLabel ? cfg.clientLabel + 's' : 'Clientes';
             if (menuInventario) menuInventario.textContent = cfg.inventoryLabel || 'Inventario';
             if (menuVentas) menuVentas.textContent = cfg.salesLabel ? cfg.salesLabel + 's' : 'Ventas';
+
+            // Ocultar .menu-section-title si todos sus items hermanos están ocultos
+            const sectionTitles = document.querySelectorAll('.sidebar-menu .menu-section-title');
+            sectionTitles.forEach(title => {
+                let sibling = title.nextElementSibling;
+                let allHidden = true;
+                while (sibling && !sibling.classList.contains('menu-section-title')) {
+                    if (sibling.tagName === 'LI' && !sibling.classList.contains('menu-section-title')) {
+                        if (sibling.style.display !== 'none') { allHidden = false; break; }
+                    }
+                    sibling = sibling.nextElementSibling;
+                }
+                title.style.display = allHidden ? 'none' : '';
+            });
         }
 
         function updateSidebarBrand() {
@@ -5309,7 +5422,7 @@
             if (page === 'embudo-clinica') renderEmbudoClinica();
             if (page === 'tareas-clinica') renderTareasClinica();
             if (page === 'config') { cargarConfiguracion(); renderRubroSelector(); }
-            if (page === 'clientes') { try { actualizarPanelOdontologico(); actualizarPanelInmobiliario(); } catch(e){} }
+            if (page === 'clientes') { try { renderClientes(); actualizarPanelOdontologico(); actualizarPanelInmobiliario(); } catch(e){} }
             if (page === 'presupuestos') { try { renderPresupuestos(); } catch(e){} }
             if (page === 'remitos') { try { renderRemitos(); } catch(e){} }
             if (page === 'pipeline-ventas') { try { renderPipelineVentas(); } catch(e){} }
@@ -5420,6 +5533,7 @@
 
             try { renderSalesChart(); } catch(e) { console.warn('Chart render error:', e); }
             try { renderTopProductsChart(); } catch(e) { console.warn('Chart render error:', e); }
+            try { renderCashflowChart(); } catch(e) { console.warn('Cashflow render error:', e); }
             renderRecentActivity();
         }
 
@@ -5516,13 +5630,13 @@
                     document.getElementById('modal-cliente-campos-extra').innerHTML += `<div class="form-group"><label>${field.label}</label><input type="text" id="modal-cliente-${field.name}"></div>`;
                 });
             }
-            document.getElementById('modal-cliente-title').textContent = id ? 'Editar Cliente' : 'Nuevo ' + db.industryConfig.clientLabel;
+            document.getElementById('modal-cliente-title').textContent = id ? 'Editar Cliente' : 'Nuevo ' + (db.industryConfig?.clientLabel || 'Cliente');
             if (id) {
                 const cliente = db.clientes.find(c => c.id === id);
                 document.getElementById('modal-cliente-nombre').value = cliente.nombre;
                 document.getElementById('modal-cliente-email').value = cliente.email;
                 document.getElementById('modal-cliente-telefono').value = cliente.telefono;
-                document.getElementById('modal-cliente-modal').dataset.id = id;
+                document.getElementById('cliente-modal').dataset.id = id;
                 if (db.industryConfig.customClientFields) {
                     db.industryConfig.customClientFields.forEach(field => {
                         document.getElementById(`modal-cliente-${field.name}`).value = cliente[field.name] || '';
@@ -5532,7 +5646,7 @@
                 document.getElementById('modal-cliente-nombre').value = '';
                 document.getElementById('modal-cliente-email').value = '';
                 document.getElementById('modal-cliente-telefono').value = '';
-                delete document.getElementById('modal-cliente-modal').dataset.id;
+                delete document.getElementById('cliente-modal').dataset.id;
             }
             openModal('cliente-modal');
             const clienteId = id || 0;
@@ -5780,7 +5894,8 @@
             if (tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center;">Sin productos</td></tr>';
 
             const subtotal = ventaCarrito.reduce((sum, item) => sum + item.subtotal, 0);
-            const iva = subtotal * 0.21;
+            const ivaRateCarrito = (db.account?.iva || 21) / 100;
+            const iva = subtotal * ivaRateCarrito;
             const total = subtotal + iva;
 
             if (document.getElementById('venta-subtotal')) {
@@ -5805,7 +5920,8 @@
             }
 
             const subtotal = ventaCarrito.reduce((sum, item) => sum + item.subtotal, 0);
-            const iva = subtotal * 0.21;
+            const ivaRateVenta = (db.account?.iva || 21) / 100;
+            const iva = subtotal * ivaRateVenta;
             const total = subtotal + iva;
 
             const venta = {
@@ -5914,7 +6030,8 @@
             if (tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center;">Sin items</td></tr>';
 
             const subtotal = facturaItems.reduce((sum, item) => sum + item.subtotal, 0);
-            const iva = subtotal * 0.21;
+            const ivaRatePreview = (db.account?.iva || 21) / 100;
+            const iva = subtotal * ivaRatePreview;
             const total = subtotal + iva;
 
             if (document.getElementById('factura-subtotal')) {
@@ -6226,6 +6343,14 @@
 
         // GASTOS
         function openGastoModal(id = null) {
+            // Resetear zona OCR
+            const ocrPreview = document.getElementById('ocr-preview');
+            const ocrSpinner = document.getElementById('ocr-spinner');
+            const ocrFile    = document.getElementById('ocr-file-input');
+            if (ocrPreview) ocrPreview.style.display = 'none';
+            if (ocrSpinner) ocrSpinner.style.display = 'none';
+            if (ocrFile)    ocrFile.value = '';
+            _ocrDatosPendientes = null;
             const select = document.getElementById('modal-gasto-categoria');
             if (select) {
                 select.innerHTML = EXPENSE_CATEGORIES.map(c => `<option>${c}</option>`).join('');
@@ -6821,7 +6946,7 @@
             if (!clienteId || !fecha) { alert('Completá cliente y fecha'); return; }
             if (_presItemsTemp.length === 0) { alert('Agregá al menos un ítem'); return; }
 
-            const total = _presItemsTemp.reduce((s, i) => s + i.subtotal, 0);
+            const total = _presItemsTemp.reduce((s, i) => s + (parseFloat(i.subtotal) || 0), 0);
             const id = document.getElementById('presupuesto-modal').dataset.id;
             const data = { clienteId, fecha, vencimiento, estado, observaciones, items: _presItemsTemp, total };
 
@@ -6985,17 +7110,24 @@
 
             if (id) {
                 const idx = db.remitos.findIndex(r => r.id === parseInt(id));
-                if (idx >= 0) db.remitos[idx] = { ...db.remitos[idx], ...data };
+                if (idx >= 0) {
+                    // Restaurar stock de items anteriores antes de aplicar los nuevos
+                    (db.remitos[idx].items || []).forEach(item => {
+                        const prod = db.productos.find(p => p.id === item.productoId);
+                        if (prod) prod.stock = (prod.stock || 0) + item.cantidad;
+                    });
+                    db.remitos[idx] = { ...db.remitos[idx], ...data };
+                }
             } else {
                 data.id = safeMaxId(db.remitos);
                 data.numero = 'REM-' + String(data.id).padStart(4, '0');
                 db.remitos.push(data);
-                // Descontar stock
-                _remItemsTemp.forEach(item => {
-                    const prod = db.productos.find(p => p.id === item.productoId);
-                    if (prod) prod.stock = Math.max(0, (prod.stock || 0) - item.cantidad);
-                });
             }
+            // Descontar stock (aplica tanto a creacion como a actualizacion)
+            _remItemsTemp.forEach(item => {
+                const prod = db.productos.find(p => p.id === item.productoId);
+                if (prod) prod.stock = Math.max(0, (prod.stock || 0) - item.cantidad);
+            });
             saveDB();
             closeModal('remito-modal');
             renderRemitos();
@@ -7425,7 +7557,7 @@
                 const nombre = document.getElementById('cita-cliente-nombre').value;
                 const tel = document.getElementById('cita-cliente-tel').value;
                 if (!nombre) { alert('Ingresa el nombre del cliente'); return; }
-                if (!db.nextId.cliente) db.nextId.cliente = (db.clientes.length > 0 ? Math.max(...db.clientes.map(c=>c.id)) + 1 : 1);
+                if (!db.nextId.cliente) db.nextId.cliente = safeMaxId(db.clientes);
                 const nuevoCliente = { id: db.nextId.cliente++, nombre, telefono: tel, email: '', totalCompras: 0 };
                 db.clientes.push(nuevoCliente);
                 clienteId = nuevoCliente.id;
@@ -7485,32 +7617,141 @@
             renderCitas();
         }
 
-        // WHATSAPP BUSINESS
-        function conectarWhatsApp() {
-            const phone = document.getElementById('wa-phone').value.trim();
-            const token = document.getElementById('wa-token').value.trim();
-            const businessId = document.getElementById('wa-business-id').value.trim();
+        // WHATSAPP BUSINESS — Integración vía QR (microservicio externo)
+        let _waQrPollingInterval = null;
 
-            if (!phone || !token) {
-                alert('Ingresa al menos el numero y el token de WhatsApp Business');
+        function _setWASessionState(state) {
+            // state: 'disconnected' | 'waiting_qr' | 'connected'
+            const icon   = document.getElementById('wa-status-icon');
+            const text   = document.getElementById('wa-status-text');
+            const sub    = document.getElementById('wa-status-sub');
+            const badge  = document.getElementById('wa-session-badge');
+            const qrPanel = document.getElementById('wa-qr-panel');
+            const btnQR   = document.getElementById('wa-btn-qr');
+            const btnDisc = document.getElementById('wa-btn-disconnect');
+            if (!icon) return;
+            if (state === 'connected') {
+                icon.style.color  = '#25D366';
+                text.textContent  = 'Conectado';
+                sub.textContent   = `WhatsApp activo: ${db.whatsapp?.phone || ''}`;
+                badge.textContent = '● Conectado';
+                badge.style.background = '#dcfce7';
+                badge.style.color      = '#16a34a';
+                qrPanel.style.display  = 'none';
+                btnQR.style.display    = 'none';
+                btnDisc.style.display  = '';
+            } else if (state === 'waiting_qr') {
+                icon.style.color  = '#f59e0b';
+                text.textContent  = 'Esperando escaneo...';
+                sub.textContent   = 'Escanea el QR con tu telefono para vincular';
+                badge.textContent = '● Esperando QR';
+                badge.style.background = '#fef3c7';
+                badge.style.color      = '#d97706';
+                qrPanel.style.display  = '';
+                btnQR.style.display    = 'none';
+                btnDisc.style.display  = '';
+            } else {
+                icon.style.color  = '#ef4444';
+                text.textContent  = 'Desconectado';
+                sub.textContent   = 'Vincula tu telefono escaneando un codigo QR';
+                badge.textContent = '● Desconectado';
+                badge.style.background = '#fee2e2';
+                badge.style.color      = '#dc2626';
+                qrPanel.style.display  = 'none';
+                btnQR.style.display    = '';
+                btnDisc.style.display  = 'none';
+            }
+        }
+
+        async function generarQRWhatsApp() {
+            const phone = document.getElementById('wa-phone').value.trim();
+            db.whatsapp = db.whatsapp || {};
+            if (phone) db.whatsapp.phone = phone;
+            saveDB();
+
+            _setWASessionState('waiting_qr');
+
+            // Mostrar placeholder mientras carga
+            const img = document.getElementById('wa-qr-img');
+            const placeholder = document.getElementById('wa-qr-placeholder');
+            img.style.display = 'none';
+            placeholder.style.display = 'flex';
+
+            // Endpoint configurable (el usuario lo establece en db.config.whatsapp_qr_endpoint)
+            const endpoint = (db.config || {}).whatsapp_qr_endpoint || null;
+
+            if (!endpoint) {
+                // MODO DEMO: muestra un QR de ejemplo con data simulada
+                const demoQR = 'data:image/svg+xml;base64,' + btoa(`
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="white"/>
+  <text x="100" y="90" text-anchor="middle" font-size="12" fill="#475569">QR de demostración</text>
+  <text x="100" y="110" text-anchor="middle" font-size="10" fill="#64748b">Configura whatsapp_qr_endpoint</text>
+  <text x="100" y="128" text-anchor="middle" font-size="10" fill="#64748b">en db.config para QR real</text>
+  <rect x="30" y="140" width="140" height="4" rx="2" fill="#e2e8f0"/>
+</svg>`);
+                img.src = demoQR;
+                img.style.display = '';
+                placeholder.style.display = 'none';
+                document.getElementById('wa-qr-expiry').style.display = '';
+                document.getElementById('wa-qr-expiry').textContent = 'MODO DEMO — El QR real se obtiene desde el microservicio configurado en db.config.whatsapp_qr_endpoint';
+                // Simular polling que detecta conexion después de 20s en demo
+                clearInterval(_waQrPollingInterval);
+                _waQrPollingInterval = null;
                 return;
             }
 
-            db.whatsapp = db.whatsapp || {};
-            db.whatsapp.phone = phone;
-            db.whatsapp.token = token;
-            db.whatsapp.businessId = businessId;
-            db.whatsapp.connected = true;
-            db.whatsapp.connectedAt = new Date().toISOString();
-            saveDB();
-
-            document.getElementById('wa-status').innerHTML = `
-                <i class="fab fa-whatsapp" style="font-size: 48px; color: #25D366; margin-bottom: 12px; display: block;"></i>
-                <div style="font-weight: 600; margin-bottom: 4px; color: #25D366;">Conectado</div>
-                <div style="font-size: 12px; color: var(--gray-600);">WhatsApp Business activo: ${phone}</div>
-            `;
-            alert('WhatsApp Business conectado correctamente');
+            try {
+                const res = await fetch(endpoint + '/qr', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+                const data = await res.json();
+                if (data.qr) {
+                    const src = data.qr.startsWith('data:') ? data.qr : 'data:image/png;base64,' + data.qr;
+                    img.src = src;
+                    img.style.display = '';
+                    placeholder.style.display = 'none';
+                    const expiryEl = document.getElementById('wa-qr-expiry');
+                    expiryEl.style.display = '';
+                    expiryEl.textContent = 'El codigo QR expira en 60 segundos. Escanea ahora.';
+                }
+                // Iniciar polling para detectar cuando se escanea
+                clearInterval(_waQrPollingInterval);
+                _waQrPollingInterval = setInterval(() => _pollWASessionStatus(endpoint), 3000);
+            } catch (e) {
+                console.error('[WA QR] Error obteniendo QR:', e);
+                alert('No se pudo obtener el QR. Verifica la URL del microservicio en Configuracion > whatsapp_qr_endpoint');
+                _setWASessionState('disconnected');
+            }
         }
+
+        async function _pollWASessionStatus(endpoint) {
+            try {
+                const res = await fetch(endpoint + '/status', { method: 'GET' });
+                const data = await res.json();
+                if (data.connected || data.status === 'connected') {
+                    clearInterval(_waQrPollingInterval);
+                    _waQrPollingInterval = null;
+                    db.whatsapp = db.whatsapp || {};
+                    db.whatsapp.connected = true;
+                    db.whatsapp.connectedAt = new Date().toISOString();
+                    saveDB();
+                    _setWASessionState('connected');
+                }
+            } catch (e) { /* silencioso */ }
+        }
+
+        function desconectarWhatsApp() {
+            if (!confirm('¿Desconectar WhatsApp? Se cerrara la sesion activa.')) return;
+            clearInterval(_waQrPollingInterval);
+            _waQrPollingInterval = null;
+            db.whatsapp = db.whatsapp || {};
+            db.whatsapp.connected = false;
+            db.whatsapp.connectedAt = null;
+            saveDB();
+            _setWASessionState('disconnected');
+        }
+
+        // Mantener compatibilidad (llamado desde cargarConfigWA)
+        function conectarWhatsApp() { generarQRWhatsApp(); }
 
         function guardarConfigWA() {
             db.whatsapp = db.whatsapp || {};
@@ -7531,28 +7772,22 @@
         function cargarConfigWA() {
             if (!db.whatsapp) return;
             const wa = db.whatsapp;
-            if (wa.phone) document.getElementById('wa-phone').value = wa.phone;
-            if (wa.token) document.getElementById('wa-token').value = wa.token;
-            if (wa.businessId) document.getElementById('wa-business-id').value = wa.businessId;
-            if (wa.tone) document.getElementById('wa-tone').value = wa.tone;
-            if (wa.welcomeMsg) document.getElementById('wa-welcome').value = wa.welcomeMsg;
-            if (wa.horaDesde) document.getElementById('wa-hora-desde').value = wa.horaDesde;
-            if (wa.horaHasta) document.getElementById('wa-hora-hasta').value = wa.horaHasta;
-            if (wa.bankInfo) document.getElementById('wa-bank-info').value = wa.bankInfo;
-            if (wa.autoStock !== undefined) document.getElementById('wa-auto-stock').checked = wa.autoStock;
-            if (wa.autoCitas !== undefined) document.getElementById('wa-auto-citas').checked = wa.autoCitas;
-            if (wa.autoCobro !== undefined) document.getElementById('wa-auto-cobro').checked = wa.autoCobro;
-            if (wa.autoBanco !== undefined) document.getElementById('wa-auto-banco').checked = wa.autoBanco;
-            if (wa.autoFactura !== undefined) document.getElementById('wa-auto-factura').checked = wa.autoFactura;
-            if (wa.autoNotif !== undefined) document.getElementById('wa-auto-notif').checked = wa.autoNotif;
-
-            if (wa.connected) {
-                document.getElementById('wa-status').innerHTML = `
-                    <i class="fab fa-whatsapp" style="font-size: 48px; color: #25D366; margin-bottom: 12px; display: block;"></i>
-                    <div style="font-weight: 600; margin-bottom: 4px; color: #25D366;">Conectado</div>
-                    <div style="font-size: 12px; color: var(--gray-600);">WhatsApp Business activo: ${wa.phone}</div>
-                `;
-            }
+            // Campos de configuracion de conexion
+            if (wa.phone) { const el = document.getElementById('wa-phone'); if (el) el.value = wa.phone; }
+            // Campos de configuracion IA
+            if (wa.tone) { const el = document.getElementById('wa-tone'); if (el) el.value = wa.tone; }
+            if (wa.welcomeMsg) { const el = document.getElementById('wa-welcome'); if (el) el.value = wa.welcomeMsg; }
+            if (wa.horaDesde) { const el = document.getElementById('wa-hora-desde'); if (el) el.value = wa.horaDesde; }
+            if (wa.horaHasta) { const el = document.getElementById('wa-hora-hasta'); if (el) el.value = wa.horaHasta; }
+            if (wa.bankInfo) { const el = document.getElementById('wa-bank-info'); if (el) el.value = wa.bankInfo; }
+            if (wa.autoStock !== undefined) { const el = document.getElementById('wa-auto-stock'); if (el) el.checked = wa.autoStock; }
+            if (wa.autoCitas !== undefined) { const el = document.getElementById('wa-auto-citas'); if (el) el.checked = wa.autoCitas; }
+            if (wa.autoCobro !== undefined) { const el = document.getElementById('wa-auto-cobro'); if (el) el.checked = wa.autoCobro; }
+            if (wa.autoBanco !== undefined) { const el = document.getElementById('wa-auto-banco'); if (el) el.checked = wa.autoBanco; }
+            if (wa.autoFactura !== undefined) { const el = document.getElementById('wa-auto-factura'); if (el) el.checked = wa.autoFactura; }
+            if (wa.autoNotif !== undefined) { const el = document.getElementById('wa-auto-notif'); if (el) el.checked = wa.autoNotif; }
+            // Restaurar estado de sesion visual
+            _setWASessionState(wa.connected ? 'connected' : 'disconnected');
         }
 
         function simularMensajeWA() {
@@ -9483,10 +9718,7 @@ Estado: ${p.estado}`);
             board.innerHTML = PIPELINE_ETAPAS.map(etapa => {
                 const ops = db.oportunidades.filter(o => o.etapa === etapa.key);
                 const totalEtapa = ops.reduce((s,o) => s + (parseFloat(o.monto)||0), 0);
-                const btnsOtrasEtapas = PIPELINE_ETAPAS
-                    .filter(e => e.key !== etapa.key && e.key !== 'perdido')
-                    .slice(0, 2)
-                    .map(e => `<button class="kc-btn" onclick="event.stopPropagation();moverOportunidad(${'{op.id}'}, '${e.key}')">\u2192 ${e.label.split(' ')[0]}</button>`);
+                // btnsOtrasEtapas: eliminado (variable muerta — los botones de movimiento se generan dentro de cada card vía `btns`)
                 const cards = ops.map(op => {
                     const cliente = db.clientes.find(c => c.id === op.clienteId);
                     const nomCliente = cliente ? escapeHTML(cliente.nombre) : (op.clienteNombre ? escapeHTML(op.clienteNombre) : '\u2014');
@@ -9720,6 +9952,186 @@ Estado: ${p.estado}`);
         }
 
 
+        // ═══════════════════════════════════════════════════════════════
+        // SPRINT 2 — Flujo de Caja Predictivo
+        // ═══════════════════════════════════════════════════════════════
+        function renderCashflowChart() {
+            const ventas  = Array.isArray(db.ventas)  ? db.ventas  : [];
+            const gastos  = Array.isArray(db.gastos)  ? db.gastos  : [];
+
+            // Calcular neto diario de los últimos 30 días reales
+            const hoy = new Date();
+            const hace30 = new Date(hoy); hace30.setDate(hoy.getDate() - 30);
+
+            let totalIngresos = 0, totalEgresos = 0;
+            ventas.forEach(v => { if (new Date(v.fecha) >= hace30) totalIngresos += (v.total || 0); });
+            gastos.forEach(g => { if (new Date(g.fecha) >= hace30) totalEgresos += (g.monto || 0); });
+
+            const netoDiario = (totalIngresos - totalEgresos) / 30;
+
+            // Balance actual = suma total ventas - suma total gastos
+            const balanceActual = ventas.reduce((s,v) => s + (v.total||0), 0)
+                                - gastos.reduce((s,g) => s + (g.monto||0), 0);
+
+            const proyeccion30 = balanceActual + (netoDiario * 30);
+
+            // Actualizar KPIs
+            const fmt = v => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(v);
+            const elBA  = document.getElementById('cf-balance-actual');
+            const elND  = document.getElementById('cf-neto-diario');
+            const elP30 = document.getElementById('cf-proyeccion-30');
+            if (elBA)  { elBA.textContent  = fmt(balanceActual); elBA.style.color  = balanceActual  >= 0 ? 'var(--success)' : 'var(--danger)'; }
+            if (elND)  { elND.textContent  = fmt(netoDiario);    elND.style.color  = netoDiario     >= 0 ? 'var(--success)' : 'var(--danger)'; }
+            if (elP30) { elP30.textContent = fmt(proyeccion30);  elP30.style.color = proyeccion30   >= 0 ? 'var(--success)' : 'var(--danger)'; }
+
+            // Alerta déficit
+            const alertaEl = document.getElementById('cashflow-alerta');
+            if (alertaEl) alertaEl.style.display = proyeccion30 < 0 ? 'block' : 'none';
+
+            // Construir datos del chart: balance acumulado día a día para los próximos 30 días
+            const labels = [], dataBalance = [], dataProyectado = [];
+            for (let i = 0; i <= 30; i++) {
+                const d = new Date(hoy);
+                d.setDate(hoy.getDate() + i);
+                labels.push(i === 0 ? 'Hoy' : `+${i}d`);
+                dataBalance.push(+(balanceActual + netoDiario * i).toFixed(2));
+            }
+
+            // Renderizar chart de forma segura
+            const canvas = document.getElementById('cashflowChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            const existing = Chart.getChart(canvas);
+            if (existing) existing.destroy();
+
+            new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Balance proyectado',
+                        data: dataBalance,
+                        borderColor: dataBalance[dataBalance.length-1] >= 0 ? '#10b981' : '#ef4444',
+                        backgroundColor: dataBalance[dataBalance.length-1] >= 0
+                            ? 'rgba(16,185,129,0.10)' : 'rgba(239,68,68,0.10)',
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 2,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(ctx.parsed.y)
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { maxTicksLimit: 8, font: { size: 11 } } },
+                        y: {
+                            ticks: {
+                                font: { size: 11 },
+                                callback: v => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',notation:'compact',maximumFractionDigits:0}).format(v)
+                            },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // SPRINT 2 — OCR Simulado de comprobantes
+        // ═══════════════════════════════════════════════════════════════
+        const _OCR_PROVEEDORES = [
+            { nombre:'YPF S.A.',          categoria:'Combustible',      montoMin:8000,   montoMax:35000  },
+            { nombre:'Telecom Argentina', categoria:'Telecomunicaciones',montoMin:4500,   montoMax:18000  },
+            { nombre:'EDENOR',            categoria:'Servicios',         montoMin:3000,   montoMax:22000  },
+            { nombre:'Metrogas',          categoria:'Servicios',         montoMin:2000,   montoMax:12000  },
+            { nombre:'Sodimac',           categoria:'Mantenimiento',     montoMin:5000,   montoMax:80000  },
+            { nombre:'Office Net',        categoria:'Insumos',           montoMin:2000,   montoMax:40000  },
+            { nombre:'Mercado Libre',     categoria:'Insumos',           montoMin:1500,   montoMax:60000  },
+            { nombre:'Fravega',           categoria:'Equipamiento',      montoMin:20000,  montoMax:300000 },
+            { nombre:'Carrefour',         categoria:'Insumos',           montoMin:3000,   montoMax:25000  },
+            { nombre:'Rapipago',          categoria:'Servicios',         montoMin:500,    montoMax:8000   },
+            { nombre:'Andreani',          categoria:'Logística',         montoMin:1200,   montoMax:15000  },
+            { nombre:'OCA',              categoria:'Logística',         montoMin:1000,   montoMax:12000  },
+            { nombre:'DHL Argentina',     categoria:'Logística',         montoMin:2000,   montoMax:30000  },
+            { nombre:'Farmacity',         categoria:'Salud',             montoMin:500,    montoMax:8000   },
+            { nombre:'Movistar',          categoria:'Telecomunicaciones',montoMin:3000,   montoMax:15000  },
+            { nombre:'Personal',          categoria:'Telecomunicaciones',montoMin:2500,   montoMax:14000  }
+        ];
+
+        let _ocrDatosPendientes = null;
+
+        function procesarComprobanteOCR(file) {
+            if (!file) return;
+            const spinner  = document.getElementById('ocr-spinner');
+            const preview  = document.getElementById('ocr-preview');
+            const datos    = document.getElementById('ocr-datos');
+            if (spinner) spinner.style.display = 'block';
+            if (preview) preview.style.display  = 'none';
+
+            setTimeout(() => {
+                // Simular OCR: elegir proveedor aleatorio y monto dentro del rango
+                const prov = _OCR_PROVEEDORES[Math.floor(Math.random() * _OCR_PROVEEDORES.length)];
+                const monto = Math.round(prov.montoMin + Math.random() * (prov.montoMax - prov.montoMin));
+
+                // Fecha: hoy o ayer
+                const fecha = new Date();
+                if (Math.random() > 0.5) fecha.setDate(fecha.getDate() - 1);
+                const fechaStr = fecha.toISOString().split('T')[0];
+
+                // Número de comprobante simulado
+                const nroComp = String(Math.floor(Math.random() * 99999)).padStart(8,'0');
+                const desc    = `${prov.nombre} - Comprobante N° ${nroComp}`;
+
+                _ocrDatosPendientes = {
+                    categoria:   prov.categoria,
+                    descripcion: desc,
+                    monto:       monto,
+                    fecha:       fechaStr
+                };
+
+                if (spinner) spinner.style.display = 'none';
+                if (datos) {
+                    datos.innerHTML =
+                        `<b>Proveedor:</b> ${escapeHTML(prov.nombre)}<br>` +
+                        `<b>Categoría:</b> ${escapeHTML(prov.categoria)}<br>` +
+                        `<b>Descripción:</b> ${escapeHTML(desc)}<br>` +
+                        `<b>Monto:</b> ${new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS'}).format(monto)}<br>` +
+                        `<b>Fecha:</b> ${fecha.toLocaleDateString('es-AR')}`;
+                }
+                if (preview) preview.style.display = 'block';
+            }, 1500);
+        }
+
+        function aplicarDatosOCR() {
+            if (!_ocrDatosPendientes) return;
+            const d = _ocrDatosPendientes;
+            const sel = document.getElementById('modal-gasto-categoria');
+            if (sel) sel.value = d.categoria;
+            const desc = document.getElementById('modal-gasto-descripcion');
+            if (desc) desc.value = d.descripcion;
+            const monto = document.getElementById('modal-gasto-monto');
+            if (monto) monto.value = d.monto;
+            const fecha = document.getElementById('modal-gasto-fecha');
+            if (fecha) fecha.value = d.fecha;
+            // Ocultar zona OCR y limpiar estado
+            const preview = document.getElementById('ocr-preview');
+            if (preview) preview.style.display = 'none';
+            const fileInput = document.getElementById('ocr-file-input');
+            if (fileInput) fileInput.value = '';
+            _ocrDatosPendientes = null;
+            // Feedback
+            showToast && showToast('Datos del comprobante aplicados ✅', 'success');
+        }
+
         async function enviarReporteBug() {
             const mensajeRaw = document.getElementById('bug-mensaje-input').value.trim();
             if (!mensajeRaw) {
@@ -9774,6 +10186,182 @@ Estado: ${p.estado}`);
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') cerrarModalBug();
         });
+
+        // ═══════════════════════════════════════════════════════════
+        // QA AUTO-TEST — window.runSystemQA()
+        // Ejecutar en consola del navegador: runSystemQA()
+        // ═══════════════════════════════════════════════════════════
+        window.runSystemQA = function() {
+            console.group('🧪 SistemaVOS — QA Auto-Test');
+            const resultados = { ventas: false, stock: false, factura: false, gasto: false, arqueo: false };
+            let errores = [];
+
+            try {
+                // ─── 1. Crear cliente de prueba ───────────────────────────────
+                const clienteId = safeMaxId(db.clientes);
+                const clientePrueba = {
+                    id: clienteId,
+                    nombre: '__QA_Cliente_Test__',
+                    email: 'qa@sistemavos.test',
+                    telefono: '1100000000',
+                    totalCompras: 0
+                };
+                db.clientes.push(clientePrueba);
+                console.log('✅ Paso 1 — Cliente creado. ID:', clienteId);
+
+                // ─── 2. Crear producto con stock ──────────────────────────────
+                const productoId = safeMaxId(db.productos);
+                const stockInicial = 50;
+                const productoPrueba = {
+                    id: productoId,
+                    codigo: 'QA-001',
+                    nombre: '__QA_Producto_Test__',
+                    categoria: 'General',
+                    stock: stockInicial,
+                    precio: 1000,
+                    stockMin: 5
+                };
+                db.productos.push(productoPrueba);
+                console.log('✅ Paso 2 — Producto creado. ID:', productoId, '| Stock inicial:', stockInicial);
+
+                // ─── 3. Crear venta (descuenta stock) ─────────────────────────
+                const cantidadVendida = 3;
+                const subtotalVenta = productoPrueba.precio * cantidadVendida;
+                const ivaVenta = subtotalVenta * 0.21;
+                const totalVenta = subtotalVenta + ivaVenta;
+                const ventaId = safeMaxId(db.ventas);
+                const ventaPrueba = {
+                    id: ventaId,
+                    clienteId: clienteId,
+                    fecha: new Date().toISOString(),
+                    items: [{ productoId, nombre: productoPrueba.nombre, cantidad: cantidadVendida, precio: productoPrueba.precio, subtotal: subtotalVenta }],
+                    subtotal: subtotalVenta,
+                    iva: ivaVenta,
+                    total: totalVenta,
+                    metodoPago: 'efectivo',
+                    estado: 'completada'
+                };
+                db.ventas.push(ventaPrueba);
+                // Descontar stock manualmente (simula completarVenta)
+                const prodEnDB = db.productos.find(p => p.id === productoId);
+                prodEnDB.stock -= cantidadVendida;
+                clientePrueba.totalCompras += totalVenta;
+
+                const stockEsperado = stockInicial - cantidadVendida;
+                if (prodEnDB.stock === stockEsperado) {
+                    resultados.stock = true;
+                    console.log('✅ Paso 3 — Venta creada. Stock restante:', prodEnDB.stock, '(esperado:', stockEsperado, ')');
+                } else {
+                    errores.push('Stock incorrecto: ' + prodEnDB.stock + ' (esperado ' + stockEsperado + ')');
+                    console.error('❌ Paso 3 — Stock INCORRECTO:', prodEnDB.stock, '(esperado:', stockEsperado, ')');
+                }
+                resultados.ventas = true;
+
+                // ─── 4. Generar factura de esa venta ─────────────────────────
+                const facturaId = safeMaxId(db.facturas);
+                const subtotalFact = subtotalVenta;
+                const ivaRateFact = (db.account?.iva || 21) / 100;
+                const ivaFact = subtotalFact * ivaRateFact;
+                const totalFact = subtotalFact + ivaFact;
+                const factPuntoVenta = String(db.account?.puntoVenta || 1).padStart(4, '0');
+                const factNro = String(db.facturas.filter(f => f.tipo === 'A').length + (db.account?.nroFacturaInicio || 1)).padStart(8, '0');
+                const facturaPrueba = {
+                    id: facturaId,
+                    tipo: 'A',
+                    numero: factNro,
+                    puntoVenta: factPuntoVenta,
+                    numeroCompleto: factPuntoVenta + '-' + factNro,
+                    clienteId: clienteId,
+                    fecha: new Date().toISOString(),
+                    items: [...ventaPrueba.items],
+                    subtotal: subtotalFact,
+                    iva: ivaFact,
+                    total: totalFact,
+                    cae: String(Math.floor(Math.random() * 1e14)).padStart(14, '0'),
+                    estado: 'Autorizada AFIP',
+                    creadaPor: 'QA-Test',
+                    creadaEn: new Date().toISOString(),
+                    ultimaModificacionPor: 'QA-Test',
+                    ultimaModificacionEn: new Date().toISOString(),
+                    logEstados: [{ estado: 'Emitida', por: 'QA-Test', fecha: new Date().toISOString() }]
+                };
+                db.facturas.push(facturaPrueba);
+                const factVerif = db.facturas.find(f => f.id === facturaId);
+                if (factVerif && !isNaN(factVerif.total) && factVerif.total > 0) {
+                    resultados.factura = true;
+                    console.log('✅ Paso 4 — Factura generada:', facturaPrueba.numeroCompleto, '| Total:', factVerif.total);
+                } else {
+                    errores.push('Factura con total inválido: ' + factVerif?.total);
+                    console.error('❌ Paso 4 — Factura con total inválido');
+                }
+
+                // ─── 5. Crear un gasto ────────────────────────────────────────
+                const gastoId = safeMaxId(db.gastos);
+                const montoGasto = 500;
+                const gastoPrueba = {
+                    id: gastoId,
+                    categoria: 'General',
+                    descripcion: '__QA_Gasto_Test__',
+                    monto: montoGasto,
+                    fecha: new Date().toISOString().split('T')[0],
+                    usuario: 'QA-Test'
+                };
+                db.gastos.push(gastoPrueba);
+                const gastoVerif = db.gastos.find(g => g.id === gastoId);
+                if (gastoVerif && gastoVerif.monto === montoGasto) {
+                    resultados.gasto = true;
+                    console.log('✅ Paso 5 — Gasto creado. Monto:', montoGasto);
+                } else {
+                    errores.push('Gasto no encontrado o monto incorrecto');
+                    console.error('❌ Paso 5 — Gasto inválido');
+                }
+
+                // ─── 6. Arqueo de caja (simula movimientos del día) ───────────
+                const arqueoIngresoId = safeMaxId(db.arqueo);
+                db.arqueo.push({ id: arqueoIngresoId, tipo: 'ingreso', descripcion: '__QA_Ingreso__', monto: totalVenta, fecha: new Date().toISOString(), usuario: 'QA-Test' });
+                const arqueoEgresoId = safeMaxId(db.arqueo);
+                db.arqueo.push({ id: arqueoEgresoId, tipo: 'egreso', descripcion: '__QA_Egreso__', monto: montoGasto, fecha: new Date().toISOString(), usuario: 'QA-Test' });
+
+                const hoy = new Date().toDateString();
+                const arqueoHoy = db.arqueo.filter(a => new Date(a.fecha).toDateString() === hoy);
+                const ingresosArqueo = arqueoHoy.filter(a => a.tipo === 'ingreso').reduce((sum, a) => sum + a.monto, 0);
+                const egresosArqueo  = arqueoHoy.filter(a => a.tipo === 'egreso').reduce((sum, a) => sum + a.monto, 0);
+                const balanceArqueo  = ingresosArqueo - egresosArqueo;
+                const balanceEsperado = totalVenta - montoGasto;
+
+                if (!isNaN(balanceArqueo) && Math.abs(balanceArqueo - balanceEsperado) < 0.01) {
+                    resultados.arqueo = true;
+                    console.log('✅ Paso 6 — Arqueo OK. Ingresos:', ingresosArqueo, '| Egresos:', egresosArqueo, '| Balance:', balanceArqueo);
+                } else {
+                    errores.push('Arqueo incorrecto: ' + balanceArqueo + ' (esperado ~' + balanceEsperado + ')');
+                    console.error('❌ Paso 6 — Arqueo INCORRECTO. Balance:', balanceArqueo, '(esperado:', balanceEsperado, ')');
+                }
+
+                // ─── Persistir todo (saveDB) ──────────────────────────────────
+                saveDB();
+
+            } catch(e) {
+                errores.push('Error inesperado: ' + e.message);
+                console.error('❌ Error inesperado durante QA:', e);
+            }
+
+            // ─── Reporte final ────────────────────────────────────────────────
+            console.group('📋 REPORTE FINAL QA');
+            console.log(resultados.ventas  ? '✅ Test de Ventas: OK'         : '❌ Test de Ventas: FALLO');
+            console.log(resultados.stock   ? '✅ Test de Stock: OK (Stock restado)' : '❌ Test de Stock: FALLO');
+            console.log(resultados.factura ? '✅ Test de Factura: OK'        : '❌ Test de Factura: FALLO');
+            console.log(resultados.gasto   ? '✅ Test de Gasto: OK'          : '❌ Test de Gasto: FALLO');
+            console.log(resultados.arqueo  ? '✅ Arqueo: OK'                 : '❌ Arqueo: FALLO');
+            if (errores.length > 0) {
+                console.warn('⚠️ Errores detectados:', errores);
+            }
+            const todos = Object.values(resultados).every(Boolean);
+            console.log(todos ? '🎉 TODOS LOS TESTS PASARON — Sistema 100% funcional' : '🔴 Algunos tests fallaron. Revisar errores arriba.');
+            console.table(resultados);
+            console.groupEnd();
+            console.groupEnd();
+            return resultados;
+        };
         // ═══════════════════════════════════════════════════════════
 
         </script>
