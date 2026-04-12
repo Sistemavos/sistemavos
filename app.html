@@ -3647,6 +3647,29 @@
                                 <button class="btn-primary" onclick="guardarConfigGeneral()">Guardar Cambios</button>
                             </div>
 
+
+                            <!-- WIDGET AUTOMATIZACIONES MAKE ─────────── -->
+                            <div class="make-quota-widget" id="make-quota-widget">
+                                <div class="mq-header">
+                                    <div class="mq-title">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+                                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#6C3AE1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        Automatizaciones Make.com
+                                    </div>
+                                    <span class="mq-count" id="mq-count-label">— / —</span>
+                                </div>
+                                <div class="make-progress-track">
+                                    <div class="make-progress-fill" id="mq-progress-bar" style="width:0%"></div>
+                                </div>
+                                <div class="make-quota-actions">
+                                    <span class="mq-info" id="mq-info-label">Cargando…</span>
+                                    <button class="btn-ampliar-plan" onclick="abrirUpgradeModal()">
+                                        ⚡ Ampliar mi Plan
+                                    </button>
+                                </div>
+                            </div>
+
                             <!-- PANEL CAMBIAR RUBRO -->
                             <div class="card" style="margin-top:16px;border:2px dashed var(--primary);background:linear-gradient(135deg,#f5f3ff,#fff);">
                                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
@@ -5107,6 +5130,13 @@
 
             updateSidebarBrand();
             renderDashboard();
+            // Detectar retorno de pago de upgrade exitoso
+            const _urlParams = new URLSearchParams(window.location.search);
+            if (_urlParams.get('upgrade') === 'exitoso') {
+                const _tipoPlan = _urlParams.get('plan') || 'booster';
+                setTimeout(() => simularPagoExitoso(_tipoPlan), 800);
+                history.replaceState({}, '', window.location.pathname);
+            }
             showPage('dashboard');
             cargarConfigWA();
 
@@ -6054,7 +6084,7 @@
             if (page === 'cotizaciones-agenda') renderCotizacionesAgenda();
             if (page === 'embudo-agenda') renderEmbudoAgenda();
             if (page === 'tareas-agenda') renderTareasAgenda();
-            if (page === 'config') { cargarConfiguracion(); renderRubroSelector(); }
+            if (page === 'config') { cargarConfiguracion(); renderRubroSelector(); setTimeout(renderBarraConsumo, 200); }
             if (page === 'clientes') { try { renderClientes(); actualizarPanelOdontologico(); actualizarPanelInmobiliario(); } catch(e){} }
             if (page === 'presupuestos') { try { renderPresupuestos(); } catch(e){} }
             if (page === 'remitos') { try { renderRemitos(); } catch(e){} }
@@ -7026,6 +7056,185 @@
             border-radius: 6px; padding: 5px 12px;
             font-size: 12px; cursor: pointer; font-weight: 600;
         }
+
+        /* ── Upgrade Plan Modal ─────────────────────────────── */
+        #modal-upgrade-plan {
+            display: none; position: fixed; inset: 0;
+            background: rgba(15,10,40,0.75);
+            backdrop-filter: blur(6px);
+            z-index: 10010;
+            align-items: center; justify-content: center;
+            overflow-y: auto; padding: 20px;
+        }
+        #modal-upgrade-plan.open { display: flex; }
+
+        .upgrade-box {
+            background: #0f0a28;
+            border: 1px solid rgba(167,139,250,0.25);
+            border-radius: 20px;
+            padding: 36px 32px;
+            max-width: 680px;
+            width: 100%;
+            margin: auto;
+            box-shadow: 0 30px 80px rgba(108,58,225,0.35);
+            color: #f1f5f9;
+            position: relative;
+        }
+        .upgrade-header { text-align: center; margin-bottom: 28px; }
+        .upgrade-header .up-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg,#6C3AE1,#a78bfa);
+            color: #fff; font-size: 11px; font-weight: 700;
+            padding: 4px 14px; border-radius: 20px; letter-spacing: 1px;
+            text-transform: uppercase; margin-bottom: 12px;
+        }
+        .upgrade-header h2 {
+            margin: 0 0 6px; font-size: 26px; font-weight: 800;
+            background: linear-gradient(135deg,#fff 30%,#a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .upgrade-header p { margin: 0; font-size: 14px; color: #94a3b8; }
+
+        /* Tarjetas */
+        .upgrade-cards {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 520px) { .upgrade-cards { grid-template-columns: 1fr; } }
+
+        .upgrade-card {
+            border: 1.5px solid rgba(167,139,250,0.2);
+            border-radius: 14px; padding: 22px 20px;
+            background: rgba(108,58,225,0.07);
+            position: relative; transition: border-color 0.2s, transform 0.2s;
+            cursor: default;
+        }
+        .upgrade-card:hover { border-color: rgba(167,139,250,0.6); transform: translateY(-2px); }
+        .upgrade-card.featured {
+            border-color: #6C3AE1;
+            background: linear-gradient(135deg,rgba(108,58,225,0.18),rgba(167,139,250,0.08));
+        }
+        .upgrade-card .card-badge {
+            position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(90deg,#6C3AE1,#a78bfa);
+            color: #fff; font-size: 10px; font-weight: 800;
+            padding: 3px 14px; border-radius: 20px;
+            letter-spacing: 0.5px; white-space: nowrap;
+        }
+        .upgrade-card .card-icon { font-size: 28px; margin-bottom: 10px; }
+        .upgrade-card .card-name {
+            font-size: 15px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px;
+        }
+        .upgrade-card .card-desc {
+            font-size: 12px; color: #64748b; margin-bottom: 14px; line-height: 1.4;
+        }
+        .upgrade-card .card-price {
+            font-size: 28px; font-weight: 800;
+            background: linear-gradient(135deg,#a78bfa,#6C3AE1);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+        .upgrade-card .card-price span {
+            font-size: 13px; font-weight: 500; color: #64748b;
+            -webkit-text-fill-color: #64748b;
+        }
+        .upgrade-card .card-features {
+            list-style: none; padding: 0; margin: 14px 0 18px;
+            font-size: 12px; color: #94a3b8;
+        }
+        .upgrade-card .card-features li {
+            padding: 4px 0; display: flex; align-items: center; gap: 7px;
+        }
+        .upgrade-card .card-features li::before {
+            content: '✓'; color: #a78bfa; font-weight: 800; flex-shrink: 0;
+        }
+        .btn-upgrade-pay {
+            width: 100%; padding: 12px; border: none; border-radius: 10px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-upgrade-pay:active { transform: scale(0.97); }
+        .btn-upgrade-pay.primary {
+            background: linear-gradient(135deg,#6C3AE1,#a78bfa);
+            color: #fff; box-shadow: 0 4px 18px rgba(108,58,225,0.45);
+        }
+        .btn-upgrade-pay.secondary {
+            background: rgba(167,139,250,0.12);
+            color: #a78bfa; border: 1px solid rgba(167,139,250,0.3);
+        }
+        .btn-upgrade-pay:hover { opacity: 0.9; }
+
+        .upgrade-footer {
+            text-align: center; font-size: 11px; color: #475569;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .upgrade-close-btn {
+            position: absolute; top: 16px; right: 20px;
+            background: none; border: none; color: #475569;
+            font-size: 22px; cursor: pointer; line-height: 1; padding: 4px;
+        }
+        .upgrade-close-btn:hover { color: #94a3b8; }
+
+        /* ── Barra de consumo Make ───────────────────────────── */
+        .make-quota-widget {
+            background: rgba(108,58,225,0.06);
+            border: 1px solid rgba(108,58,225,0.2);
+            border-radius: 12px; padding: 18px 20px; margin-top: 16px;
+        }
+        .make-quota-widget .mq-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
+        }
+        .make-quota-widget .mq-title {
+            font-size: 13px; font-weight: 700; color: var(--text);
+            display: flex; align-items: center; gap: 7px;
+        }
+        .make-quota-widget .mq-count {
+            font-size: 12px; color: var(--text-secondary);
+        }
+        .make-progress-track {
+            background: rgba(108,58,225,0.12);
+            border-radius: 20px; height: 10px; overflow: hidden; margin-bottom: 10px;
+        }
+        .make-progress-fill {
+            height: 100%; border-radius: 20px;
+            background: linear-gradient(90deg,#6C3AE1,#a78bfa);
+            transition: width 0.6s ease;
+        }
+        .make-progress-fill.warning { background: linear-gradient(90deg,#d97706,#fbbf24); }
+        .make-progress-fill.critical { background: linear-gradient(90deg,#dc2626,#ef4444); }
+        .make-quota-actions {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 8px;
+        }
+        .make-quota-actions .mq-info { font-size: 11px; color: var(--text-secondary); }
+        .btn-ampliar-plan {
+            background: linear-gradient(135deg,#6C3AE1,#a78bfa);
+            color: #fff; border: none; border-radius: 8px;
+            padding: 8px 18px; font-size: 12px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 6px;
+            transition: opacity 0.2s, box-shadow 0.2s;
+            box-shadow: 0 3px 12px rgba(108,58,225,0.35);
+        }
+        .btn-ampliar-plan:hover { opacity: 0.88; box-shadow: 0 6px 20px rgba(108,58,225,0.5); }
+
+        /* Toast upgrade */
+        #upgrade-toast {
+            display: none; position: fixed;
+            top: 20px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg,#065f46,#059669);
+            color: #fff; padding: 14px 24px; border-radius: 14px;
+            font-size: 14px; font-weight: 600; z-index: 10020;
+            box-shadow: 0 8px 30px rgba(5,150,105,0.4);
+            align-items: center; gap: 10px; white-space: nowrap;
+            animation: toastIn 0.35s ease;
+        }
+        #upgrade-toast.show { display: flex; }
+        @keyframes toastIn {
+            from { opacity:0; transform:translateX(-50%) translateY(-12px); }
+            to   { opacity:1; transform:translateX(-50%) translateY(0); }
+        }
         </style></head><body>
             <div class="factura-wrap">
                 <div class="factura-header">
@@ -7380,6 +7589,93 @@
 <div id="pwa-update-toast">
     <span>🔄 Hay una nueva versión disponible</span>
     <button onclick="pwaUpdate()">Actualizar</button>
+</div>
+
+
+<!-- ════════════ UPGRADE PLAN MODAL ════════════ -->
+<div id="modal-upgrade-plan" onclick="if(event.target===this)cerrarUpgradeModal()">
+  <div class="upgrade-box">
+    <button class="upgrade-close-btn" onclick="cerrarUpgradeModal()">✕</button>
+
+    <div class="upgrade-header">
+      <div class="up-badge">⚡ Ampliar Plan</div>
+      <h2>Más automatizaciones, sin fricciones</h2>
+      <p>Elegí el paquete que mejor se adapta a tu volumen de operaciones en Make.com.</p>
+    </div>
+
+    <div class="upgrade-cards">
+
+      <!-- Tarjeta 1: Booster -->
+      <div class="upgrade-card">
+        <div class="card-icon">🚀</div>
+        <div class="card-name">Paquete Booster</div>
+        <div class="card-desc">+500 operaciones extra este mes. Ideal para meses de alto volumen.</div>
+        <div class="card-price">$3.990 <span>/ único pago ARS</span></div>
+        <ul class="card-features">
+          <li>+500 automatizaciones al instante</li>
+          <li>Sin vencimiento mensual</li>
+          <li>Activo en menos de 5 minutos</li>
+          <li>Soporte por WhatsApp</li>
+        </ul>
+        <button class="btn-upgrade-pay secondary" onclick="iniciarCheckoutUpgrade('booster', 3990)">
+          <img src="https://http2.mlstatic.com/storage/logos-api-admin/a5e9c8d0-d46a-11e8-bde1-2d4f5bdcd13d-m.png"
+               style="height:18px;filter:brightness(1.5)" onerror="this.style.display='none'">
+          Pagar con Mercado Pago
+        </button>
+      </div>
+
+      <!-- Tarjeta 2: Premium Automatizaciones (featured) -->
+      <div class="upgrade-card featured">
+        <div class="card-badge">⭐ MÁS POPULAR</div>
+        <div class="card-icon">💎</div>
+        <div class="card-name">Plan Premium Ops</div>
+        <div class="card-desc">2.000 operaciones mensuales renovables + soporte prioritario 24/7.</div>
+        <div class="card-price">$7.990 <span>/ mes ARS</span></div>
+        <ul class="card-features">
+          <li>2.000 automatizaciones / mes</li>
+          <li>Se renuevan automáticamente</li>
+          <li>Soporte Prioritario 24/7</li>
+          <li>Alertas de consumo en tiempo real</li>
+          <li>Dashboard de automatizaciones</li>
+        </ul>
+        <button class="btn-upgrade-pay primary" onclick="iniciarCheckoutUpgrade('premium_ops', 7990)">
+          <img src="https://http2.mlstatic.com/storage/logos-api-admin/a5e9c8d0-d46a-11e8-bde1-2d4f5bdcd13d-m.png"
+               style="height:18px;filter:brightness(10)" onerror="this.style.display='none'">
+          Pagar con Mercado Pago
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Botón de simulación (solo visible en modo test/beta) -->
+    <div id="upgrade-sim-zone" style="display:none;text-align:center;margin-bottom:14px;">
+      <p style="font-size:11px;color:#475569;margin-bottom:8px;">⚠️ MODO TEST — No se procesa pago real</p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <button onclick="simularPagoExitoso('booster')"
+          style="background:#0f172a;color:#a78bfa;border:1px solid rgba(167,139,250,0.3);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;">
+          🧪 Simular Booster
+        </button>
+        <button onclick="simularPagoExitoso('premium_ops')"
+          style="background:#0f172a;color:#a78bfa;border:1px solid rgba(167,139,250,0.3);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;">
+          🧪 Simular Premium Ops
+        </button>
+      </div>
+    </div>
+
+    <div class="upgrade-footer">
+      <span>🔒 Pago seguro</span>
+      <span>·</span>
+      <span>Activación inmediata</span>
+      <span>·</span>
+      <span>Cancelás cuando querés</span>
+    </div>
+  </div>
+</div>
+
+<!-- Toast upgrade exitoso -->
+<div id="upgrade-toast">
+  <span>🎉</span>
+  <span id="upgrade-toast-msg">¡Pago exitoso! Tu nueva cuota está disponible.</span>
 </div>
 
 </body></html>`);
@@ -8531,6 +8827,246 @@
                 _pwaRegistration.waiting.postMessage('SKIP_WAITING');
             }
             window.location.reload();
+        }
+
+
+        // ══════════════════════════════════════════════════════════
+        // SISTEMA DE UPGRADE PLAN — Cuotas de Automatizaciones
+        // ══════════════════════════════════════════════════════════
+
+        // Config de planes
+        const UPGRADE_PLANS = {
+            booster: {
+                nombre: 'Paquete Booster',
+                ops: 500,
+                precio: 3990,
+                tipo: 'unico', // cuota puntual, no recurrente
+                descripcion: '+500 automatizaciones extra'
+            },
+            premium_ops: {
+                nombre: 'Plan Premium Ops',
+                ops: 2000,
+                precio: 7990,
+                tipo: 'mensual',
+                descripcion: '2.000 automatizaciones / mes'
+            }
+        };
+
+        // Defaults de cuota si no existe config
+        function _getSuscripcion() {
+            if (!db.config) db.config = {};
+            if (!db.config.suscripcion) {
+                db.config.suscripcion = {
+                    cuota_automatizaciones: 500,
+                    consumo_automatizaciones: 0,
+                    plan: 'basico',
+                    mes_activo: new Date().toISOString().slice(0,7) // YYYY-MM
+                };
+            }
+            // Resetear consumo si cambió el mes
+            const mesActual = new Date().toISOString().slice(0,7);
+            if (db.config.suscripcion.mes_activo !== mesActual) {
+                db.config.suscripcion.consumo_automatizaciones = 0;
+                db.config.suscripcion.mes_activo = mesActual;
+                saveDB();
+            }
+            return db.config.suscripcion;
+        }
+
+        // ── Abrir / cerrar modal ────────────────────────────────
+        function abrirUpgradeModal() {
+            const modal = document.getElementById('modal-upgrade-plan');
+            if (!modal) return;
+            modal.classList.add('open');
+            // Mostrar zona de simulación solo si es beta tester o master
+            const isTester = db.account?.isBetaTester || currentUser?.role === 'master' || currentUser?.role === 'superadmin';
+            const simZone = document.getElementById('upgrade-sim-zone');
+            if (simZone) simZone.style.display = isTester ? 'block' : 'none';
+        }
+
+        function cerrarUpgradeModal() {
+            document.getElementById('modal-upgrade-plan')?.classList.remove('open');
+        }
+
+        // ── FASE 2: Checkout con MercadoPago ────────────────────
+        async function iniciarCheckoutUpgrade(tipoPlan, precio) {
+            const plan = UPGRADE_PLANS[tipoPlan];
+            if (!plan) return;
+
+            cerrarUpgradeModal();
+            _mostrarEsperandoPago();
+
+            const userId    = currentUser?.id || db.account?.email || 'anonimo';
+            const emailUser = db.account?.email || '';
+            const bizName   = db.account?.businessName || 'Mi Negocio';
+
+            // Notificar a Make.com de forma asíncrona
+            try {
+                fetch(MAKE_WEBHOOK_PAGO, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        evento: 'upgrade_automatizaciones',
+                        tipoPlan, precio, plan: plan.nombre,
+                        ops: plan.ops, userId, email: emailUser,
+                        businessName: bizName,
+                        external_reference: userId + '_' + tipoPlan,
+                        timestamp: new Date().toISOString()
+                    })
+                }).catch(() => {});
+            } catch(e) { /* silencioso */ }
+
+            // Intentar crear Preference en MercadoPago directamente
+            try {
+                const MP_ACCESS_TOKEN = db.mercadopago?.accessToken || db.account?.mpAccessToken || '';
+                if (MP_ACCESS_TOKEN) {
+                    const res = await fetch('https://api.mercadopago.com/checkout/preferences', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + MP_ACCESS_TOKEN
+                        },
+                        body: JSON.stringify({
+                            items: [{
+                                title: plan.nombre + ' — SistemaVOS',
+                                description: plan.descripcion,
+                                quantity: 1,
+                                unit_price: precio,
+                                currency_id: 'ARS'
+                            }],
+                            payer: { email: emailUser, name: bizName },
+                            external_reference: userId + '_' + tipoPlan,
+                            back_urls: {
+                                success: 'https://sistemavos.vercel.app/?upgrade=exitoso&plan=' + tipoPlan,
+                                failure: 'https://sistemavos.vercel.app/?upgrade=fallido',
+                                pending: 'https://sistemavos.vercel.app/?upgrade=pendiente'
+                            },
+                            auto_return: 'approved',
+                            notification_url: MAKE_WEBHOOK_PAGO
+                        })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (data.init_point) {
+                        const esp = document.getElementById('esperando-pago-modal');
+                        if (esp) esp.remove();
+                        window.open(data.init_point, '_blank');
+                        return;
+                    }
+                }
+            } catch(e) { /* fallback a link */ }
+
+            // Fallback: link directo al módulo MP del sistema
+            const esp = document.getElementById('esperando-pago-modal');
+            if (esp) esp.remove();
+            showPage('mercadopago');
+            mostrarToastUpgrade('Completá el pago en el módulo de Mercado Pago.', 'info');
+        }
+
+        // ── FASE 3: Simulador de pago exitoso ─────────────────
+        function simularPagoExitoso(tipoPlan) {
+            const plan = UPGRADE_PLANS[tipoPlan];
+            if (!plan) { alert('Plan no reconocido: ' + tipoPlan); return; }
+
+            const sus = _getSuscripcion();
+
+            // Sumar cuota de automatizaciones
+            sus.cuota_automatizaciones = (sus.cuota_automatizaciones || 0) + plan.ops;
+
+            // Actualizar plan si es premium
+            if (tipoPlan === 'premium_ops') {
+                sus.plan = 'premium_ops';
+                sus.plan_nombre = plan.nombre;
+                sus.renovacion = plan.tipo;
+            }
+
+            sus.ultimo_upgrade = {
+                tipoPlan, ops: plan.ops, precio: plan.precio,
+                fecha: new Date().toISOString()
+            };
+
+            saveDB();
+            logAudit('Upgrade', 'Suscripción', plan.nombre + ' activado (+' + plan.ops + ' ops)');
+
+            cerrarUpgradeModal();
+
+            const msg = '🎉 ¡' + plan.nombre + ' activado! Sumaste ' + plan.ops.toLocaleString('es-AR') + ' automatizaciones a tu cuota.';
+            mostrarToastUpgrade(msg);
+
+            // Actualizar barra visualmente
+            renderBarraConsumo();
+        }
+
+        // ── Barra de consumo ────────────────────────────────────
+        function renderBarraConsumo() {
+            const sus = _getSuscripcion();
+            const consumo = sus.consumo_automatizaciones || 0;
+            const cuota   = sus.cuota_automatizaciones   || 500;
+            const pct     = Math.min(100, Math.round((consumo / cuota) * 100));
+
+            const bar   = document.getElementById('mq-progress-bar');
+            const count = document.getElementById('mq-count-label');
+            const info  = document.getElementById('mq-info-label');
+
+            if (!bar) return;
+
+            bar.style.width = pct + '%';
+            bar.className = 'make-progress-fill' +
+                (pct >= 90 ? ' critical' : pct >= 70 ? ' warning' : '');
+
+            if (count) count.textContent = consumo.toLocaleString('es-AR') + ' / ' + cuota.toLocaleString('es-AR') + ' ops';
+
+            if (info) {
+                const restantes = cuota - consumo;
+                if (pct >= 90) {
+                    info.innerHTML = '<span style="color:#ef4444;font-weight:600">⚠️ Cuota casi agotada — ampliá tu plan</span>';
+                } else if (pct >= 70) {
+                    info.innerHTML = '<span style="color:#d97706">🟡 ' + restantes.toLocaleString('es-AR') + ' ops restantes</span>';
+                } else {
+                    info.innerHTML = restantes.toLocaleString('es-AR') + ' operaciones disponibles este mes';
+                }
+            }
+
+            // Mostrar alerta de límite si >= 90%
+            if (pct >= 90) verificarLimiteAutomatizaciones(pct);
+        }
+
+        // Alerta automática cuando el límite es inminente
+        function verificarLimiteAutomatizaciones(pct) {
+            const alertKey = 'upgrade_alerta_' + new Date().toISOString().slice(0,7);
+            if (localStorage.getItem(alertKey)) return; // solo 1 vez por mes
+            localStorage.setItem(alertKey, '1');
+            setTimeout(() => {
+                const confirmed = confirm(
+                    '⚠️ Cuota de automatizaciones al ' + pct + '%
+
+' +
+                    'Estás por alcanzar el límite mensual de Make.com. ' +
+                    '¿Querés ampliar tu plan ahora para no perder automatizaciones?'
+                );
+                if (confirmed) abrirUpgradeModal();
+            }, 1500);
+        }
+
+        // Toast de upgrade
+        function mostrarToastUpgrade(msg, tipo) {
+            const t = document.getElementById('upgrade-toast');
+            const m = document.getElementById('upgrade-toast-msg');
+            if (!t || !m) return;
+            m.textContent = msg;
+            t.style.background = tipo === 'info'
+                ? 'linear-gradient(135deg,#1e3a5f,#2563eb)'
+                : 'linear-gradient(135deg,#065f46,#059669)';
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 4500);
+        }
+
+        // Registrar uso de automatización (llamar desde Make hooks)
+        function registrarUsoAutomatizacion(cantidad) {
+            cantidad = cantidad || 1;
+            const sus = _getSuscripcion();
+            sus.consumo_automatizaciones = (sus.consumo_automatizaciones || 0) + cantidad;
+            saveDB();
+            renderBarraConsumo();
         }
 
         // ─── HOOKS showPage para nuevos módulos ───────────────────────────────────
