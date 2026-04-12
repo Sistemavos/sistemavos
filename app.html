@@ -4568,7 +4568,8 @@
             industryConfig: {},
             config: { modulosOcultos: [], webhookGCal: 'https://hook.eu1.make.com/uflsn3dizm1qmfyj2y63t3ysmclavo9j', gcal: { clientId: '', accessToken: null, tokenExpiry: null, email: null, connected: false } },
             agenda: { turnos: [] },
-            audit_logs: []
+            audit_logs: [],
+            bugs: []
         };
 
         const INDUSTRY_CONFIGS = {
@@ -4723,6 +4724,13 @@
         ];
 
         // ═══════════════════════════════════════════════
+
+        // EMPTY STATE HELPER
+        function emptyStateRow(icon, titulo, sub, ctaLabel, ctaFn, cols) {
+            var btn = ctaLabel ? '<button class="btn-primary" onclick="' + ctaFn + '">' + ctaLabel + '</button>' : '';
+            return '<tr><td colspan="' + cols + '" style="border:none;padding:0"><div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + titulo + '</h3><p>' + sub + '</p>' + btn + '</div></td></tr>';
+        }
+
         // AUDIT LOG
         // ═══════════════════════════════════════════════
         function logAudit(accion, modulo, detalle) {
@@ -4759,6 +4767,7 @@
         if (!db.config.gcal) db.config.gcal = { clientId: '', accessToken: null, tokenExpiry: null, email: null, connected: false };
             if (!db.agenda) db.agenda = { turnos: [] };
             if (!Array.isArray(db.audit_logs)) db.audit_logs = [];
+            if (!Array.isArray(db.bugs)) db.bugs = [];
         }
 
         // ===== DOCUMENTO SYSTEM =====
@@ -5079,6 +5088,7 @@
 
             // Filtrar sidebar y labels según rubro
             aplicarVisibilidadModulos();
+            setTimeout(() => actualizarVisibilidadBugFab(), 400);
 
             // Aplicar modo lectura si el plan no está activo
             setTimeout(aplicarModoLectura, 500);
@@ -5128,7 +5138,15 @@
         // y la flag isBetaTester=true en db.account para features exclusivas.
         const BETA_CODES = [
             'BETA-VOS-001','BETA-VOS-002','BETA-VOS-003','BETA-VOS-004',
-            'BETA-VOS-005','BETA-VOS-006','BETA-VOS-007','BETA-VOS-008'
+            'BETA-VOS-005','BETA-VOS-006','BETA-VOS-007','BETA-VOS-008',
+            // ═══ Códigos Beta Privada 2026 (exclusivos del lanzamiento) ═══
+            'BETA-VOS-2026',    // Beta Testers seleccionados
+            'BETA-VOS-ALPHA',   // Acceso Alpha privado
+            'BETA-VOS-PRIVADA', // Invitación directa
+            // ═══ Ronda 2 — Nuevos códigos promo ═══
+            'BETA-VOS-PRO01',   // Promo ronda 2 - slot 1
+            'BETA-VOS-PRO02',   // Promo ronda 2 - slot 2
+            'BETA-VOS-PRO03'    // Promo ronda 2 - slot 3
         ];
         const BETA_STORAGE_KEY = 'sistemavos_beta_codes_used';
 
@@ -5472,6 +5490,18 @@
             role: 'master'
         };
 
+        // ═══ FOUNDER — acceso lifetime, beta tester por defecto ═══
+        const FOUNDER_CREDENTIALS = {
+            email: 'lupauleau@icloud.com',
+            rawPass: 'F0und3r_V0S#2026!',
+            name: 'Lu Pauleau',
+            role: 'superadmin',
+            plan: 'premium',
+            isBetaTester: true,
+            planStatus: 'lifetime',
+            badge: '👑 Founder'
+        };
+
         // ═══ USUARIO DEMO — acceso total sin Supabase ═══
         const DEMO_CREDENTIALS = {
             email: 'demo@sistemavos.com',
@@ -5544,6 +5574,68 @@
                 localStorage.setItem('sistemavos_db', JSON.stringify(db));
                 currentUser = { email, name: DEMO_CREDENTIALS.name, role: 'demo' };
                 showApp();
+                return;
+            }
+
+            // Founder login — acceso lifetime, plan premium, beta tester
+            if (email === FOUNDER_CREDENTIALS.email && password === FOUNDER_CREDENTIALS.rawPass) {
+                clearLoginError();
+                currentUser = {
+                    email,
+                    name: FOUNDER_CREDENTIALS.name,
+                    role: FOUNDER_CREDENTIALS.role,
+                    plan: FOUNDER_CREDENTIALS.plan,
+                    isBetaTester: true
+                };
+                // Asegurar que db.account refleje el plan founder
+                if (!db.account || !db.account.email) {
+                    db.account = {
+                        businessName: 'SistemaVOS HQ',
+                        ownerName: FOUNDER_CREDENTIALS.name,
+                        email: FOUNDER_CREDENTIALS.email,
+                        industry: 'general',
+                        plan: 'premium',
+                        promoFreeForever: true,
+                        isBetaTester: true,
+                        subscriptionStatus: 'premium_lifetime',
+                        planStatus: 'lifetime',
+                        color: '#6C3AE1',
+                        currency: '$',
+                        iva: 21,
+                        puntoVenta: 1,
+                        nroFacturaInicio: 1,
+                        codigoReferido: 'VOS-FOUNDER-001',
+                        referidosActivos: [],
+                        createdAt: new Date().toISOString()
+                    };
+                } else {
+                    db.account.promoFreeForever = true;
+                    db.account.isBetaTester = true;
+                    db.account.subscriptionStatus = 'premium_lifetime';
+                    db.account.planStatus = 'lifetime';
+                    db.account.plan = 'premium';
+                }
+                // Asegurar usuario en db.usuarios
+                if (!db.usuarios) db.usuarios = [];
+                const founderInDb = db.usuarios.find(u => u.email === FOUNDER_CREDENTIALS.email);
+                if (!founderInDb) {
+                    db.usuarios.unshift({
+                        id: safeMaxId(db.usuarios),
+                        nombre: FOUNDER_CREDENTIALS.name,
+                        email: FOUNDER_CREDENTIALS.email,
+                        rol: 'superadmin',
+                        estado: 'activo',
+                        permisos: [],
+                        badge: '👑 Founder'
+                    });
+                } else {
+                    founderInDb.rol = 'superadmin';
+                    founderInDb.badge = '👑 Founder';
+                }
+                if (!db.industryConfig) db.industryConfig = INDUSTRY_CONFIGS['general'];
+                saveDB();
+                showApp();
+                setTimeout(() => actualizarVisibilidadBugFab(), 300);
                 return;
             }
 
@@ -5642,6 +5734,7 @@
                         }
 
                         showApp();
+                        setTimeout(() => actualizarVisibilidadBugFab(), 400);
                         return;
                     }
 
@@ -6221,7 +6314,7 @@
             });
             const tbody = document.querySelector('#clientes-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center;">Sin clientes</td></tr>';
+                tbody.innerHTML = html || emptyStateRow('👥','Aún no tenés clientes','Registrá tu primer cliente para empezar a gestionar ventas.','+ Agregar primer cliente','openClienteModal()',5);
             }
         }
 
@@ -6329,7 +6422,7 @@
             });
             const tbody = document.querySelector('#productos-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="7" style="text-align: center;">Sin productos</td></tr>';
+                tbody.innerHTML = html || emptyStateRow('📦','Tu inventario está vacío','Cargá productos o servicios para realizar ventas y controlar tu stock.','+ Agregar producto','openProductoModal()',7);
             }
         }
 
@@ -6412,7 +6505,7 @@
                 </tr>`;
             });
             const tbody = document.querySelector('#venta-carrito-table tbody');
-            if (tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center;">Sin productos</td></tr>';
+            if (tbody) tbody.innerHTML = html || emptyStateRow('📦','Sin productos','Cargá productos en el módulo Inventario primero.','',null,5);
 
             const subtotal = ventaCarrito.reduce((sum, item) => sum + item.subtotal, 0);
             const ivaRateCarrito = (db.account?.iva || 21) / 100;
@@ -6497,7 +6590,7 @@
             });
             const tbody = document.querySelector('#ventas-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="7" style="text-align: center;">Sin ventas</td></tr>';
+                tbody.innerHTML = html || emptyStateRow('🛒','Todavía no hay ventas','Registrá tu primera venta desde la pestaña Nueva Venta.','+ Nueva venta','openVentaTab()',7);
             }
         }
 
@@ -6647,7 +6740,7 @@
             });
             const tbody = document.querySelector('#facturas-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="8" style="text-align: center;">Sin facturas</td></tr>';
+                tbody.innerHTML = html || emptyStateRow('🧾','Ninguna factura emitida','Emití tu primera factura seleccionando un cliente y agregando ítems.','+ Nueva factura','openFacturaTab()',8);
             }
         }
 
@@ -6840,6 +6933,14 @@
             outline: none; transition: border .2s;
         }
         .otp-input:focus { border-color: var(--primary); }
+
+        /* Empty States */
+        .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:56px 24px 48px; text-align:center; }
+        .empty-state-icon { font-size:54px; margin-bottom:18px; opacity:0.8; line-height:1; animation:esFloat 3s ease-in-out infinite; }
+        @keyframes esFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-7px); } }
+        .empty-state h3 { margin:0 0 8px; font-size:18px; font-weight:700; color:var(--text); }
+        .empty-state p  { margin:0 0 22px; font-size:14px; color:var(--text-secondary); max-width:300px; line-height:1.5; }
+        .empty-state .btn-primary { padding:10px 28px; font-size:14px; border-radius:8px; box-shadow:0 4px 14px rgba(108,58,225,0.22); }
         </style></head><body>
             <div class="factura-wrap">
                 <div class="factura-header">
@@ -7269,7 +7370,7 @@
             });
             const tbody = document.querySelector('#arqueo-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center;">Sin movimientos hoy</td></tr>';
+                tbody.innerHTML = html || emptyStateRow('💰','Sin movimientos registrados','Registrá ingresos y egresos para el control de caja diario.','+ Registrar movimiento','openArqueoModal()',5);
             }
         }
 
@@ -7369,7 +7470,7 @@
             }
             const tbody = document.querySelector('#gastos-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="6" style="text-align: center;">Sin gastos</td></tr>';
+                tbody.innerHTML = html || emptyStateRow('📊','Sin gastos registrados','Llevar el control de gastos te ayuda a conocer la rentabilidad real.','+ Registrar gasto','openGastoModal()',6);
             }
         }
 
@@ -7465,7 +7566,7 @@
             });
             const tbody = document.querySelector('#empleados-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="6" style="text-align: center;">Sin empleados</td></tr>';
+                tbody.innerHTML = html || emptyStateRow('👤','Sin empleados cargados','Agregá tu equipo para gestionar sueldos, nóminas y sucursales.','+ Agregar empleado','openEmpleadoModal()',6);
             }
         }
 
@@ -7532,7 +7633,7 @@
             });
             const tbody = document.querySelector('#nominas-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="7" style="text-align: center;">Sin nóminas</td></tr>';
+                tbody.innerHTML = html || emptyStateRow('📋','Sin nóminas generadas','Cargá empleados primero y luego generá la nómina del mes.','Ver empleados','showPage("empleados")',7);
             }
         }
 
@@ -7594,7 +7695,7 @@
             });
             const grid = document.getElementById('sucursales-grid');
             if (grid) {
-                grid.innerHTML = html || '<p style="text-align: center;">Sin sucursales</p>';
+                grid.innerHTML = html || '<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🏪</div><h3>Sin sucursales</h3><p>Agregá las ubicaciones de tu negocio para organizar tu operación.</p><button class="btn-primary" onclick="openSucursalModal()">+ Agregar sucursal</button></div>';
             }
         }
 
@@ -7673,7 +7774,7 @@
             });
             const tbody = document.querySelector('#proveedores-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center;">Sin proveedores</td></tr>';
+                tbody.innerHTML = html || emptyStateRow('🤝','Sin proveedores','Registrá tus proveedores para un control completo de compras.','+ Agregar proveedor','openProveedorModal()',5);
             }
         }
 
@@ -7800,7 +7901,7 @@
             });
             const tbody = document.querySelector('#usuarios-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="6" style="text-align: center;">Sin usuarios</td></tr>';
+                tbody.innerHTML = html || emptyStateRow('🔐','Solo el administrador','Creá usuarios con roles para que tu equipo acceda al sistema.','+ Nuevo usuario','openUsuarioModal()',6);
             }
         }
 
@@ -7990,7 +8091,7 @@
                 </tr>`;
             });
             const tbody = document.querySelector('#presupuestos-table tbody');
-            if (tbody) tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center;">Sin presupuestos</td></tr>';
+            if (tbody) tbody.innerHTML = html || emptyStateRow('📝','Sin presupuestos','Creá presupuestos para tus clientes y haceá seguimiento de su estado.','+ Nuevo presupuesto','openPresupuestoModal()',8);
         }
 
         function eliminarPresupuesto(id) {
@@ -8158,7 +8259,7 @@
                 </tr>`;
             });
             const tbody = document.querySelector('#remitos-table tbody');
-            if (tbody) tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Sin remitos</td></tr>';
+            if (tbody) tbody.innerHTML = html || emptyStateRow('🚚','Sin remitos','Los remitos documentan entregas de mercancía de forma profesional.','+ Nuevo remito','openRemitoModal()',7);
         }
 
         function eliminarRemito(id) {
@@ -8242,6 +8343,15 @@
             a.click(); URL.revokeObjectURL(url);
         }
 
+
+        function openVentaTab() {
+            var btn = document.querySelector('#ventas .tab-button:last-child');
+            if (btn) btn.click();
+        }
+        function openFacturaTab() {
+            var btn = document.querySelector('#facturacion .tab-button:last-child');
+            if (btn) btn.click();
+        }
         // ─── HOOKS showPage para nuevos módulos ───────────────────────────────────
         const _origShowPage = showPage;
 
@@ -11317,14 +11427,42 @@ Estado: ${p.estado}`);
         // ═══════════════════════════════════════════════════════════
         const WEBHOOK_BUGS_URL = 'https://hook.eu1.make.com/6ltbcrc83fcfg4vc4k2ig70kc1hdmmrf';
 
+        // Muestra u oculta el FAB según si el usuario es beta tester
+        function actualizarVisibilidadBugFab() {
+            const fab = document.getElementById('bug-fab');
+            if (!fab) return;
+            const esBeta = db.account?.isBetaTester === true || currentUser?.isBetaTester === true
+                || currentUser?.role === 'master' || currentUser?.role === 'superadmin';
+            fab.style.display = esBeta ? 'flex' : 'none';
+        }
+
         function abrirModalBug() {
+            // Reset form
+            const tituloEl = document.getElementById('bug-titulo-input');
+            const mensajeEl = document.getElementById('bug-mensaje-input');
+            if (tituloEl) tituloEl.value = '';
+            if (mensajeEl) mensajeEl.value = '';
+            document.querySelectorAll('input[name="bug-severidad"]').forEach(r => r.checked = false);
+            ['bug-sev-baja','bug-sev-media','bug-sev-critica'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.borderColor = '#334155';
+            });
             document.getElementById('bug-report-modal').style.display = 'flex';
-            document.getElementById('bug-mensaje-input').focus();
+            setTimeout(() => { if (tituloEl) tituloEl.focus(); }, 100);
         }
 
         function cerrarModalBug() {
             document.getElementById('bug-report-modal').style.display = 'none';
-            document.getElementById('bug-mensaje-input').value = '';
+        }
+
+        function resaltarSeveridad() {
+            const selected = document.querySelector('input[name="bug-severidad"]:checked')?.value;
+            const colorMap = { 'Baja': '#22c55e', 'Media': '#eab308', 'Crítica': '#ef4444' };
+            ['bug-sev-baja','bug-sev-media','bug-sev-critica'].forEach(id => {
+                const el = document.getElementById(id);
+                const val = el?.querySelector('input')?.value;
+                if (el) el.style.borderColor = (val === selected) ? (colorMap[val] || '#334155') : '#334155';
+            });
         }
 
 
@@ -11789,24 +11927,45 @@ Estado: ${p.estado}`);
         }
 
         async function enviarReporteBug() {
+            const tituloRaw = (document.getElementById('bug-titulo-input')?.value || '').trim();
             const mensajeRaw = document.getElementById('bug-mensaje-input').value.trim();
-            if (!mensajeRaw) {
-                document.getElementById('bug-mensaje-input').style.borderColor = '#ef4444';
+            const severidad = document.querySelector('input[name="bug-severidad"]:checked')?.value || 'Media';
+
+            if (!tituloRaw || !mensajeRaw) {
+                if (!tituloRaw && document.getElementById('bug-titulo-input'))
+                    document.getElementById('bug-titulo-input').style.borderColor = '#ef4444';
+                if (!mensajeRaw)
+                    document.getElementById('bug-mensaje-input').style.borderColor = '#ef4444';
+                mostrarToastBug('⚠️ Completá el título y la descripción', 'error');
                 return;
             }
+            document.getElementById('bug-titulo-input').style.borderColor = '';
             document.getElementById('bug-mensaje-input').style.borderColor = '';
 
+            const titulo = escapeHTML(tituloRaw);
             const mensaje = escapeHTML(mensajeRaw);
-            const urlError = window.location.hash || window.location.pathname;
+            const urlActual = window.location.hash || window.location.pathname;
+            const emailTester = currentUser?.email || db.account?.email || 'Desconocido';
+            const nombreTester = currentUser?.name || db.account?.ownerName || 'Desconocido';
 
-            let userId = null;
-            try {
-                if (typeof supabaseClient !== 'undefined') {
-                    const { data: { user } } = await supabaseClient.auth.getUser();
-                    userId = user?.id || null;
-                }
-            } catch(e) { /* silencioso */ }
+            // ── Guardar en db.bugs ────────────────────────────────
+            if (!Array.isArray(db.bugs)) db.bugs = [];
+            const bug = {
+                id: safeMaxId(db.bugs),
+                timestamp: new Date().toISOString(),
+                email: emailTester,
+                nombre: nombreTester,
+                titulo,
+                descripcion: mensaje,
+                severidad,
+                url: urlActual,
+                estado: 'abierto'
+            };
+            db.bugs.push(bug);
+            saveDB();
+            logAudit('Reportó', 'Bug Tracker', `Bug "${titulo}" (${severidad})`);
 
+            // ── Enviar al Webhook de Make ─────────────────────────
             const btnEnviar = document.getElementById('bug-btn-enviar');
             btnEnviar.disabled = true;
             btnEnviar.textContent = 'Enviando...';
@@ -11815,12 +11974,17 @@ Estado: ${p.estado}`);
                 await fetch(WEBHOOK_BUGS_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId, mensaje: mensaje, url_error: urlError })
+                    body: JSON.stringify({
+                        titulo, descripcion: mensaje, severidad, url: urlActual,
+                        email: emailTester, nombre: nombreTester,
+                        timestamp: bug.timestamp, bug_id: bug.id
+                    })
                 });
                 cerrarModalBug();
                 mostrarToastBug('🐞 Reporte enviado. ¡Gracias por tu feedback!', 'success');
             } catch(e) {
-                mostrarToastBug('❌ Error al enviar el reporte. Intentá de nuevo.', 'error');
+                cerrarModalBug();
+                mostrarToastBug('💾 Reporte guardado localmente (sin conexión).', 'success');
             } finally {
                 btnEnviar.disabled = false;
                 btnEnviar.textContent = 'Enviar reporte';
@@ -12747,13 +12911,43 @@ Estado: ${p.estado}`);
 
         </style>
 
-<button id="bug-fab" onclick="abrirModalBug()" title="Reportar un bug">🐞</button>
+<button id="bug-fab" onclick="abrirModalBug()" title="Reportar un bug" style="display:none">🐞</button>
 
 <div id="bug-report-modal" onclick="if(event.target===this)cerrarModalBug()">
     <div id="bug-modal-box">
-        <h3>🐞 Reportar un bug</h3>
-        <p>Describí el problema que encontraste. Se enviará junto con la URL de la vista actual.</p>
-        <textarea id="bug-mensaje-input" placeholder="Ej: Al hacer clic en 'Guardar venta' aparece un error en blanco..."></textarea>
+        <h3>🐞 Reportar un Bug</h3>
+        <p style="margin:0 0 14px">Beta Tester exclusivo — tu reporte llega directo al equipo.</p>
+
+        <div style="margin-bottom:12px">
+            <label style="display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:5px">TÍTULO DEL ERROR</label>
+            <input type="text" id="bug-titulo-input" placeholder="Ej: Error al guardar venta con descuento..."
+                style="width:100%;background:#0f172a;border:1.5px solid #334155;border-radius:8px;color:#f1f5f9;font-size:14px;padding:10px 12px;box-sizing:border-box;outline:none;">
+        </div>
+
+        <div style="margin-bottom:12px">
+            <label style="display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:5px">DESCRIPCIÓN Y PASOS PARA REPRODUCIRLO</label>
+            <textarea id="bug-mensaje-input" placeholder="1. Fui a Ventas&#10;2. Agregué un producto&#10;3. Puse descuento&#10;4. Al guardar apareció pantalla en blanco"
+                style="width:100%;min-height:90px;background:#0f172a;border:1.5px solid #334155;border-radius:8px;color:#f1f5f9;font-size:14px;padding:10px 12px;resize:vertical;box-sizing:border-box;outline:none;"></textarea>
+        </div>
+
+        <div style="margin-bottom:16px">
+            <label style="display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:5px">SEVERIDAD</label>
+            <div style="display:flex;gap:8px">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border-radius:6px;border:1.5px solid #334155;flex:1;justify-content:center" id="bug-sev-baja">
+                    <input type="radio" name="bug-severidad" value="Baja" style="display:none" onchange="resaltarSeveridad()">
+                    🟢 Baja
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border-radius:6px;border:1.5px solid #334155;flex:1;justify-content:center" id="bug-sev-media">
+                    <input type="radio" name="bug-severidad" value="Media" style="display:none" onchange="resaltarSeveridad()">
+                    🟡 Media
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border-radius:6px;border:1.5px solid #334155;flex:1;justify-content:center" id="bug-sev-critica">
+                    <input type="radio" name="bug-severidad" value="Crítica" style="display:none" onchange="resaltarSeveridad()">
+                    🔴 Crítica
+                </label>
+            </div>
+        </div>
+
         <div id="bug-modal-actions">
             <button id="bug-btn-cancelar" onclick="cerrarModalBug()">Cancelar</button>
             <button id="bug-btn-enviar" onclick="enviarReporteBug()">Enviar reporte</button>
