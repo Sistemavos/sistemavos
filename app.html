@@ -2158,7 +2158,12 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2 id="clientes-title">Clientes</h2>
-                                <button class="btn-primary" onclick="openClienteModal()">+ Nuevo</button>
+                                <div style="display:flex;gap:8px;">
+                                    <button class="btn-secondary" onclick="openModal('modal-campana-email')" style="background:#8b5cf6;color:#fff;">
+                                        <i class="fas fa-envelope-circle-check"></i> Campaña Email
+                                    </button>
+                                    <button class="btn-primary" onclick="openClienteModal()">+ Nuevo</button>
+                                </div>
                             </div>
                             <div class="search-bar">
                                 <input type="text" id="clientes-search" placeholder="Buscar cliente..." onkeyup="filterClientes()">
@@ -3226,6 +3231,86 @@
                         </div>
                     </div>
 
+                        <!-- Modal Email Presupuesto -->
+                        <div class="modal" id="modal-email-presupuesto">
+                            <div class="modal-content" style="max-width:500px;">
+                                <div class="modal-header">
+                                    <h3>Enviar Presupuesto por Email</h3>
+                                    <button onclick="closeModal('modal-email-presupuesto')" class="modal-close">✕</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label>Email del Cliente *</label>
+                                        <input type="email" id="email-pres-destino" placeholder="cliente@example.com" style="width:100%;padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Mensaje (opcional)</label>
+                                        <textarea id="email-pres-mensaje" placeholder="Agregá un mensaje personalizado..." rows="3" style="width:100%;padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;resize:vertical;"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button onclick="closeModal('modal-email-presupuesto')" class="btn-secondary">Cancelar</button>
+                                    <button onclick="enviarPresupuestoPorEmail()" class="btn-primary">Enviar Email</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Email Factura -->
+                        <div class="modal" id="modal-email-factura">
+                            <div class="modal-content" style="max-width:500px;">
+                                <div class="modal-header">
+                                    <h3>Enviar Factura por Email</h3>
+                                    <button onclick="closeModal('modal-email-factura')" class="modal-close">✕</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label>Email del Cliente *</label>
+                                        <input type="email" id="email-fact-destino" placeholder="cliente@example.com" style="width:100%;padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Mensaje (opcional)</label>
+                                        <textarea id="email-fact-mensaje" placeholder="Agregá un mensaje personalizado..." rows="3" style="width:100%;padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;resize:vertical;"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button onclick="closeModal('modal-email-factura')" class="btn-secondary">Cancelar</button>
+                                    <button onclick="enviarFacturaPorEmail()" class="btn-primary">Enviar Email</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Campaña Email -->
+                        <div class="modal" id="modal-campana-email">
+                            <div class="modal-content" style="max-width:600px;">
+                                <div class="modal-header">
+                                    <h3>Campaña de Email a Clientes</h3>
+                                    <button onclick="closeModal('modal-campana-email')" class="modal-close">✕</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label>Segmento de Clientes *</label>
+                                        <select id="campana-segmento" style="width:100%;padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;">
+                                            <option value="todos">Todos los clientes</option>
+                                            <option value="mes-actual">Compraron este mes</option>
+                                            <option value="sin-compras-30">Sin compras hace 30+ días</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Asunto/Mensaje *</label>
+                                        <textarea id="campana-mensaje" placeholder="Escribí el asunto y mensaje de tu campaña..." rows="4" style="width:100%;padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;resize:vertical;"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Webhook URL (opcional, usa config si no especificás)</label>
+                                        <input type="url" id="campana-webhook" placeholder="https://hook.eu1.make.com/..." style="width:100%;padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button onclick="closeModal('modal-campana-email')" class="btn-secondary">Cancelar</button>
+                                    <button onclick="enviarCampanaEmail()" class="btn-primary">Enviar Campaña</button>
+                                </div>
+                            </div>
+                        </div>
+
                     <!-- REMITOS PAGE -->
                     <div id="remitos" class="page">
                         <div class="card">
@@ -3311,7 +3396,10 @@
                     <div id="pipeline-ventas" class="page">
                         <div class="pipeline-header">
                             <p style="color:var(--gray-500);font-size:13px;margin:0;">Gestioná prospectos y oportunidades. Usá los botones de cada tarjeta para mover entre etapas.</p>
-                            <button class="btn-primary" onclick="openOportunidadModal()"><i class="fas fa-plus"></i> Nueva Oportunidad</button>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn-primary" onclick="openOportunidadModal()"><i class="fas fa-plus"></i> Nueva Oportunidad</button>
+                                <button class="btn-secondary" onclick="openModal('modal-pipeline-integraciones')"><i class="fas fa-link"></i> Integraciones</button>
+                            </div>
                         </div>
                         <div class="pipeline-stats" id="pipeline-stats"></div>
                         <div class="kanban-board" id="pipeline-board"></div>
@@ -3368,6 +3456,38 @@
                                 <div style="display:flex;gap:12px;margin-top:16px;">
                                     <button class="btn-secondary" style="flex:1;" onclick="closeModal('oportunidad-modal')">Cancelar</button>
                                     <button class="btn-primary" style="flex:1;" onclick="guardarOportunidad()"><i class="fas fa-save" style="margin-right:6px;"></i>Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Integraciones Pipeline -->
+                        <div class="modal" id="modal-pipeline-integraciones">
+                            <div class="modal-content" style="max-width:600px;">
+                                <div class="modal-header">
+                                    <h2>\u1F517 Conectar con tus Campañas</h2>
+                                    <button class="modal-close" onclick="closeModal('modal-pipeline-integraciones')">&times;</button>
+                                </div>
+                                <div style="padding:20px;border-top:1px solid var(--gray-200);">
+                                    <p style="color:var(--gray-600);margin-bottom:16px;">Pegá esta URL en tus campañas de Facebook/Instagram Ads vía Make.com para que tus leads caigan directamente en este embudo.</p>
+
+                                    <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:16px;margin-bottom:20px;">
+                                        <label style="font-weight:600;color:var(--gray-800);display:block;margin-bottom:8px;">URL de Webhook Simulada:</label>
+                                        <div style="display:flex;gap:8px;align-items:center;">
+                                            <input type="text" id="webhook-url" readonly style="flex:1;padding:8px;border:1px solid var(--gray-300);border-radius:4px;background:white;font-size:12px;font-family:monospace;" value="">
+                                            <button class="btn-primary" onclick="copiarWebhookUrl()"><i class="fas fa-copy"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <h4 style="margin-top:24px;margin-bottom:12px;font-size:14px;font-weight:600;">\u{1F389} 3 Pasos para Configurar:</h4>
+                                    <ol style="padding-left:20px;color:var(--gray-600);line-height:1.8;">
+                                        <li><strong>Crear escenario en Make.com:</strong> Entra a make.com, crea un nuevo escenario para conectar tus ads.</li>
+                                        <li><strong>Conectar Facebook Lead Ads:</strong> Usa el módulo de Facebook Ads para captar leads cuando alguien completa el formulario.</li>
+                                        <li><strong>HTTP POST a esta URL:</strong> Agrega el módulo HTTP en Make para hacer POST a la URL de arriba con los datos del lead (nombre, email, teléfono, fuente, mensaje).</li>
+                                    </ol>
+
+                                    <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;border-radius:4px;margin-top:20px;font-size:13px;color:#92400e;">
+                                        <strong>\u26A0 Nota:</strong> Por ahora la URL es simulada. Próximamente será un endpoint real que sincronice directamente con tu base de datos.
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3554,6 +3674,7 @@
                             <button class="tab-button" onclick="switchTab('config-seguridad', this)">Seguridad</button>
                             <button class="tab-button" onclick="switchTab('config-integraciones', this);actualizarUIGCal()">Integraciones</button>
                             <button class="tab-button" onclick="switchTab('config-migracion', this)">Migración</button>
+                            <button class="tab-button" onclick="switchTab('config-webform', this)">🌐 Integración Web</button>
                             <button class="tab-button" id="tab-btn-audit" onclick="switchTab('config-audit', this)" style="display:none">📋 Actividad</button>
                         </div>
 
@@ -3925,6 +4046,26 @@
                                     style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:13px;box-sizing:border-box;"
                                     oninput="db.config.webhookGCal=this.value;saveDB()">
                             </div>
+
+                            <!-- Email: Documentos (Presupuestos/Facturas) -->
+                            <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+                                <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Webhook Email Documentos</div>
+                                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Para enviar presupuestos y facturas por email mediante Make.com.</div>
+                                <input type="text" id="config-webhook-email-docs"
+                                    placeholder="https://hook.eu1.make.com/..."
+                                    style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:13px;box-sizing:border-box;"
+                                    oninput="db.config.webhookEmailDocs=this.value;saveDB()">
+                            </div>
+
+                            <!-- Email: Campaña Email (CRM/Clientes) -->
+                            <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:24px;">
+                                <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Webhook Campaña Email (CRM)</div>
+                                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Para campañas de email masivo dirigidas a segmentos de clientes.</div>
+                                <input type="text" id="config-webhook-campana-email"
+                                    placeholder="https://hook.eu1.make.com/..."
+                                    style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:13px;box-sizing:border-box;"
+                                    oninput="db.config.webhookCampanaEmail=this.value;saveDB()">
+                            </div>
                         </div>
                         <!-- Lista de próximos turnos -->
                         <div class="card" style="margin-bottom:16px;">
@@ -3951,6 +4092,85 @@
                                 <div class="kpi-value" id="ck-noshows">0</div>
                                 <div class="kpi-sub">riesgo en 24h</div>
                         <!-- ══ MIGRACIÓN DE DATOS ══ -->
+                        <!-- ═══ INTEGRACIÓN WEB ═══ -->
+                        <div id="config-webform" class="tab-content" style="display:none">
+                            <h3 style="margin-bottom:4px;color:var(--primary)">🌐 Integración Web — Captador de Leads</h3>
+                            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">Copiá este formulario y pegalo en tu sitio web. Cada envío llegará directo a Make.com y se insertará en tu CRM automáticamente.</p>
+
+                            <!-- Step 1: Webhook URL -->
+                            <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+                                <label style="font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:8px;">
+                                    1. Pegá tu URL de Webhook de Make.com
+                                </label>
+                                <div style="display:flex;gap:8px;">
+                                    <input type="url" id="webform-webhook-url"
+                                        placeholder="https://hook.eu1.make.com/..."
+                                        oninput="actualizarCodigoWebform()"
+                                        style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg,var(--card-bg));color:var(--text);font-size:13px;font-family:monospace;">
+                                    <button onclick="guardarWebhookWebform()"
+                                        style="padding:9px 16px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;">
+                                        Guardar
+                                    </button>
+                                </div>
+                                <p style="font-size:11px;color:var(--text-secondary);margin:6px 0 0;">
+                                    En Make.com: Crear escenario → Módulo "Webhooks" → "Custom webhook" → Copiar URL
+                                </p>
+                            </div>
+
+                            <!-- Step 2: Preview + Copy -->
+                            <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+                                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                                    <label style="font-size:13px;font-weight:600;color:var(--text);">
+                                        2. Copiá el código y pegalo en tu web
+                                    </label>
+                                    <div style="display:flex;gap:8px;">
+                                        <button onclick="copiarCodigoWebform()"
+                                            style="padding:7px 16px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">
+                                            📋 Copiar código
+                                        </button>
+                                        <button onclick="descargarCodigoWebform()"
+                                            style="padding:7px 14px;background:var(--card-bg);border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer;font-size:12px;">
+                                            ⬇ Descargar .html
+                                        </button>
+                                    </div>
+                                </div>
+                                <textarea id="webform-codigo-output" readonly
+                                    style="width:100%;min-height:360px;background:#0d0d1a;color:#a5f3fc;font-family:'Fira Code','Courier New',monospace;font-size:11.5px;border:1px solid rgba(99,102,241,0.3);border-radius:8px;padding:14px;resize:vertical;line-height:1.6;box-sizing:border-box;"></textarea>
+                                <p id="webform-warning" style="font-size:11px;color:#f59e0b;margin:6px 0 0;display:none;">
+                                    ⚠ Aún no configuraste la URL del webhook. El formulario funcionará cuando la pegues arriba.
+                                </p>
+                            </div>
+
+                            <!-- Step 3: Campos opcionales -->
+                            <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:20px;">
+                                <label style="font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:12px;">
+                                    3. Personalización opcional
+                                </label>
+                                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+                                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                                        <input type="checkbox" id="wf-campo-telefono" checked onchange="actualizarCodigoWebform()"> Teléfono
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                                        <input type="checkbox" id="wf-campo-mensaje" checked onchange="actualizarCodigoWebform()"> Mensaje
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                                        <input type="checkbox" id="wf-campo-empresa" onchange="actualizarCodigoWebform()"> Empresa
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                                        <input type="checkbox" id="wf-campo-servicio" onchange="actualizarCodigoWebform()"> Servicio de interés
+                                    </label>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                    <span style="font-size:12px;color:var(--text-secondary);">Color del botón:</span>
+                                    <input type="color" id="wf-color-btn" value="#7c3aed" oninput="actualizarCodigoWebform()"
+                                        style="width:36px;height:28px;border:none;border-radius:4px;cursor:pointer;background:none;">
+                                    <span style="font-size:12px;color:var(--text-secondary);">Texto del botón:</span>
+                                    <input type="text" id="wf-btn-texto" value="Enviar consulta" oninput="actualizarCodigoWebform()"
+                                        style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--input-bg,var(--card-bg));color:var(--text);font-size:12px;width:160px;">
+                                </div>
+                            </div>
+                        </div>
+
                         <div id="config-audit" class="tab-content" style="display:none">
                             <div class="card">
                                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
@@ -4028,6 +4248,22 @@
                                     </label>
                                 </div>
 
+                                <!-- Plantillas descargables -->
+                                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+                                    <button onclick="descargarPlantillaCSV('clientes')"
+                                        style="padding:5px 12px;font-size:11px;background:rgba(99,102,241,0.1);border:1px solid var(--primary);color:var(--primary);border-radius:6px;cursor:pointer;">
+                                        &#x1F4E5; Plantilla Clientes.csv
+                                    </button>
+                                    <button onclick="descargarPlantillaCSV('productos')"
+                                        style="padding:5px 12px;font-size:11px;background:rgba(245,158,11,0.1);border:1px solid #f59e0b;color:#f59e0b;border-radius:6px;cursor:pointer;">
+                                        &#x1F4E5; Plantilla Productos.csv
+                                    </button>
+                                    <button onclick="descargarPlantillaCSV('proveedores')"
+                                        style="padding:5px 12px;font-size:11px;background:rgba(59,130,246,0.1);border:1px solid #3b82f6;color:#3b82f6;border-radius:6px;cursor:pointer;">
+                                        &#x1F4E5; Plantilla Proveedores.csv
+                                    </button>
+                                </div>
+
                                 <!-- Instrucciones columnas esperadas -->
                                 <div id="csv-columnas-info" style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;padding:10px 12px;background:rgba(99,102,241,0.06);border-radius:8px;border-left:3px solid var(--primary);">
                                     <strong>Clientes — columnas esperadas:</strong> nombre, telefono, email, direccion, cuit, notas<br>
@@ -4057,6 +4293,14 @@
                                     </button>
                                 </div>
                                 <div id="csv-import-resultado" style="margin-top:10px;font-size:13px;"></div>
+
+                                <!-- Loader importación -->
+                                <div id="csv-loader" style="display:none;margin-top:14px;">
+                                    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:6px;" id="csv-loader-label">Importando...</div>
+                                    <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+                                        <div id="csv-loader-bar" style="height:100%;background:linear-gradient(90deg,#7c3aed,#6d28d9);width:0%;transition:width 0.3s ease;border-radius:4px;"></div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- EXPORTAR -->
@@ -6088,7 +6332,7 @@
             if (page === 'clientes') { try { renderClientes(); actualizarPanelOdontologico(); actualizarPanelInmobiliario(); } catch(e){} }
             if (page === 'presupuestos') { try { renderPresupuestos(); } catch(e){} }
             if (page === 'remitos') { try { renderRemitos(); } catch(e){} }
-            if (page === 'pipeline-ventas') { try { renderPipelineVentas(); } catch(e){} }
+            if (page === 'pipeline-ventas') { try { renderPipelineVentas(); actualizarWebhookUrl(); } catch(e){} }
             setTimeout(aplicarModoLectura, 200);
         }
 
@@ -6127,6 +6371,13 @@
         function switchTab(tabName, element) {
             // Render audit logs al activar pestaña
             if (tabName === 'config-audit') { setTimeout(renderAuditLogs, 50); }
+            if (tabName === 'config-webform') {
+                setTimeout(() => {
+                    const inp = document.getElementById('webform-webhook-url');
+                    if (inp && db.config?.webhookWebform) inp.value = db.config.webhookWebform;
+                    actualizarCodigoWebform();
+                }, 50);
+            }
             // Solo afectar tabs del mismo contenedor (no todos los .tab-content de la app)
             const parentPage = element.closest('.page');
             if (parentPage) {
@@ -6782,8 +7033,10 @@
                 const acciones = f.estado === 'Autorizada AFIP'
                     ? `<button class="btn-sm" onclick="verFactura(${f.id})">Ver</button>
                        <button class="btn-sm" style="background:#fef2f2;color:#dc2626;margin-left:4px;" onclick="anularFactura(${f.id})">Anular</button>
-                       <button class="btn-sm" style="background:#fff7ed;color:#c2410c;margin-left:4px;" onclick="marcarDevuelta(${f.id})">Devuelta</button>`
-                    : `<button class="btn-sm" onclick="verFactura(${f.id})">Ver</button>`;
+                       <button class="btn-sm" style="background:#fff7ed;color:#c2410c;margin-left:4px;" onclick="marcarDevuelta(${f.id})">Devuelta</button>
+                       <button class="btn-sm" onclick="abrirModalEmailFactura(${f.id})">✉ Email</button>`
+                    : `<button class="btn-sm" onclick="verFactura(${f.id})">Ver</button>
+                       <button class="btn-sm" onclick="abrirModalEmailFactura(${f.id})">✉ Email</button>`;
                 html += `<tr>
                     <td>${f.tipo}</td>
                     <td>${f.numeroCompleto || '#'+f.numero}</td>
@@ -8484,6 +8737,7 @@
                     <td>
                         <button class="btn-sm" onclick="openPresupuestoModal(${p.id})">Editar</button>
                         <button class="btn-sm" onclick="convertirPresupuestoAVenta(${p.id})">→ Venta</button>
+                        <button class="btn-sm" onclick="abrirModalEmailPresupuesto(${p.id})">✉ Email</button>
                         <button class="btn-sm btn-danger" onclick="eliminarPresupuesto(${p.id})">Eliminar</button>
                     </td>
                 </tr>`;
@@ -8859,6 +9113,8 @@
                 db.config.suscripcion = {
                     cuota_automatizaciones: 500,
                     consumo_automatizaciones: 0,
+                    usadas_este_mes: 0,
+                    fecha_reinicio: new Date(new Date().getFullYear(), new Date().getMonth()+1, 1).toISOString().split('T')[0],
                     plan: 'basico',
                     mes_activo: new Date().toISOString().slice(0,7) // YYYY-MM
                 };
@@ -9061,6 +9317,47 @@
         }
 
         // Registrar uso de automatización (llamar desde Make hooks)
+        /**
+         * verificarCuotaAutomatizacion() — Interceptor principal.
+         * Devuelve true si se permite la acción, false si se bloqueó.
+         */
+        function verificarCuotaAutomatizacion(descripcion) {
+            const sus   = _getSuscripcion();
+            const usadas = sus.consumo_automatizaciones || 0;
+            const cuota  = sus.cuota_automatizaciones   || 150;
+
+            if (usadas >= cuota) {
+                const overlay = document.createElement('div');
+                overlay.id = 'modal-cuota-bloqueada';
+                overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)';
+                overlay.innerHTML = `<div style="background:var(--card-bg,#1e1e2e);border:1px solid rgba(225,29,72,0.4);border-radius:16px;padding:32px;max-width:420px;width:90%;position:relative;text-align:center">
+                    <button onclick="document.getElementById('modal-cuota-bloqueada').remove()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text-secondary);font-size:20px;cursor:pointer">&#x2715;</button>
+                    <div style="font-size:48px;margin-bottom:12px">&#x1F6AB;</div>
+                    <h3 style="margin:0 0 8px;color:#e11d48">L&#xED;mite de automatizaciones alcanzado</h3>
+                    <p style="margin:0 0 16px;color:var(--text-secondary);font-size:14px">
+                        Usaste <strong>${usadas} / ${cuota}</strong> automatizaciones de tu plan.<br>
+                        Actualiza tu suscripci&#xF3;n para seguir enviando correos o sincronizando datos autom&#xE1;ticamente.
+                    </p>
+                    <button onclick="abrirUpgradeModal();document.getElementById('modal-cuota-bloqueada').remove()"
+                        style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600">
+                        &#x26A1; Ver Planes de Mejora
+                    </button>
+                </div>`;
+                document.body.appendChild(overlay);
+                overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+                try { logAudit('CUOTA_BLOQUEADA','automatizaciones', descripcion || 'bloqueado'); } catch(_){}
+                return false;
+            }
+
+            sus.consumo_automatizaciones = usadas + 1;
+            sus.usadas_este_mes = (sus.usadas_este_mes || 0) + 1;
+            saveDB();
+            try { renderBarraConsumo(); } catch(_){}
+            const pct = Math.round(sus.consumo_automatizaciones / cuota * 100);
+            if (pct >= 90) { try { verificarLimiteAutomatizaciones(pct); } catch(_){} }
+            return true;
+        }
+
         function registrarUsoAutomatizacion(cantidad) {
             cantidad = cantidad || 1;
             const sus = _getSuscripcion();
@@ -10173,6 +10470,7 @@
                         notas:             notasVal,
                         turno_id:          nuevoTurno.id
                     };
+                    if (!verificarCuotaAutomatizacion('Sincronizar turno -> GCal')) throw new Error('CUOTA_AGOTADA');
                     const res = await fetch(webhookUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -10271,6 +10569,7 @@
                         notas:             t.notas || '',
                         turno_id:          t.id
                     };
+                    if (!verificarCuotaAutomatizacion('Bulk sync turno -> GCal')) { err++; continue; }
                     const res = await fetch(webhookUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -11426,6 +11725,7 @@
         // Enviar datos de registro al Webhook de Make (email de bienvenida)
         async function notificarRegistroMake(email, businessName, ownerName, plan) {
             try {
+                if (!verificarCuotaAutomatizacion('Email bienvenida -> Make')) return;
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 await fetch(MAKE_WEBHOOK_REGISTRO, {
                     method: 'POST',
@@ -12195,6 +12495,66 @@ Estado: ${p.estado}`);
             { key: 'ganado',      label: 'Ganado ✓',           cls: 'ganado',      prob: 100 },
             { key: 'perdido',     label: 'Perdido ✗',          cls: 'perdido',     prob: 0   }
         ];
+
+        function recibirLeadExterno(datos) {
+            // Recibe objeto {nombre, email, telefono, fuente, mensaje}
+            // Aplica escapeHTML a todos los campos de texto
+            if (!datos || typeof datos !== 'object') {
+                console.error('recibirLeadExterno: datos inválidos', datos);
+                return false;
+            }
+            try {
+                if (!Array.isArray(db.oportunidades)) db.oportunidades = [];
+
+                const nuevaOportunidad = {
+                    id: safeMaxId(db.oportunidades),
+                    titulo: escapeHTML((datos.nombre || 'Lead Externo').substring(0, 100)),
+                    clienteId: null,
+                    clienteNombre: escapeHTML((datos.nombre || 'Lead Externo').substring(0, 100)),
+                    monto: 0,
+                    etapa: 'prospecto',
+                    probabilidad: 30,
+                    fechaCierre: '',
+                    responsable: escapeHTML((datos.fuente || 'Campaña Externa').substring(0, 50)),
+                    notas: escapeHTML((datos.mensaje || '').substring(0, 500)),
+                    email: escapeHTML((datos.email || '').substring(0, 100)),
+                    telefono: escapeHTML((datos.telefono || '').substring(0, 30)),
+                    fuente: escapeHTML((datos.fuente || 'Externa').substring(0, 50)),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                db.oportunidades.push(nuevaOportunidad);
+                saveDB();
+                renderPipelineVentas();
+                console.log('Lead externo recibido y agregado:', nuevaOportunidad);
+                return true;
+            } catch (error) {
+                console.error('Error en recibirLeadExterno:', error);
+                return false;
+            }
+        }
+
+        function copiarWebhookUrl() {
+            const input = document.getElementById('webhook-url');
+            if (!input) return;
+            input.select();
+            document.execCommand('copy');
+            alert('URL copiada al portapapeles');
+        }
+
+        function actualizarWebhookUrl() {
+            const input = document.getElementById('webhook-url');
+            if (!input) return;
+            let token = 'VOS-';
+            if (db.account && db.account.email) {
+                const encoded = btoa(db.account.email).substring(0, 8);
+                token += encoded;
+            } else {
+                token += '12345678';
+            }
+            input.value = 'https://sistemavos.vercel.app/api/lead?token=' + token;
+        }
 
         function renderPipelineVentas() {
             if (!Array.isArray(db.oportunidades)) db.oportunidades = [];
@@ -13205,79 +13565,369 @@ Estado: ${p.estado}`);
             const tipo = document.getElementById('csv-import-tipo').value;
             if (!_csvParsedData.length) { mostrarToast('No hay datos para importar', 'error'); return; }
 
-            let importados = 0, omitidos = 0;
+            // Mostrar loader
+            const loader    = document.getElementById('csv-loader');
+            const loaderBar = document.getElementById('csv-loader-bar');
+            const loaderLbl = document.getElementById('csv-loader-label');
+            loader.style.display = 'block';
+            document.getElementById('csv-import-actions').style.display = 'none';
 
-            if (tipo === 'clientes') {
-                _csvParsedData.forEach(row => {
-                    const nombre = row['nombre'] || row['name'] || row['razon social'] || row['razonsocial'] || '';
-                    if (!nombre) { omitidos++; return; }
-                    const newId = safeMaxId(db.clientes) + 1;
-                    db.clientes.push({
-                        id: newId,
-                        nombre: nombre,
-                        telefono: row['telefono'] || row['tel'] || row['phone'] || '',
-                        email: row['email'] || row['correo'] || '',
-                        direccion: row['direccion'] || row['domicilio'] || row['address'] || '',
-                        cuit: row['cuit'] || row['dni'] || '',
-                        notas: row['notas'] || row['observaciones'] || row['notes'] || '',
-                        fechaAlta: new Date().toISOString().slice(0, 10)
-                    });
-                    importados++;
+            const total = _csvParsedData.length;
+            let importados = 0, omitidos = 0;
+            const CHUNK = 100; // procesar en lotes para no bloquear UI
+
+            function procesarChunk(offset) {
+                const slice = _csvParsedData.slice(offset, offset + CHUNK);
+                const pct = Math.min(100, Math.round((offset / total) * 100));
+                loaderBar.style.width = pct + '%';
+                loaderLbl.textContent = 'Procesando ' + Math.min(offset + CHUNK, total) + ' / ' + total + ' filas...';
+
+                slice.forEach(row => {
+                    if (tipo === 'clientes') {
+                        const nombre = escapeHTML(row['nombre'] || row['name'] || row['razon social'] || row['razonsocial'] || '');
+                        if (!nombre) { omitidos++; return; }
+                        db.clientes.push({
+                            id: safeMaxId(db.clientes) + 1,
+                            nombre: nombre,
+                            telefono: escapeHTML(row['telefono'] || row['tel'] || row['phone'] || ''),
+                            email: escapeHTML(row['email'] || row['correo'] || ''),
+                            direccion: escapeHTML(row['direccion'] || row['domicilio'] || row['address'] || ''),
+                            cuit: escapeHTML(row['cuit'] || row['dni'] || ''),
+                            notas: escapeHTML(row['notas'] || row['observaciones'] || row['notes'] || ''),
+                            fechaAlta: new Date().toISOString().slice(0, 10)
+                        });
+                        importados++;
+                    } else if (tipo === 'productos') {
+                        const nombre = escapeHTML(row['nombre'] || row['name'] || row['descripcion'] || row['producto'] || '');
+                        if (!nombre) { omitidos++; return; }
+                        db.inventario.push({
+                            id: safeMaxId(db.inventario) + 1,
+                            nombre: nombre,
+                            precio: parseFloat(row['precio'] || row['price'] || row['pvp'] || 0) || 0,
+                            costo:  parseFloat(row['costo']  || row['cost']  || 0) || 0,
+                            stock:  parseInt(row['stock']  || row['cantidad'] || row['qty'] || 0) || 0,
+                            stockMin: 0,
+                            categoria: escapeHTML(row['categoria'] || row['category'] || row['rubro'] || 'General'),
+                            codigo:    escapeHTML(row['codigo'] || row['sku'] || row['code'] || ''),
+                            descripcion: escapeHTML(row['descripcion'] || row['description'] || ''),
+                            activo: true
+                        });
+                        importados++;
+                    } else if (tipo === 'proveedores') {
+                        const nombre = escapeHTML(row['nombre'] || row['name'] || row['razon social'] || row['razonsocial'] || '');
+                        if (!nombre) { omitidos++; return; }
+                        db.proveedores.push({
+                            id: safeMaxId(db.proveedores) + 1,
+                            nombre: nombre,
+                            telefono: escapeHTML(row['telefono'] || row['tel'] || ''),
+                            email:    escapeHTML(row['email']    || row['correo'] || ''),
+                            direccion: escapeHTML(row['direccion'] || row['domicilio'] || ''),
+                            cuit:     escapeHTML(row['cuit'] || ''),
+                            contacto: escapeHTML(row['contacto'] || row['responsable'] || ''),
+                            notas:    escapeHTML(row['notas'] || row['observaciones'] || ''),
+                            fechaAlta: new Date().toISOString().slice(0, 10)
+                        });
+                        importados++;
+                    }
                 });
-            } else if (tipo === 'productos') {
-                _csvParsedData.forEach(row => {
-                    const nombre = row['nombre'] || row['name'] || row['descripcion'] || row['producto'] || '';
-                    if (!nombre) { omitidos++; return; }
-                    const newId = safeMaxId(db.inventario) + 1;
-                    const precio = parseFloat(row['precio'] || row['price'] || row['pvp'] || 0) || 0;
-                    const costo  = parseFloat(row['costo'] || row['cost'] || 0) || 0;
-                    const stock  = parseInt(row['stock'] || row['cantidad'] || row['qty'] || 0) || 0;
-                    db.inventario.push({
-                        id: newId,
-                        nombre: nombre,
-                        precio: precio,
-                        costo: costo,
-                        stock: stock,
-                        stockMin: 0,
-                        categoria: row['categoria'] || row['category'] || row['rubro'] || 'General',
-                        codigo: row['codigo'] || row['sku'] || row['code'] || '',
-                        descripcion: row['descripcion'] || row['description'] || '',
-                        activo: true
-                    });
-                    importados++;
-                });
-            } else if (tipo === 'proveedores') {
-                _csvParsedData.forEach(row => {
-                    const nombre = row['nombre'] || row['name'] || row['razon social'] || row['razonsocial'] || '';
-                    if (!nombre) { omitidos++; return; }
-                    const newId = safeMaxId(db.proveedores) + 1;
-                    db.proveedores.push({
-                        id: newId,
-                        nombre: nombre,
-                        telefono: row['telefono'] || row['tel'] || '',
-                        email: row['email'] || row['correo'] || '',
-                        direccion: row['direccion'] || row['domicilio'] || '',
-                        cuit: row['cuit'] || '',
-                        contacto: row['contacto'] || row['responsable'] || '',
-                        notas: row['notas'] || row['observaciones'] || '',
-                        fechaAlta: new Date().toISOString().slice(0, 10)
-                    });
-                    importados++;
-                });
+
+                if (offset + CHUNK < total) {
+                    setTimeout(() => procesarChunk(offset + CHUNK), 10);
+                } else {
+                    // Finalizar
+                    loaderBar.style.width = '100%';
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                        if (importados > 0) {
+                            saveDB();
+                            try {
+                                logAudit('IMPORTACION_CSV', tipo,
+                                    'Importados: ' + importados + ', Omitidos: ' + omitidos + ', Archivo: ' + tipo + '.csv');
+                            } catch(_) {}
+                        }
+                        cancelarImportCSV();
+                        // Mostrar modal resumen
+                        const ok = importados > 0;
+                        document.getElementById('csv-resumen-icon').textContent  = ok ? '\u2705' : '\u274C';
+                        document.getElementById('csv-resumen-titulo').textContent = ok ? 'Importaci\u00F3n exitosa' : 'Sin registros v\u00E1lidos';
+                        document.getElementById('csv-resumen-titulo').style.color = ok ? '#22c55e' : '#ef4444';
+                        let bodyTxt = ok
+                            ? 'Se agregaron <strong>' + importados + ' ' + tipo + '</strong> correctamente.'
+                            : 'No se import\u00F3 ning\u00FAn registro.';
+                        if (omitidos) bodyTxt += '<br><span style="color:#f59e0b">Se omitieron ' + omitidos + ' filas por falta de nombre o datos inv\u00E1lidos.</span>';
+                        document.getElementById('csv-resumen-body').innerHTML = bodyTxt;
+                        document.getElementById('modal-csv-resumen').style.display = 'flex';
+                    }, 200);
+                }
             }
 
-            saveDB();
-            const resultEl = document.getElementById('csv-import-resultado');
-            resultEl.style.color = importados > 0 ? '#22c55e' : '#ef4444';
-            resultEl.textContent = importados > 0
-                ? '✅ ' + importados + ' registros importados correctamente' + (omitidos ? ' (' + omitidos + ' omitidos por falta de nombre)' : '')
-                : '❌ No se importó ningún registro — verificá el formato del archivo';
-
-            if (importados > 0) mostrarToast('✅ ' + importados + ' ' + tipo + ' importados', 'success');
-            cancelarImportCSV();
+            procesarChunk(0);
         }
 
         // ─── EXPORTAR CSV ───────────────────────────────────────────
+        // ─── INTEGRACIÓN WEB — WEBFORM ───────────────────────────────
+        function _generarCodigoWebform() {
+            const webhookUrl = (document.getElementById('webform-webhook-url')?.value || '').trim()
+                             || (db.config?.webhookWebform || '');
+            const conTel     = document.getElementById('wf-campo-telefono')?.checked ?? true;
+            const conMsg     = document.getElementById('wf-campo-mensaje')?.checked  ?? true;
+            const conEmp     = document.getElementById('wf-campo-empresa')?.checked  ?? false;
+            const conServ    = document.getElementById('wf-campo-servicio')?.checked ?? false;
+            const colorBtn   = document.getElementById('wf-color-btn')?.value || '#7c3aed';
+            const btnTxt     = (document.getElementById('wf-btn-texto')?.value || 'Enviar consulta').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+            const action = webhookUrl || 'PEGA_AQUI_TU_URL_DE_MAKE';
+
+            return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario de Contacto</title>
+  <style>
+    /* ── SistemaVOS Lead Form ── */
+    .vos-form-wrapper {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 480px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .vos-form-wrapper h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      color: #111827;
+    }
+    .vos-form-wrapper p.subtitle {
+      margin: 0 0 24px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .vos-form-group {
+      margin-bottom: 16px;
+    }
+    .vos-form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 5px;
+    }
+    .vos-form-group input,
+    .vos-form-group textarea,
+    .vos-form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #111827;
+      background: #f9fafb;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .vos-form-group input:focus,
+    .vos-form-group textarea:focus,
+    .vos-form-group select:focus {
+      border-color: ${colorBtn};
+      background: #fff;
+      box-shadow: 0 0 0 3px ${colorBtn}22;
+    }
+    .vos-form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .vos-btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: ${colorBtn};
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 4px;
+    }
+    .vos-btn-submit:hover { opacity: 0.88; }
+    .vos-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .vos-form-msg {
+      margin-top: 14px;
+      font-size: 13px;
+      text-align: center;
+      min-height: 18px;
+    }
+    .vos-form-msg.ok  { color: #16a34a; }
+    .vos-form-msg.err { color: #dc2626; }
+  </style>
+</head>
+<body>
+
+<div class="vos-form-wrapper">
+  <h2>&#x1F4AC; Contactanos</h2>
+  <p class="subtitle">Completá el formulario y nos comunicamos a la brevedad.</p>
+
+  <form id="vos-lead-form">
+    <div class="vos-form-group">
+      <label for="vos-nombre">Nombre completo *</label>
+      <input type="text" id="vos-nombre" name="nombre" placeholder="Ej: María García" required>
+    </div>
+    <div class="vos-form-group">
+      <label for="vos-email">Email *</label>
+      <input type="email" id="vos-email" name="email" placeholder="tu@email.com" required>
+    </div>${conTel ? """
+    <div class="vos-form-group">
+      <label for="vos-telefono">Teléfono</label>
+      <input type="tel" id="vos-telefono" name="telefono" placeholder="+54 11 1234-5678">
+    </div>""" : ''}${conEmp ? """
+    <div class="vos-form-group">
+      <label for="vos-empresa">Empresa</label>
+      <input type="text" id="vos-empresa" name="empresa" placeholder="Nombre de tu empresa">
+    </div>""" : ''}${conServ ? """
+    <div class="vos-form-group">
+      <label for="vos-servicio">Servicio de interés</label>
+      <select id="vos-servicio" name="servicio">
+        <option value="">— Seleccioná —</option>
+        <option>Consulta general</option>
+        <option>Presupuesto</option>
+        <option>Soporte</option>
+        <option>Otro</option>
+      </select>
+    </div>""" : ''}${conMsg ? """
+    <div class="vos-form-group">
+      <label for="vos-mensaje">Mensaje</label>
+      <textarea id="vos-mensaje" name="mensaje" placeholder="Contanos en qué podemos ayudarte..."></textarea>
+    </div>""" : ''}
+    <button type="submit" class="vos-btn-submit">${btnTxt}</button>
+    <div class="vos-form-msg" id="vos-form-msg"></div>
+  </form>
+</div>
+
+<script>
+  document.getElementById('vos-lead-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('.vos-btn-submit');
+    const msg = document.getElementById('vos-form-msg');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    msg.className = 'vos-form-msg';
+    msg.textContent = '';
+
+    const data = {};
+    new FormData(this).forEach((v, k) => { data[k] = v; });
+    data.fecha   = new Date().toISOString();
+    data.origen  = window.location.href;
+    data.fuente  = 'formulario_web';
+
+    try {
+      const res = await fetch('${action}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      msg.className = 'vos-form-msg ok';
+      msg.textContent = '\u2705 \u00A1Mensaje enviado! Nos contactaremos pronto.';
+      this.reset();
+    } catch(err) {
+      msg.className = 'vos-form-msg err';
+      msg.textContent = '\u274C Error al enviar. Reintent\u00E1 en unos minutos.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '${btnTxt}';
+    }
+  });
+</script>
+
+</body>
+</html>`;
+        }
+
+        function actualizarCodigoWebform() {
+            const out = document.getElementById('webform-codigo-output');
+            const warn = document.getElementById('webform-warning');
+            if (!out) return;
+            const url = (document.getElementById('webform-webhook-url')?.value || '').trim();
+            if (warn) warn.style.display = url ? 'none' : 'block';
+            out.value = _generarCodigoWebform();
+        }
+
+        function guardarWebhookWebform() {
+            const url = document.getElementById('webform-webhook-url')?.value?.trim() || '';
+            if (!db.config) db.config = {};
+            db.config.webhookWebform = url;
+            saveDB();
+            mostrarToast('Webhook guardado ✓', 'success');
+            actualizarCodigoWebform();
+        }
+
+        function copiarCodigoWebform() {
+            const out = document.getElementById('webform-codigo-output');
+            if (!out || !out.value) return;
+            navigator.clipboard.writeText(out.value)
+                .then(() => mostrarToast('\uD83D\uDCCB Código copiado al portapapeles', 'success'))
+                .catch(() => { out.select(); document.execCommand('copy'); mostrarToast('Código copiado', 'info'); });
+        }
+
+        function descargarCodigoWebform() {
+            const codigo = _generarCodigoWebform();
+            const blob = new Blob([codigo], { type: 'text/html;charset=utf-8;' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href = url; a.download = 'formulario-contacto-vos.html';
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            mostrarToast('Archivo .html descargado', 'info');
+        }
+
+        function descargarPlantillaCSV(tipo) {
+            const plantillas = {
+                clientes: {
+                    headers: ['nombre','telefono','email','direccion','cuit','notas'],
+                    ejemplo: [
+                        ['Maria Garcia','11-1234-5678','maria@email.com','Av. Corrientes 1234','20-12345678-0','Cliente VIP'],
+                        ['Juan Perez','11-9876-5432','juan@email.com','Belgrano 567','27-87654321-4','']
+                    ]
+                },
+                productos: {
+                    headers: ['nombre','precio','costo','stock','categoria','codigo','descripcion'],
+                    ejemplo: [
+                        ['Producto A','1500','800','50','Electronica','SKU-001','Descripcion del producto'],
+                        ['Producto B','2200','1100','30','Ropa','SKU-002','']
+                    ]
+                },
+                proveedores: {
+                    headers: ['nombre','telefono','email','direccion','cuit','contacto','notas'],
+                    ejemplo: [
+                        ['Proveedor XYZ','11-1111-2222','proveedor@mail.com','Av. Industrial 100','30-11111111-1','Carlos Lopez','Proveedor principal'],
+                        ['Distribuidora ABC','11-3333-4444','abc@mail.com','Ruta 8 Km 40','30-22222222-2','Ana Torres','']
+                    ]
+                }
+            };
+            const p = plantillas[tipo];
+            if (!p) return;
+            const escape = v => {
+                const s = String(v || '').replace(/"/g, '""');
+                return (s.includes(',') || s.includes('"') || s.includes('\n')) ? '"' + s + '"' : s;
+            };
+            let csv = p.headers.map(escape).join(',') + '\n';
+            p.ejemplo.forEach(row => { csv += row.map(escape).join(',') + '\n'; });
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href = url; a.download = 'plantilla_' + tipo + '.csv';
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            mostrarToast('Plantilla ' + tipo + '.csv descargada', 'info');
+        }
+
         function _arrayToCSV(headers, rows) {
             const escape = v => {
                 const s = String(v === null || v === undefined ? '' : v).replace(/"/g, '""');
@@ -13354,7 +14004,226 @@ Estado: ${p.estado}`);
             }
         });
 
+
+
+        // ═══════════════════════════════════════════════════════════════════
+        // EMAIL FEATURES - Presupuestos, Facturas, Campaña Email
+        // ═══════════════════════════════════════════════════════════════════
+
+        let _emailPresupuestoId = null;
+        let _emailFacturaId = null;
+
+        function abrirModalEmailPresupuesto(id) {
+            _emailPresupuestoId = id;
+            const pres = db.presupuestos.find(p => p.id === id);
+            if (!pres) return;
+            const cliente = db.clientes.find(c => c.id === pres.clienteId);
+            document.getElementById('email-pres-destino').value = cliente?.email || '';
+            document.getElementById('email-pres-mensaje').value = '';
+            openModal('modal-email-presupuesto');
+        }
+
+        function abrirModalEmailFactura(id) {
+            _emailFacturaId = id;
+            const factura = db.facturas.find(f => f.id === id);
+            if (!factura) return;
+            const cliente = db.clientes.find(c => c.id === factura.clienteId);
+            document.getElementById('email-fact-destino').value = cliente?.email || '';
+            document.getElementById('email-fact-mensaje').value = '';
+            openModal('modal-email-factura');
+        }
+
+        function enviarPresupuestoPorEmail() {
+            if (!verificarCuotaAutomatizacion('Email presupuesto')) return;
+            
+            const email = document.getElementById('email-pres-destino').value.trim();
+            const mensaje = document.getElementById('email-pres-mensaje').value.trim();
+            
+            if (!email) {
+                alert('Por favor, indicá un email de destino.');
+                return;
+            }
+            
+            if (!_emailPresupuestoId) return;
+            const pres = db.presupuestos.find(p => p.id === _emailPresupuestoId);
+            if (!pres) return;
+            
+            const payload = {
+                tipo: 'presupuesto',
+                id: pres.id,
+                numero: pres.numero,
+                monto: pres.total,
+                email_destino: email,
+                mensaje: mensaje,
+                fecha: new Date().toISOString()
+            };
+            
+            const webhook = db.config?.webhookEmailDocs || 'CONFIGURA_WEBHOOK';
+            if (webhook === 'CONFIGURA_WEBHOOK') {
+                alert('⚠ Aún no configuraste el webhook de email en Integraciones.');
+                return;
+            }
+            
+            fetch(webhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert('✓ Presupuesto enviado por email exitosamente.');
+                closeModal('modal-email-presupuesto');
+                logAudit('Envió', 'Presupuestos', 'Email presupuesto ' + pres.numero + ' a ' + email);
+            })
+            .catch(err => {
+                console.error('Error enviando presupuesto:', err);
+                alert('Error al enviar el email. Verificá tu configuración de webhook.');
+            });
+        }
+
+        function enviarFacturaPorEmail() {
+            if (!verificarCuotaAutomatizacion('Email factura')) return;
+            
+            const email = document.getElementById('email-fact-destino').value.trim();
+            const mensaje = document.getElementById('email-fact-mensaje').value.trim();
+            
+            if (!email) {
+                alert('Por favor, indicá un email de destino.');
+                return;
+            }
+            
+            if (!_emailFacturaId) return;
+            const factura = db.facturas.find(f => f.id === _emailFacturaId);
+            if (!factura) return;
+            
+            const payload = {
+                tipo: 'factura',
+                id: factura.id,
+                numeroCompleto: factura.numeroCompleto || '#' + factura.numero,
+                monto: factura.total,
+                email_destino: email,
+                mensaje: mensaje,
+                fecha: new Date().toISOString()
+            };
+            
+            const webhook = db.config?.webhookEmailDocs || 'CONFIGURA_WEBHOOK';
+            if (webhook === 'CONFIGURA_WEBHOOK') {
+                alert('⚠ Aún no configuraste el webhook de email en Integraciones.');
+                return;
+            }
+            
+            fetch(webhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert('✓ Factura enviada por email exitosamente.');
+                closeModal('modal-email-factura');
+                logAudit('Envió', 'Facturación', 'Email factura ' + (factura.numeroCompleto || '#' + factura.numero) + ' a ' + email);
+            })
+            .catch(err => {
+                console.error('Error enviando factura:', err);
+                alert('Error al enviar el email. Verificá tu configuración de webhook.');
+            });
+        }
+
+        function enviarCampanaEmail() {
+            if (!verificarCuotaAutomatizacion('Campaña email masiva')) return;
+            
+            const segmento = document.getElementById('campana-segmento').value;
+            const mensaje = document.getElementById('campana-mensaje').value.trim();
+            const webhookUrl = document.getElementById('campana-webhook').value.trim();
+            
+            if (!mensaje) {
+                alert('Por favor, escribí el mensaje/asunto de la campaña.');
+                return;
+            }
+            
+            // Filtrar clientes por segmento
+            let destinatarios = [];
+            const ahora = new Date();
+            
+            if (segmento === 'todos') {
+                destinatarios = db.clientes.map(c => ({ nombre: c.nombre, email: c.email })).filter(d => d.email);
+            } else if (segmento === 'mes-actual') {
+                destinatarios = db.clientes.filter(c => {
+                    const ventasCliente = db.ventas.filter(v => v.clienteId === c.id);
+                    const mesActual = ventasCliente.some(v => {
+                        const ventaFecha = new Date(v.fecha);
+                        return ventaFecha.getMonth() === ahora.getMonth() && ventaFecha.getFullYear() === ahora.getFullYear();
+                    });
+                    return mesActual && c.email;
+                }).map(c => ({ nombre: c.nombre, email: c.email }));
+            } else if (segmento === 'sin-compras-30') {
+                const hace30 = new Date(ahora.getTime() - 30*24*60*60*1000);
+                destinatarios = db.clientes.filter(c => {
+                    const ventasCliente = db.ventas.filter(v => v.clienteId === c.id);
+                    const ultimaVenta = ventasCliente.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
+                    const sinVentas = !ultimaVenta || new Date(ultimaVenta.fecha) < hace30;
+                    return sinVentas && c.email;
+                }).map(c => ({ nombre: c.nombre, email: c.email }));
+            }
+            
+            if (destinatarios.length === 0) {
+                alert('No hay clientes en este segmento.');
+                return;
+            }
+            
+            const webhook = webhookUrl || db.config?.webhookCampanaEmail || 'CONFIGURA_WEBHOOK';
+            if (webhook === 'CONFIGURA_WEBHOOK') {
+                alert('⚠ Aún no configuraste el webhook de campaña email en Integraciones.');
+                return;
+            }
+            
+            const payload = {
+                destinatarios: destinatarios,
+                mensaje: mensaje,
+                segmento: segmento,
+                total_destinatarios: destinatarios.length,
+                fecha: new Date().toISOString()
+            };
+            
+            fetch(webhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert('✓ Campaña de email enviada a ' + destinatarios.length + ' clientes.');
+                closeModal('modal-campana-email');
+                logAudit('Envió', 'CRM', 'Campaña email ' + segmento + ' a ' + destinatarios.length + ' clientes');
+            })
+            .catch(err => {
+                console.error('Error enviando campaña:', err);
+                alert('Error al enviar la campaña. Verificá tu configuración de webhook.');
+            });
+        }
+
         </script>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- MODAL RESUMEN IMPORTACION CSV                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="modal-csv-resumen" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);
+    align-items:center;justify-content:center;z-index:9995;backdrop-filter:blur(4px);">
+    <div style="background:var(--card-bg,#1e1e2e);border:1px solid rgba(34,197,94,0.4);border-radius:16px;
+        padding:32px;max-width:420px;width:90%;position:relative;text-align:center;">
+        <button onclick="document.getElementById('modal-csv-resumen').style.display='none'"
+            style="position:absolute;top:12px;right:16px;background:none;border:none;
+            color:var(--text-secondary);font-size:20px;cursor:pointer;">&#x2715;</button>
+        <div id="csv-resumen-icon" style="font-size:48px;margin-bottom:12px;">&#x2705;</div>
+        <h3 id="csv-resumen-titulo" style="margin:0 0 8px;color:#22c55e;">Importaci&#xF3;n exitosa</h3>
+        <p id="csv-resumen-body" style="margin:0 0 20px;color:var(--text-secondary);font-size:14px;line-height:1.6;"></p>
+        <button onclick="document.getElementById('modal-csv-resumen').style.display='none'"
+            style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;
+            padding:10px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;">
+            Perfecto
+        </button>
+    </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- SISTEMA REPORTE BUGS BETA — UI                            -->
