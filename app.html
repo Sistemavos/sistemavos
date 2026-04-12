@@ -1718,6 +1718,7 @@
             updateCloudStatus('offline');
         });
     </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
     <!-- REGISTRATION PAGE -->
@@ -1879,7 +1880,19 @@
                     </div>
                     <div class="form-buttons">
                         <button type="button" class="btn-secondary" onclick="registrationStep(3)">Anterior</button>
-                        <button type="button" class="btn-primary" onclick="completeRegistration()">Crear Cuenta</button>
+                        
+                            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+                                <input type="checkbox" id="acepto-terminos" required
+                                    style="margin-top:3px;width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--primary);">
+                                <label for="acepto-terminos" style="font-size:12px;color:var(--text-secondary);cursor:pointer;line-height:1.5;">
+                                    He leído y acepto los
+                                    <button type="button" onclick="abrirModalLegal('terminos')" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:12px;padding:0;text-decoration:underline;">Términos y Condiciones</button>
+                                    y la
+                                    <button type="button" onclick="abrirModalLegal('privacidad')" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:12px;padding:0;text-decoration:underline;">Política de Privacidad</button>
+                                    de SistemaVOS.
+                                </label>
+                            </div>
+                            <button type="button" class="btn-primary" onclick="completeRegistration()">Crear Cuenta</button>
                     </div>
                 </form>
             </div>
@@ -1921,6 +1934,17 @@
                     <input type="email" id="forgot-email" placeholder="tu@email.com" style="width:100%; margin-bottom:10px;">
                     <button type="button" class="btn-primary" style="width:100%; padding:10px; font-size:13px;" onclick="recoverPassword()">Enviar Instrucciones</button>
                     <div id="forgot-feedback" style="font-size:12px; margin-top:8px;"></div>
+                        <!-- Trust Badges -->
+                        <div class="trust-badges">
+                            <span class="trust-badge"><i class="fas fa-lock"></i> SSL 256-bit</span>
+                            <span class="trust-badge"><i class="fas fa-shield-halved"></i> Datos Protegidos</span>
+                            <span class="trust-badge"><i class="fas fa-credit-card"></i> PCI-DSS via MercadoPago</span>
+                        </div>
+                        <div style="text-align:center;margin-top:10px;">
+                            <button onclick="abrirModalSeguridad()" style="background:none;border:none;color:rgba(255,255,255,0.45);font-size:11px;cursor:pointer;text-decoration:underline;padding:0;">
+                                <i class="fas fa-shield-halved" style="margin-right:4px;"></i>Centro de Seguridad
+                            </button>
+                        </div>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
                     <a href="#" onclick="showRegistration(); return false;" style="font-size: 13px; color: var(--primary); text-decoration: none;">¿No tienes cuenta? Registrate</a>
@@ -2004,7 +2028,18 @@
                 <div class="sidebar-footer">
                     <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
                 </div>
-            </aside>
+                        <!-- Sellos de confianza para pagos -->
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;justify-content:center;">
+                            <span class="trust-badge trust-badge-dark"><i class="fas fa-lock"></i> Conexión Encriptada SSL</span>
+                            <span class="trust-badge trust-badge-dark"><i class="fas fa-credit-card"></i> PCI-DSS — MercadoPago</span>
+                            <span class="trust-badge trust-badge-dark"><i class="fas fa-shield-halved"></i> No almacenamos tarjetas</span>
+                        </div>
+            
+                    <div class="legal-footer-bar legal-footer-bar-dark" style="padding:8px 16px 12px;border-top:1px solid var(--border);">
+                        <button onclick="abrirModalLegal('terminos')">Términos y Condiciones</button>
+                        <span style="color:var(--border);">|</span>
+                        <button onclick="abrirModalLegal('privacidad')">Política de Privacidad</button>
+                    </div></aside>
 
             <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -2953,7 +2988,8 @@
                                         <tr>
                                             <th>Nombre</th>
                                             <th>Email</th>
-                                            <th>Rol</th>
+                                            <th>Tipo</th>
+                                            <th>Accesos</th>
                                             <th>Estado</th>
                                             <th>Acciones</th>
                                         </tr>
@@ -3489,6 +3525,9 @@
                             <button class="tab-button" onclick="switchTab('config-datos', this)">Datos</button>
                             <button class="tab-button" onclick="switchTab('config-menu', this)">Mi Menú</button>
                             <button class="tab-button" onclick="switchTab('config-seguridad', this)">Seguridad</button>
+                            <button class="tab-button" onclick="switchTab('config-integraciones', this);actualizarUIGCal()">Integraciones</button>
+                            <button class="tab-button" onclick="switchTab('config-migracion', this)">Migración</button>
+                            <button class="tab-button" id="tab-btn-audit" onclick="switchTab('config-audit', this)" style="display:none">📋 Actividad</button>
                         </div>
 
                         <!-- GENERAL CONFIG -->
@@ -3771,6 +3810,72 @@
                                 </button>
                             </div>
                         </div>
+                        <!-- ══ INTEGRACIONES ══ -->
+                        <div id="config-integraciones" class="tab-content" style="display:none">
+                            <h3 style="margin-bottom:20px;color:var(--primary)">Integraciones</h3>
+
+                            <!-- Google Calendar -->
+                            <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                        <rect width="24" height="24" rx="4" fill="#fff" stroke="#dadce0"/>
+                                        <path d="M7 2v2M17 2v2M3 8h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="#4285f4" stroke-width="1.5" stroke-linecap="round"/>
+                                        <text x="8" y="18" font-size="7" fill="#1a73e8" font-weight="bold" font-family="Arial">CAL</text>
+                                    </svg>
+                                    <div>
+                                        <div style="font-weight:600;font-size:15px;">Google Calendar</div>
+                                        <div style="font-size:12px;color:var(--text-secondary);">Sincroniza turnos automáticamente con tu calendario</div>
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom:14px;">
+                                    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Google OAuth Client ID</label>
+                                    <input type="text" id="gcal-client-id"
+                                        placeholder="xxxxxxxx.apps.googleusercontent.com"
+                                        style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:13px;box-sizing:border-box;"
+                                        oninput="db.config.gcal.clientId=this.value;saveDB()">
+                                    <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">
+                                        Obtenelo en <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--primary)">Google Cloud Console</a> → Credenciales → OAuth 2.0 → Web application
+                                    </div>
+                                </div>
+
+                                <div id="gcal-status-badge" style="margin-bottom:14px;padding:8px 12px;border-radius:8px;font-size:13px;display:none;"></div>
+
+                                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                                    <button id="gcal-connect-btn" onclick="iniciarGCalOAuth()"
+                                        style="padding:9px 18px;background:#4285f4;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;">
+                                        <i class="fab fa-google"></i> Conectar Google Calendar
+                                    </button>
+                                    <button id="gcal-disconnect-btn" onclick="desconectarGCal()"
+                                        style="padding:9px 18px;background:var(--danger,#ef4444);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;display:none;">
+                                        Desconectar
+                                    </button>
+                                    <button onclick="testGCalConexion()"
+                                        style="padding:9px 18px;background:var(--card-bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">
+                                        Probar conexión
+                                    </button>
+                                </div>
+
+                                <div style="margin-top:16px;padding:12px;background:rgba(66,133,244,0.07);border-radius:8px;font-size:12px;color:var(--text-secondary);">
+                                    <strong>¿Cómo configurarlo?</strong><br>
+                                    1. Abrí <a href="https://console.cloud.google.com" target="_blank" style="color:var(--primary)">Google Cloud Console</a><br>
+                                    2. Creá un proyecto → Habilitá la API de Google Calendar<br>
+                                    3. Credenciales → Crear credencial → ID de cliente OAuth 2.0 → Tipo: Aplicación web<br>
+                                    4. Orígenes autorizados: <code style="background:var(--border);padding:2px 5px;border-radius:4px;">https://www.sistemavos.com.ar</code><br>
+                                    5. Pegá el Client ID arriba y hacé clic en Conectar
+                                </div>
+                            </div>
+
+                            <!-- Webhook Make.com (avanzado) -->
+                            <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:24px;">
+                                <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Webhook Make.com <span style="font-size:11px;color:var(--text-secondary);font-weight:400;">(avanzado / alternativo)</span></div>
+                                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Si preferís usar Make.com en lugar de la integración directa, pegá tu webhook URL aquí.</div>
+                                <input type="text" id="config-webhook-gcal"
+                                    placeholder="https://hook.eu1.make.com/..."
+                                    style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:13px;box-sizing:border-box;"
+                                    oninput="db.config.webhookGCal=this.value;saveDB()">
+                            </div>
+                        </div>
                         <!-- Lista de próximos turnos -->
                         <div class="card" style="margin-bottom:16px;">
                             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -3795,6 +3900,142 @@
                                 <div class="kpi-label">No-Shows</div>
                                 <div class="kpi-value" id="ck-noshows">0</div>
                                 <div class="kpi-sub">riesgo en 24h</div>
+                        <!-- ══ MIGRACIÓN DE DATOS ══ -->
+                        <div id="config-audit" class="tab-content" style="display:none">
+                            <div class="card">
+                                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+                                    <h2 style="margin:0">📋 Registro de Actividad</h2>
+                                    <button class="btn-secondary btn-sm" onclick="exportarAuditCSV()">⬇ Exportar CSV</button>
+                                </div>
+                                <!-- Filtros -->
+                                <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;margin-bottom:16px;align-items:end">
+                                    <div>
+                                        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Filtrar por usuario</label>
+                                        <input type="text" id="audit-filter-usuario" placeholder="Nombre..." oninput="renderAuditLogs()" style="width:100%">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Módulo</label>
+                                        <select id="audit-filter-modulo" onchange="renderAuditLogs()" style="width:100%">
+                                            <option value="">Todos</option>
+                                            <option>Clientes</option>
+                                            <option>Ventas</option>
+                                            <option>Facturación</option>
+                                            <option>Gastos</option>
+                                            <option>Inventario</option>
+                                            <option>Empleados</option>
+                                            <option>Arqueo de Caja</option>
+                                            <option>Citas</option>
+                                            <option>Usuarios</option>
+                                            <option>Presupuestos</option>
+                                            <option>Remitos</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Fecha</label>
+                                        <input type="date" id="audit-filter-fecha" onchange="renderAuditLogs()" style="width:100%">
+                                    </div>
+                                    <button class="btn-secondary btn-sm" onclick="limpiarFiltrosAudit()">Limpiar</button>
+                                </div>
+                                <!-- Tabla -->
+                                <div style="overflow-x:auto">
+                                    <table class="data-table" id="audit-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha y Hora</th>
+                                                <th>Usuario</th>
+                                                <th>Acción</th>
+                                                <th>Módulo</th>
+                                                <th>Detalle</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="audit-tbody">
+                                            <tr><td colspan="5" style="text-align:center;color:var(--text-secondary)">Sin registros de actividad</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p id="audit-count" style="font-size:12px;color:var(--text-secondary);margin-top:8px;text-align:right"></p>
+                            </div>
+                        </div>
+
+                        <div id="config-migracion" class="tab-content" style="display:none">
+                            <h3 style="margin-bottom:4px;color:var(--primary)">Migración de Datos</h3>
+                            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">Importá masivamente desde Excel/CSV o exportá tu base de datos actual.</p>
+
+                            <!-- IMPORTAR -->
+                            <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:18px;">
+                                <h4 style="margin:0 0 14px;font-size:14px;display:flex;align-items:center;gap:8px;">
+                                    <i class="fas fa-file-import" style="color:#6366f1;"></i> Importar desde CSV
+                                </h4>
+                                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+                                    <select id="csv-import-tipo" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:13px;">
+                                        <option value="clientes">Clientes</option>
+                                        <option value="productos">Productos / Inventario</option>
+                                        <option value="proveedores">Proveedores</option>
+                                    </select>
+                                    <label style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--primary);color:#fff;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">
+                                        <i class="fas fa-upload"></i> Seleccionar archivo CSV
+                                        <input type="file" accept=".csv,.txt" id="csv-file-input" onchange="previsualizarCSV(this)" style="display:none">
+                                    </label>
+                                </div>
+
+                                <!-- Instrucciones columnas esperadas -->
+                                <div id="csv-columnas-info" style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;padding:10px 12px;background:rgba(99,102,241,0.06);border-radius:8px;border-left:3px solid var(--primary);">
+                                    <strong>Clientes — columnas esperadas:</strong> nombre, telefono, email, direccion, cuit, notas<br>
+                                    <span style="font-size:11px;opacity:0.8;">La primera fila debe ser el encabezado. Separador: coma (,) o punto y coma (;).</span>
+                                </div>
+
+                                <!-- Preview tabla -->
+                                <div id="csv-preview-container" style="display:none;margin-bottom:14px;">
+                                    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
+                                        Vista previa (primeras 5 filas): <span id="csv-preview-count" style="font-weight:600;color:var(--primary);"></span>
+                                    </div>
+                                    <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);">
+                                        <table id="csv-preview-table" style="width:100%;border-collapse:collapse;font-size:12px;">
+                                            <thead id="csv-preview-head" style="background:var(--primary);color:#fff;"></thead>
+                                            <tbody id="csv-preview-body" style=""></tbody>
+                                        </table>
+                                    </div>
+                                    <div id="csv-mapeo-info" style="margin-top:8px;font-size:11px;color:#22c55e;"></div>
+                                </div>
+
+                                <div id="csv-import-actions" style="display:none;gap:10px;flex-wrap:wrap;">
+                                    <button onclick="confirmarImportCSV()" style="padding:9px 20px;background:#22c55e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">
+                                        <i class="fas fa-check"></i> Confirmar Importación
+                                    </button>
+                                    <button onclick="cancelarImportCSV()" style="padding:9px 16px;background:var(--card-bg);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">
+                                        Cancelar
+                                    </button>
+                                </div>
+                                <div id="csv-import-resultado" style="margin-top:10px;font-size:13px;"></div>
+                            </div>
+
+                            <!-- EXPORTAR -->
+                            <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:22px;">
+                                <h4 style="margin:0 0 14px;font-size:14px;display:flex;align-items:center;gap:8px;">
+                                    <i class="fas fa-file-export" style="color:#22c55e;"></i> Exportar a CSV
+                                </h4>
+                                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+                                    <button onclick="exportarCSV('clientes')" style="padding:11px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:8px;color:var(--text);">
+                                        <i class="fas fa-users" style="color:#6366f1;"></i> Clientes
+                                    </button>
+                                    <button onclick="exportarCSV('productos')" style="padding:11px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:8px;color:var(--text);">
+                                        <i class="fas fa-boxes-stacked" style="color:#f59e0b;"></i> Productos
+                                    </button>
+                                    <button onclick="exportarCSV('ventas')" style="padding:11px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:8px;color:var(--text);">
+                                        <i class="fas fa-chart-line" style="color:#22c55e;"></i> Ventas
+                                    </button>
+                                    <button onclick="exportarCSV('proveedores')" style="padding:11px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:8px;color:var(--text);">
+                                        <i class="fas fa-truck" style="color:#3b82f6;"></i> Proveedores
+                                    </button>
+                                    <button onclick="exportarCSV('empleados')" style="padding:11px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:8px;color:var(--text);">
+                                        <i class="fas fa-id-badge" style="color:#ec4899;"></i> Empleados
+                                    </button>
+                                    <button onclick="exportarCSV('all')" style="padding:11px;background:rgba(99,102,241,0.08);border:1px solid var(--primary);border-radius:8px;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:8px;color:var(--primary);font-weight:600;">
+                                        <i class="fas fa-database"></i> Todo (ZIP)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                             </div>
                             <div class="clinic-kpi-card">
                                 <div class="kpi-label">Tareas SLA</div>
@@ -4259,9 +4500,9 @@
     </div>
 
     <div id="usuario-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width:540px">
             <div class="modal-header">
-                <h2>Nuevo Usuario</h2>
+                <h2 id="usuario-modal-title">Nuevo Usuario</h2>
                 <button class="modal-close" onclick="closeModal('usuario-modal')">&times;</button>
             </div>
             <div class="form-group">
@@ -4273,13 +4514,18 @@
                 <input type="email" id="modal-usuario-email">
             </div>
             <div class="form-group">
-                <label>Rol</label>
-                <select id="modal-usuario-rol">
-                    <option value="admin">Administrador</option>
+                <label>Tipo de Cuenta</label>
+                <select id="modal-usuario-rol" onchange="togglePermisosSección()">
+                    <option value="superadmin">⭐ Super Administrador (acceso total)</option>
+                    <option value="subcuenta">👤 Sub Cuenta (acceso limitado)</option>
                     <option value="vendedor">Vendedor</option>
                     <option value="cajero">Cajero</option>
                     <option value="bodeguero">Bodeguero</option>
                 </select>
+            </div>
+            <div id="seccion-permisos" style="display:none;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;background:var(--gray-50)">
+                <p style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text-secondary)">MÓDULOS PERMITIDOS</p>
+                <div id="permisos-checkboxes" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;"></div>
             </div>
             <div class="form-group">
                 <label>Estado</label>
@@ -4320,8 +4566,9 @@
             documentos: {},
             mercadopago: { connected: false, token: null, transactions: [] },
             industryConfig: {},
-            config: { modulosOcultos: [], webhookGCal: 'https://hook.eu1.make.com/uflsn3dizm1qmfyj2y63t3ysmclavo9j' },
-            agenda: { turnos: [] }
+            config: { modulosOcultos: [], webhookGCal: 'https://hook.eu1.make.com/uflsn3dizm1qmfyj2y63t3ysmclavo9j', gcal: { clientId: '', accessToken: null, tokenExpiry: null, email: null, connected: false } },
+            agenda: { turnos: [] },
+            audit_logs: []
         };
 
         const INDUSTRY_CONFIGS = {
@@ -4452,6 +4699,48 @@
 
         const EXPENSE_CATEGORIES = ["Servicios", "Suministros", "Salarios", "Publicidad", "Transporte", "Alquiler", "Mantenimiento", "Otros"];
 
+        // ═══════════════════════════════════════════════
+        // RBAC CONFIG - módulos asignables a subcuentas
+        // ═══════════════════════════════════════════════
+        const ALL_ASSIGNABLE_MODULES = [
+            { id: 'dashboard',    label: 'Dashboard' },
+            { id: 'clientes',     label: 'Clientes' },
+            { id: 'inventario',   label: 'Inventario' },
+            { id: 'ventas',       label: 'Ventas' },
+            { id: 'facturacion',  label: 'Facturación' },
+            { id: 'arqueo',       label: 'Arqueo de Caja' },
+            { id: 'gastos',       label: 'Gastos' },
+            { id: 'presupuestos', label: 'Presupuestos' },
+            { id: 'remitos',      label: 'Remitos' },
+            { id: 'empleados',    label: 'Empleados' },
+            { id: 'nominas',      label: 'Nóminas' },
+            { id: 'citas',        label: 'Citas / Agenda' },
+            { id: 'sucursales',   label: 'Sucursales' },
+            { id: 'proveedores',  label: 'Proveedores' },
+            { id: 'mercadopago',  label: 'MercadoPago' },
+            { id: 'whatsapp',     label: 'WhatsApp' },
+            { id: 'ia',           label: 'Asistente IA' },
+        ];
+
+        // ═══════════════════════════════════════════════
+        // AUDIT LOG
+        // ═══════════════════════════════════════════════
+        function logAudit(accion, modulo, detalle) {
+            try {
+                if (!Array.isArray(db.audit_logs)) db.audit_logs = [];
+                db.audit_logs.unshift({
+                    id: safeMaxId(db.audit_logs),
+                    timestamp: new Date().toISOString(),
+                    usuario: currentUser?.name || currentUser?.email || 'Sistema',
+                    accion,
+                    modulo,
+                    detalle
+                });
+                // Mantener máximo 1000 registros
+                if (db.audit_logs.length > 1000) db.audit_logs = db.audit_logs.slice(0, 1000);
+            } catch(e) { /* silencioso */ }
+        }
+
         function saveDB() {
             localStorage.setItem('sistemavos_db', JSON.stringify(db));
             // Sincronizar con la nube (debounced, no bloquea)
@@ -4467,7 +4756,9 @@
             if (!db.config) db.config = { modulosOcultos: [], webhookGCal: '' };
             if (!db.config.modulosOcultos) db.config.modulosOcultos = [];
             if (!db.config.webhookGCal) db.config.webhookGCal = 'https://hook.eu1.make.com/uflsn3dizm1qmfyj2y63t3ysmclavo9j';
+        if (!db.config.gcal) db.config.gcal = { clientId: '', accessToken: null, tokenExpiry: null, email: null, connected: false };
             if (!db.agenda) db.agenda = { turnos: [] };
+            if (!Array.isArray(db.audit_logs)) db.audit_logs = [];
         }
 
         // ===== DOCUMENTO SYSTEM =====
@@ -5496,6 +5787,12 @@
             // Si no tiene modulosVisibles definido, mostrar todo
             if (!visibles) return;
 
+            // ── RBAC: permisos por subcuenta ──────────────────────
+            // Obtener el usuario logueado en db.usuarios (si es subcuenta)
+            const dbUser = db.usuarios.find(u => u.email === currentUser?.email);
+            const isSubcuenta = dbUser && dbUser.rol === 'subcuenta';
+            const permisosSubcuenta = isSubcuenta && Array.isArray(dbUser.permisos) ? dbUser.permisos : null;
+
             // Mostrar/ocultar grupo clínica ANTES del forEach de botones
             const agendaRubros = ['medicina', 'belleza', 'odontologia', 'talleres'];
             const isAgenda = agendaRubros.includes(cfg.rubro);
@@ -5532,12 +5829,21 @@
                 if (!li) return;
                 // Los items .menu-agenda ya fueron controlados arriba; no pisar con el forEach
                 if (li.classList.contains('menu-agenda')) return;
-                if (siempreVisibles.includes(page)) { li.style.display = ''; return; }
+                if (siempreVisibles.includes(page)) {
+                    // Las subcuentas NO ven usuarios ni config (solo superadmin)
+                    if (permisosSubcuenta && (page === 'usuarios')) {
+                        li.style.display = 'none'; return;
+                    }
+                    li.style.display = '';
+                    return;
+                }
                 // Filtro 1: permitido por rubro?
                 const permitidoPorRubro = visibles.includes(page);
                 // Filtro 2: ocultado por el usuario?
                 const ocultadoPorUsuario = modulosOcultos.includes(page);
-                li.style.display = (permitidoPorRubro && !ocultadoPorUsuario) ? '' : 'none';
+                // Filtro 3: permitido por permisos de subcuenta?
+                const permitidoPorPermiso = !permisosSubcuenta || permisosSubcuenta.includes(page);
+                li.style.display = (permitidoPorRubro && !ocultadoPorUsuario && permitidoPorPermiso) ? '' : 'none';
             });
             // Actualizar labels del sidebar según el rubro
             const menuClientes = document.getElementById('menu-clientes');
@@ -5581,6 +5887,19 @@
         }
 
         function showPage(page) {
+            // ── RBAC: Guardia de ruta para subcuentas ──────────
+            if (page !== 'dashboard') {
+                const dbUser = db.usuarios.find(u => u.email === currentUser?.email);
+                if (dbUser && dbUser.rol === 'subcuenta') {
+                    const permisos = Array.isArray(dbUser.permisos) ? dbUser.permisos : ['dashboard'];
+                    const siemprePermitidos = ['dashboard', 'config', 'ia', 'whatsapp', 'mercadopago'];
+                    const bloqueados = ['usuarios'];
+                    if (bloqueados.includes(page) || (!siemprePermitidos.includes(page) && !permisos.includes(page))) {
+                        console.warn('[RBAC] Acceso denegado a:', page);
+                        page = 'dashboard';
+                    }
+                }
+            }
             // Close sidebar on mobile after navigation
             if (window.innerWidth <= 768) {
                 const sidebar = document.querySelector('.sidebar');
@@ -5656,6 +5975,8 @@
         }
 
         function switchTab(tabName, element) {
+            // Render audit logs al activar pestaña
+            if (tabName === 'config-audit') { setTimeout(renderAuditLogs, 50); }
             // Solo afectar tabs del mismo contenedor (no todos los .tab-content de la app)
             const parentPage = element.closest('.page');
             if (parentPage) {
@@ -5869,10 +6190,12 @@
             if (id) {
                 const idx = db.clientes.findIndex(c => c.id === parseInt(id));
                 db.clientes[idx] = { ...db.clientes[idx], ...clienteData };
+                logAudit('Editó', 'Clientes', `Cliente "${nombre}" actualizado`);
             } else {
                 clienteData.id = safeMaxId(db.clientes);
                 clienteData.totalCompras = 0;
                 db.clientes.push(clienteData);
+                logAudit('Creó', 'Clientes', `Nuevo cliente "${nombre}" registrado`);
             }
             saveDB();
             closeModal('cliente-modal');
@@ -5907,7 +6230,9 @@
         }
 
         function eliminarCliente(id) {
+            const c = db.clientes.find(c => c.id === id);
             if (confirm('¿Eliminar este cliente?')) {
+                logAudit('Eliminó', 'Clientes', `Cliente "${c?.nombre}" eliminado`);
                 db.clientes = db.clientes.filter(c => c.id !== id);
                 saveDB();
                 renderClientes();
@@ -5966,9 +6291,11 @@
             if (id) {
                 const idx = db.productos.findIndex(p => p.id === parseInt(id));
                 db.productos[idx] = { ...db.productos[idx], ...productoData };
+                logAudit('Editó', 'Inventario', `Producto "${nombre}" actualizado`);
             } else {
                 productoData.id = safeMaxId(db.productos);
                 db.productos.push(productoData);
+                logAudit('Creó', 'Inventario', `Nuevo producto "${nombre}" agregado al inventario`);
             }
             saveDB();
             closeModal('producto-modal');
@@ -6137,6 +6464,7 @@
             });
             const cliente = db.clientes.find(c => c.id === clienteId);
             if (cliente) cliente.totalCompras += total;
+            logAudit('Creó', 'Ventas', `Venta #${venta.id} por ${formatCurrency(total)} a "${cliente?.nombre || 'Desconocido'}"`);
 
             saveDB();
             ventaCarrito = [];
@@ -6286,6 +6614,7 @@
             };
 
             db.facturas.push(factura);
+            logAudit('Emitió', 'Facturación', `Factura ${factura.numeroCompleto} por ${formatCurrency(factura.total)}`);
             saveDB();
             facturaItems = [];
             document.getElementById('factura-tipo').value = 'A';
@@ -6654,6 +6983,202 @@
                         </div>
                     </div>
 
+
+    <!-- ══ MODAL CENTRO DE SEGURIDAD ══ -->
+    <div id="security-modal-overlay" class="security-modal-overlay" onclick="if(event.target===this)cerrarModalSeguridad()">
+        <div class="security-modal">
+            <button onclick="cerrarModalSeguridad()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-secondary);font-size:20px;cursor:pointer;line-height:1;">&times;</button>
+            <div class="security-modal-header">
+                <div class="security-modal-icon"><i class="fas fa-shield-halved"></i></div>
+                <div>
+                    <h2 style="margin:0;font-size:20px;font-weight:700;">Centro de Transparencia y Seguridad</h2>
+                    <p style="margin:4px 0 0;font-size:13px;color:var(--text-secondary);">Cómo protegemos tu empresa y tus datos</p>
+                </div>
+            </div>
+
+            <div class="security-item">
+                <div class="security-item-icon green"><i class="fas fa-lock"></i></div>
+                <div>
+                    <h4>Cifrado en Tránsito — TLS 1.2+</h4>
+                    <p>Toda la comunicación entre tu navegador y nuestros servidores viaja cifrada con TLS 1.2 o superior (HTTPS). Los headers HSTS fuerzan conexiones seguras en cada visita, previniendo ataques de intermediario.</p>
+                </div>
+            </div>
+
+            <div class="security-item">
+                <div class="security-item-icon blue"><i class="fas fa-server"></i></div>
+                <div>
+                    <h4>Infraestructura de Grado Empresarial</h4>
+                    <p>Alojamos en <strong>Supabase (AWS us-east-1)</strong> con disponibilidad del 99.9%. El frontend se sirve desde <strong>Vercel Edge Network</strong> en más de 30 regiones del mundo, con CDN global y redundancia automática.</p>
+                </div>
+            </div>
+
+            <div class="security-item">
+                <div class="security-item-icon orange"><i class="fas fa-credit-card"></i></div>
+                <div>
+                    <h4>Pagos — Cumplimiento PCI DSS</h4>
+                    <p>No almacenamos datos de tarjetas de crédito. Todos los pagos son procesados por <strong>Mercado Pago</strong>, certificado PCI DSS nivel 1. Utilizamos Checkout Pro con tokenización para máxima seguridad en cada transacción.</p>
+                </div>
+            </div>
+
+            <div class="security-item">
+                <div class="security-item-icon purple"><i class="fas fa-database"></i></div>
+                <div>
+                    <h4>Aislamiento de Datos — Row Level Security</h4>
+                    <p>Cada empresa opera en un entorno aislado. Implementamos <strong>Políticas de Seguridad a Nivel de Fila (RLS)</strong> en Supabase, garantizando que ningún cliente pueda acceder a los datos de otro, por diseño.</p>
+                </div>
+            </div>
+
+            <div class="security-item" style="border-bottom:none">
+                <div class="security-item-icon green"><i class="fas fa-user-shield"></i></div>
+                <div>
+                    <h4>Autenticación y Control de Acceso</h4>
+                    <p>Autenticación segura vía Supabase Auth con soporte para <strong>autenticación de dos factores (2FA/TOTP)</strong>. Tokens JWT con expiración corta y políticas por roles para controlar qué puede hacer cada usuario.</p>
+                </div>
+            </div>
+
+            <div class="security-footer-badges">
+                <span class="sec-badge"><i class="fas fa-lock"></i> SSL 256-bit</span>
+                <span class="sec-badge"><i class="fas fa-shield-halved"></i> PCI DSS</span>
+                <span class="sec-badge"><i class="fas fa-cloud"></i> AWS Infrastructure</span>
+                <span class="sec-badge"><i class="fas fa-key"></i> 2FA / MFA</span>
+                <span class="sec-badge"><i class="fas fa-database"></i> RLS Enabled</span>
+                <span class="sec-badge"><i class="fas fa-globe"></i> Vercel Edge</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══ MODAL POLÍTICA DE PRIVACIDAD ══ -->
+    <div id="modal-privacidad-overlay" class="legal-modal-overlay" onclick="if(event.target===this)cerrarModalLegal('privacidad')">
+        <div class="legal-modal">
+            <div class="legal-modal-header">
+                <h2><i class="fas fa-user-shield" style="color:#6366f1;"></i> Política de Privacidad</h2>
+                <button onclick="cerrarModalLegal('privacidad')" style="background:none;border:none;color:var(--text-secondary);font-size:22px;cursor:pointer;line-height:1;">&times;</button>
+            </div>
+            <div class="legal-modal-body">
+                <h3>1. Marco Legal</h3>
+                <p>SistemaVOS opera en estricto cumplimiento de la <strong>Ley N° 25.326 de Protección de los Datos Personales</strong> de la República Argentina y sus normas reglamentarias. La autoridad de aplicación es la <strong>Agencia de Acceso a la Información Pública (AAIP)</strong>, Sarmiento 1118, Piso 5°, Ciudad Autónoma de Buenos Aires.</p>
+
+                <h3>2. Datos que Recolectamos</h3>
+                <p>En el marco de la prestación del servicio ERP/CRM y los módulos de facturación, recolectamos:</p>
+                <ul>
+                    <li><strong>Datos de la empresa:</strong> Razón social, CUIT, domicilio fiscal y datos de contacto.</li>
+                    <li><strong>Datos operativos:</strong> Clientes, proveedores, productos, ventas, empleados y demás registros ingresados voluntariamente por el usuario.</li>
+                    <li><strong>Datos de autenticación:</strong> Dirección de correo electrónico y contraseña cifrada.</li>
+                    <li><strong>Datos de facturación:</strong> Información necesaria para la emisión de comprobantes fiscales conforme a las normativas AFIP vigentes.</li>
+                    <li><strong>Datos técnicos:</strong> Dirección IP, tipo de navegador y métricas de uso anónimas para mejora del servicio.</li>
+                </ul>
+
+                <h3>3. Finalidad del Tratamiento</h3>
+                <p>Los datos son tratados exclusivamente para:</p>
+                <ul>
+                    <li>Proveer las funcionalidades del software ERP/CRM contratado.</li>
+                    <li>Gestionar la relación contractual y administrativa con el cliente.</li>
+                    <li>Cumplir con obligaciones legales y fiscales aplicables.</li>
+                    <li>Mejorar la plataforma mediante análisis agregados y anónimos.</li>
+                </ul>
+
+                <h3>4. Infraestructura y Subprocesadores</h3>
+                <p>Para la prestación del servicio utilizamos proveedores de infraestructura que cumplen con estándares internacionales de seguridad:</p>
+                <ul>
+                    <li><strong>Supabase Inc. (AWS us-east-1):</strong> Almacenamiento y autenticación. Cumple SOC 2 Tipo II.</li>
+                    <li><strong>Vercel Inc.:</strong> Hosting y distribución de la aplicación. Cumple SOC 2 Tipo II.</li>
+                    <li><strong>Mercado Pago S.A.:</strong> Procesamiento de pagos. Certificación PCI DSS Nivel 1.</li>
+                    <li><strong>Make (Celonis SE):</strong> Automatizaciones opcionales. Cumple GDPR y SOC 2.</li>
+                </ul>
+                <p>Ninguno de estos proveedores tiene autorización para utilizar los datos de nuestros clientes con fines distintos a los estrictamente necesarios para la prestación del servicio.</p>
+
+                <h3>5. Derechos ARCO</h3>
+                <p>Conforme al <strong>Artículo 14 de la Ley 25.326</strong>, el titular de los datos tiene derecho a:</p>
+                <ul>
+                    <li><strong>Acceso:</strong> Solicitar información sobre sus datos personales almacenados.</li>
+                    <li><strong>Rectificación:</strong> Corregir datos inexactos o incompletos.</li>
+                    <li><strong>Cancelación (Supresión):</strong> Solicitar la eliminación de sus datos cuando ya no sean necesarios.</li>
+                    <li><strong>Oposición:</strong> Oponerse al tratamiento de sus datos en determinadas circunstancias.</li>
+                </ul>
+                <p>Para ejercer estos derechos, contáctenos en <strong>contacto@multigestiones.com</strong>. Responderemos dentro de los plazos establecidos por la Ley 25.326.</p>
+
+                <h3>6. Seguridad de los Datos</h3>
+                <p>Implementamos medidas técnicas y organizativas para proteger los datos: cifrado TLS 1.2+ en tránsito, cifrado en reposo, autenticación de dos factores (2FA), Políticas de Seguridad a Nivel de Fila (RLS) y auditorías periódicas de seguridad.</p>
+
+                <h3>7. Retención de Datos</h3>
+                <p>Los datos se conservan mientras dure la relación contractual y por el período adicional requerido por las obligaciones legales aplicables (impositivas, contables, etc.). Ante solicitud de baja, se procederá a la supresión dentro de los 30 días hábiles.</p>
+
+                <h3>8. Modificaciones</h3>
+                <p>Esta política puede actualizarse para reflejar cambios normativos o en el servicio. Las modificaciones sustanciales serán notificadas con al menos 15 días de anticipación.</p>
+
+                <p style="margin-top:16px;font-size:11px;color:var(--text-secondary);">Última actualización: Abril 2026. La <strong>AAIP</strong> es la autoridad de control competente para recibir denuncias y consultas: <a href="https://www.argentina.gob.ar/aaip" target="_blank" style="color:var(--primary)">www.argentina.gob.ar/aaip</a></p>
+            </div>
+            <div class="legal-modal-footer">
+                <span>SistemaVOS — Ley 25.326 (Argentina)</span>
+                <button onclick="cerrarModalLegal('privacidad')" style="padding:7px 18px;background:var(--primary,#6366f1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ MODAL TÉRMINOS Y CONDICIONES ══ -->
+    <div id="modal-terminos-overlay" class="legal-modal-overlay" onclick="if(event.target===this)cerrarModalLegal('terminos')">
+        <div class="legal-modal">
+            <div class="legal-modal-header">
+                <h2><i class="fas fa-file-contract" style="color:#6366f1;"></i> Términos y Condiciones de Uso</h2>
+                <button onclick="cerrarModalLegal('terminos')" style="background:none;border:none;color:var(--text-secondary);font-size:22px;cursor:pointer;line-height:1;">&times;</button>
+            </div>
+            <div class="legal-modal-body">
+                <h3>1. Objeto y Naturaleza del Servicio</h3>
+                <p>SistemaVOS provee una plataforma de software ERP/CRM en modalidad SaaS (Software as a Service). La licencia de uso se otorga <strong>"AS IS"</strong> (tal como está), sin garantías de idoneidad para ningún propósito particular más allá de las funcionalidades descritas en el plan contratado.</p>
+
+                <h3>2. Aceptación de los Términos</h3>
+                <p>El acceso y uso de la plataforma implica la aceptación plena e incondicional de los presentes Términos y Condiciones. Si el usuario no está de acuerdo con alguna disposición, deberá abstenerse de utilizar el servicio.</p>
+
+                <h3>3. Suscripción y Pagos</h3>
+                <ul>
+                    <li>Los planes de suscripción y sus precios se detallan en la sección de configuración de la plataforma y están sujetos a modificaciones con previo aviso de 30 días.</li>
+                    <li>Los pagos se procesan exclusivamente a través de <strong>Mercado Pago</strong>. SistemaVOS no almacena ni procesa directamente datos de tarjetas de crédito o débito.</li>
+                    <li>Las suscripciones son de carácter mensual/anual y se renuevan automáticamente salvo notificación de cancelación.</li>
+                    <li>No se realizan reembolsos por períodos parciales, salvo en los casos expresamente previstos por la legislación argentina del consumidor.</li>
+                </ul>
+
+                <h3>4. Responsabilidad del Usuario</h3>
+                <p>El usuario (la empresa o profesional suscripto) es el <strong>único responsable legal</strong> por:</p>
+                <ul>
+                    <li>La veracidad, exactitud y legalidad de los datos ingresados en el CRM (clientes, productos, precios, etc.).</li>
+                    <li>Las facturas y comprobantes fiscales emitidos a través de la integración con AFIP, incluyendo el cumplimiento de las normativas impositivas vigentes.</li>
+                    <li>El uso adecuado de las credenciales de acceso y la confidencialidad de las contraseñas.</li>
+                    <li>Cualquier consecuencia derivada del uso incorrecto o ilegal de la plataforma.</li>
+                </ul>
+
+                <h3>5. Limitación de Responsabilidad</h3>
+                <p>SistemaVOS <strong>no será responsable</strong> por daños directos, indirectos, incidentales o consecuentes derivados de:</p>
+                <ul>
+                    <li>Interrupciones o fallas en los servicios de terceros proveedores (Supabase, Vercel, AWS, Cloudflare).</li>
+                    <li>Caídas, mantenimientos o cambios en los WebServices de la <strong>AFIP</strong> o el <strong>BCRA</strong>.</li>
+                    <li>Pérdida de datos por causas de fuerza mayor o ataques de terceros fuera de nuestro control razonable.</li>
+                    <li>Cambios normativos que requieran adaptaciones en la plataforma.</li>
+                    <li>Decisiones de negocio tomadas en base a la información procesada por la plataforma.</li>
+                </ul>
+                <p>La responsabilidad máxima de SistemaVOS, en todos los casos, se limita al importe abonado por el usuario en los últimos 3 meses de suscripción.</p>
+
+                <h3>6. Disponibilidad del Servicio</h3>
+                <p>SistemaVOS se compromete a mantener una disponibilidad objetivo del <strong>99% mensual</strong>. Se excluyen de este cómputo los mantenimientos programados (notificados con 48hs de anticipación) y los eventos fuera de nuestro control.</p>
+
+                <h3>7. Propiedad Intelectual</h3>
+                <p>Todos los derechos sobre el software, diseño, marca y contenidos de SistemaVOS son propiedad exclusiva de sus desarrolladores. La licencia de uso es personal, intransferible y no exclusiva. Queda prohibida la reproducción, distribución o ingeniería inversa del software.</p>
+
+                <h3>8. Rescisión</h3>
+                <p>Cualquiera de las partes puede dar por terminada la relación contractual con un preaviso de 30 días. Ante incumplimiento grave del usuario, SistemaVOS puede suspender el acceso de forma inmediata. Tras la baja, los datos estarán disponibles para exportación por 30 días.</p>
+
+                <h3>9. Jurisdicción y Ley Aplicable</h3>
+                <p>Los presentes Términos se rigen por las leyes de la <strong>República Argentina</strong>. Para cualquier controversia, las partes se someten a la jurisdicción de los tribunales ordinarios de la <strong>Ciudad Autónoma de Buenos Aires</strong>, con renuncia a cualquier otro fuero.</p>
+
+                <p style="margin-top:16px;font-size:11px;color:var(--text-secondary);">Última actualización: Abril 2026.</p>
+            </div>
+            <div class="legal-modal-footer">
+                <span>SistemaVOS — República Argentina</span>
+                <button onclick="cerrarModalLegal('terminos')" style="padding:7px 18px;background:var(--primary,#6366f1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
 </body></html>`);
             win.document.close();
         }
@@ -6713,6 +7238,7 @@
             };
 
             db.arqueo.push(arqueo);
+            logAudit('Registró', 'Arqueo de Caja', `${tipo === 'ingreso' ? 'Ingreso' : 'Egreso'} de ${formatCurrency(monto)}: "${descripcion}"`);
             saveDB();
             closeModal('arqueo-modal');
             renderArqueo();
@@ -6798,9 +7324,11 @@
             if (id) {
                 const idx = db.gastos.findIndex(g => g.id === parseInt(id));
                 db.gastos[idx] = { ...db.gastos[idx], ...gastoData };
+                logAudit('Editó', 'Gastos', `Gasto "${descripcion}" de ${formatCurrency(monto)} editado`);
             } else {
                 gastoData.id = safeMaxId(db.gastos);
                 db.gastos.push(gastoData);
+                logAudit('Registró', 'Gastos', `Nuevo gasto "${descripcion}" de ${formatCurrency(monto)}`);
             }
             saveDB();
             closeModal('gasto-modal');
@@ -6850,7 +7378,9 @@
         }
 
         function eliminarGasto(id) {
+            const g = db.gastos.find(g => g.id === id);
             if (confirm('¿Eliminar este gasto?')) {
+                logAudit('Eliminó', 'Gastos', `Gasto "${g?.descripcion}" de ${formatCurrency(g?.monto || 0)} eliminado`);
                 db.gastos = db.gastos.filter(g => g.id !== id);
                 saveDB();
                 renderGastos();
@@ -6903,9 +7433,11 @@
             if (id) {
                 const idx = db.empleados.findIndex(e => e.id === parseInt(id));
                 db.empleados[idx] = { ...db.empleados[idx], ...empleadoData };
+                logAudit('Editó', 'Empleados', `Empleado "${nombre}" actualizado`);
             } else {
                 empleadoData.id = safeMaxId(db.empleados);
                 db.empleados.push(empleadoData);
+                logAudit('Creó', 'Empleados', `Nuevo empleado "${nombre}" (${puesto}) registrado`);
             }
             saveDB();
             closeModal('empleado-modal');
@@ -6942,7 +7474,9 @@
         }
 
         function eliminarEmpleado(id) {
+            const e = db.empleados.find(e => e.id === id);
             if (confirm('¿Eliminar este empleado?')) {
+                logAudit('Eliminó', 'Empleados', `Empleado "${e?.nombre}" eliminado`);
                 db.empleados = db.empleados.filter(e => e.id !== id);
                 saveDB();
                 renderEmpleados();
@@ -7157,24 +7691,52 @@
 
         // USUARIOS
         function openUsuarioModal(id = null) {
+            // Renderizar checkboxes de permisos
+            const permContainer = document.getElementById('permisos-checkboxes');
+            if (permContainer) {
+                permContainer.innerHTML = ALL_ASSIGNABLE_MODULES.map(m =>
+                    `<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+                        <input type="checkbox" class="perm-cb" value="${m.id}" style="width:15px;height:15px;">
+                        ${m.label}
+                    </label>`
+                ).join('');
+            }
             if (id) {
                 const usuario = db.usuarios.find(u => u.id === id);
+                document.getElementById('usuario-modal-title').textContent = 'Editar Usuario';
                 document.getElementById('modal-usuario-nombre').value = usuario.nombre;
                 document.getElementById('modal-usuario-email').value = usuario.email;
-                document.getElementById('modal-usuario-rol').value = usuario.rol;
+                document.getElementById('modal-usuario-rol').value = usuario.rol || 'vendedor';
                 document.getElementById('modal-usuario-estado').value = usuario.estado;
                 document.getElementById('usuario-modal').dataset.id = id;
+                // Cargar permisos guardados
+                const permisos = Array.isArray(usuario.permisos) ? usuario.permisos : [];
+                document.querySelectorAll('.perm-cb').forEach(cb => {
+                    cb.checked = permisos.includes(cb.value);
+                });
             } else {
+                document.getElementById('usuario-modal-title').textContent = 'Nuevo Usuario';
                 document.getElementById('modal-usuario-nombre').value = '';
                 document.getElementById('modal-usuario-email').value = '';
-                document.getElementById('modal-usuario-rol').value = 'vendedor';
+                document.getElementById('modal-usuario-rol').value = 'subcuenta';
                 document.getElementById('modal-usuario-estado').value = 'activo';
                 delete document.getElementById('usuario-modal').dataset.id;
+                // Por defecto solo dashboard
+                document.querySelectorAll('.perm-cb').forEach(cb => {
+                    cb.checked = cb.value === 'dashboard';
+                });
             }
+            togglePermisosSección();
             openModal('usuario-modal');
             const usuarioId = id || 0;
             document.getElementById('modal-usuario-docs-zone').innerHTML = getDocUploadHTML('usuarios', usuarioId);
             setTimeout(() => renderDocList('usuarios', usuarioId), 100);
+        }
+
+        function togglePermisosSección() {
+            const rol = document.getElementById('modal-usuario-rol')?.value;
+            const sec = document.getElementById('seccion-permisos');
+            if (sec) sec.style.display = (rol === 'subcuenta') ? '' : 'none';
         }
 
         function guardarUsuario() {
@@ -7188,15 +7750,22 @@
                 return;
             }
 
+            // Recopilar permisos (solo si es subcuenta)
+            const permisos = rol === 'subcuenta'
+                ? [...document.querySelectorAll('.perm-cb:checked')].map(cb => cb.value)
+                : [];
+
             const id = document.getElementById('usuario-modal').dataset.id;
-            const usuarioData = { nombre, email, rol, estado };
+            const usuarioData = { nombre, email, rol, estado, permisos };
 
             if (id) {
                 const idx = db.usuarios.findIndex(u => u.id === parseInt(id));
                 db.usuarios[idx] = { ...db.usuarios[idx], ...usuarioData };
+                logAudit('Editó', 'Usuarios', `Usuario "${nombre}" (${rol}) modificado`);
             } else {
                 usuarioData.id = safeMaxId(db.usuarios);
                 db.usuarios.push(usuarioData);
+                logAudit('Creó', 'Usuarios', `Nuevo usuario "${nombre}" con rol ${rol}`);
             }
             saveDB();
             closeModal('usuario-modal');
@@ -7204,27 +7773,41 @@
         }
 
         function renderUsuarios() {
+            const isSuperAdmin = currentUser?.role === 'superadmin' || currentUser?.role === 'admin' || currentUser?.role === 'master';
             let html = '';
             db.usuarios.forEach(u => {
+                const rolBadge = u.rol === 'superadmin'
+                    ? '<span class="badge badge-success">⭐ SuperAdmin</span>'
+                    : u.rol === 'subcuenta'
+                        ? '<span class="badge badge-info">👤 SubCuenta</span>'
+                        : `<span class="badge badge-info">${u.rol}</span>`;
+                const permsCount = Array.isArray(u.permisos) ? u.permisos.length : '-';
+                const permsInfo = u.rol === 'subcuenta'
+                    ? `<span style="font-size:11px;color:var(--text-secondary)">${permsCount} módulos</span>`
+                    : `<span style="font-size:11px;color:var(--text-secondary)">Acceso total</span>`;
+                const puedeEditar = isSuperAdmin || u.id === 1;
                 html += `<tr>
-                    <td>${u.nombre}</td>
-                    <td>${u.email}</td>
-                    <td><span class="badge badge-info">${u.rol}</span></td>
+                    <td>${escapeHTML(u.nombre)}</td>
+                    <td>${escapeHTML(u.email)}</td>
+                    <td>${rolBadge}</td>
+                    <td>${permsInfo}</td>
                     <td><span class="badge badge-success">${u.estado}</span></td>
                     <td>
-                        <button class="btn-sm" onclick="openUsuarioModal(${u.id})">Editar</button>
-                        ${u.id !== 1 ? `<button class="btn-sm btn-danger" onclick="eliminarUsuario(${u.id})">Eliminar</button>` : ''}
+                        ${puedeEditar ? `<button class="btn-sm" onclick="openUsuarioModal(${u.id})">Editar</button>` : ''}
+                        ${(isSuperAdmin && u.id !== 1) ? `<button class="btn-sm btn-danger" onclick="eliminarUsuario(${u.id})">Eliminar</button>` : ''}
                     </td>
                 </tr>`;
             });
             const tbody = document.querySelector('#usuarios-table tbody');
             if (tbody) {
-                tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center;">Sin usuarios</td></tr>';
+                tbody.innerHTML = html || '<tr><td colspan="6" style="text-align: center;">Sin usuarios</td></tr>';
             }
         }
 
         function eliminarUsuario(id) {
+            const u = db.usuarios.find(u => u.id === id);
             if (confirm('¿Eliminar este usuario?')) {
+                logAudit('Eliminó', 'Usuarios', `Usuario "${u?.nombre}" eliminado`);
                 db.usuarios = db.usuarios.filter(u => u.id !== id);
                 saveDB();
                 renderUsuarios();
@@ -7584,6 +8167,79 @@
                 saveDB();
                 renderRemitos();
             }
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // AUDIT LOG UI FUNCTIONS
+        // ═══════════════════════════════════════════════
+        function renderAuditLogs() {
+            const logs = Array.isArray(db.audit_logs) ? db.audit_logs : [];
+            const filterUsuario = (document.getElementById('audit-filter-usuario')?.value || '').toLowerCase();
+            const filterModulo = document.getElementById('audit-filter-modulo')?.value || '';
+            const filterFecha = document.getElementById('audit-filter-fecha')?.value || '';
+
+            const filtered = logs.filter(log => {
+                const matchUsuario = !filterUsuario || (log.usuario || '').toLowerCase().includes(filterUsuario);
+                const matchModulo = !filterModulo || log.modulo === filterModulo;
+                const matchFecha = !filterFecha || (log.timestamp || '').startsWith(filterFecha);
+                return matchUsuario && matchModulo && matchFecha;
+            });
+
+            const ACCION_COLORS = {
+                'Creó': '#16a34a', 'Emitió': '#2563eb', 'Editó': '#d97706',
+                'Eliminó': '#dc2626', 'Registró': '#7c3aed'
+            };
+
+            let html = '';
+            filtered.slice(0, 200).forEach(log => {
+                const ts = log.timestamp ? new Date(log.timestamp) : null;
+                const fecha = ts ? ts.toLocaleDateString('es-AR') : '';
+                const hora  = ts ? ts.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '';
+                const color = ACCION_COLORS[log.accion] || '#6b7280';
+                html += `<tr>
+                    <td style="white-space:nowrap;font-size:12px">${fecha}<br><span style="color:var(--text-secondary)">${hora}</span></td>
+                    <td style="font-size:13px">${escapeHTML(log.usuario || '')}</td>
+                    <td><span style="background:${color}20;color:${color};padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600">${escapeHTML(log.accion || '')}</span></td>
+                    <td style="font-size:13px">${escapeHTML(log.modulo || '')}</td>
+                    <td style="font-size:12px;color:var(--text-secondary)">${escapeHTML(log.detalle || '')}</td>
+                </tr>`;
+            });
+            const tbody = document.getElementById('audit-tbody');
+            if (tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--text-secondary)">Sin registros para los filtros aplicados</td></tr>';
+            const countEl = document.getElementById('audit-count');
+            if (countEl) countEl.textContent = `Mostrando ${Math.min(filtered.length, 200)} de ${filtered.length} registros`;
+        }
+
+        function limpiarFiltrosAudit() {
+            ['audit-filter-usuario', 'audit-filter-modulo', 'audit-filter-fecha'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            renderAuditLogs();
+        }
+
+        function exportarAuditCSV() {
+            const logs = Array.isArray(db.audit_logs) ? db.audit_logs : [];
+            if (logs.length === 0) { alert('No hay registros para exportar'); return; }
+            const headers = ['Fecha', 'Hora', 'Usuario', 'Acción', 'Módulo', 'Detalle'];
+            const rows = logs.map(log => {
+                const ts = log.timestamp ? new Date(log.timestamp) : null;
+                return [
+                    ts ? ts.toLocaleDateString('es-AR') : '',
+                    ts ? ts.toLocaleTimeString('es-AR') : '',
+                    log.usuario || '',
+                    log.accion || '',
+                    log.modulo || '',
+                    (log.detalle || '').replace(/,/g, ';')
+                ].map(v => `"${v}"`).join(',');
+            });
+            const csv = [headers.join(','), ...rows].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url;
+            a.download = `audit_log_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click(); URL.revokeObjectURL(url);
         }
 
         // ─── HOOKS showPage para nuevos módulos ───────────────────────────────────
@@ -8000,6 +8656,7 @@
             };
 
             db.citas.push(cita);
+            logAudit('Creó', 'Citas', `Nueva cita agendada`);
             saveDB();
 
             // Send WhatsApp notification if enabled
@@ -8657,14 +9314,31 @@
             db.citas.push(nuevoTurno);
             saveDB();
 
-            // ── Webhook Make.com → Google Calendar ──
-            const webhookUrl = (db.config && db.config.webhookGCal) ? db.config.webhookGCal.trim() : '';
-            if (webhookUrl) {
-                statusEl.style.color = '#0369a1';
-                statusEl.textContent = '⏳ Sincronizando con Google Calendar...';
-                try {
+            // ── Google Calendar: integración directa (prioridad) o Make.com (fallback) ──
+            try {
+                const gcalConectado = db.config.gcal && db.config.gcal.connected && db.config.gcal.clientId;
+                const webhookUrl = (db.config && db.config.webhookGCal) ? db.config.webhookGCal.trim() : '';
+
+                if (gcalConectado) {
+                    // Opción A: Google Calendar API directa
+                    statusEl.style.color = '#0369a1';
+                    statusEl.textContent = '⏳ Creando evento en Google Calendar...';
+                    await crearEventoGCalDirecto({
+                        fechaInicio, fechaFin,
+                        titulo: `Turno: ${servicio} - ${escapeHTML(cliente.nombre || 'Sin cliente')}`,
+                        emailCliente:     nuevoTurno.email_cliente,
+                        emailResponsable: nuevoTurno.email_responsable,
+                        notas: notasVal,
+                        turnoId: nuevoTurno.id
+                    });
+                    statusEl.style.color = '#16a34a';
+                    statusEl.textContent = '✅ Turno guardado y sincronizado con Google Calendar';
+                } else if (webhookUrl) {
+                    // Fallback: Make.com webhook
+                    statusEl.style.color = '#0369a1';
+                    statusEl.textContent = '⏳ Sincronizando con Google Calendar...';
                     const payload = {
-                        fecha_inicio:      fechaInicio,          // ISO datetime local
+                        fecha_inicio:      fechaInicio,
                         fecha_fin:         fechaFin,
                         titulo_evento:     `Turno: ${servicio} - ${cliente.nombre || 'Sin cliente'}`,
                         email_cliente:     nuevoTurno.email_cliente,
@@ -8677,21 +9351,19 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    if (res.ok) {
-                        nuevoTurno.sincGCal = true;
-                        saveDB();
-                        statusEl.style.color = '#15803d';
-                        statusEl.textContent = '✅ Turno guardado y sincronizado con Google Calendar.';
-                    } else {
-                        statusEl.style.color = '#d97706';
-                        statusEl.textContent = '⚠️ Turno guardado. Error en sync GCal (verifica el webhook).';
-                    }
-                } catch(e) {
-                    console.warn('Error webhook GCal:', e);
-                    statusEl.style.color = '#d97706';
-                    statusEl.textContent = '⚠️ Turno guardado. Sin conexión al webhook GCal.';
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    statusEl.style.color = '#16a34a';
+                    statusEl.textContent = '✅ Turno guardado y sincronizado';
+                } else {
+                    statusEl.style.color = '#16a34a';
+                    statusEl.textContent = '✅ Turno guardado';
                 }
-            } else {
+            } catch(syncErr) {
+                console.warn('Error sincronizando GCal:', syncErr);
+                statusEl.style.color = '#d97706';
+                statusEl.textContent = '⚠️ Turno guardado, error al sincronizar Google Calendar';
+            }
+ else {
                 statusEl.style.color = '#15803d';
                 statusEl.textContent = '✅ Turno guardado. (Webhook GCal no configurado)';
             }
@@ -8899,6 +9571,14 @@
         function cargarConfiguracion() {
             cargarGestorMenu();
             cargarSecuridad();
+            // Mostrar pestaña de Audit solo a SuperAdmin/admin
+            const tabAudit = document.getElementById('tab-btn-audit');
+            if (tabAudit) {
+                const isSA = currentUser?.role === 'master' || currentUser?.role === 'admin' || currentUser?.role === 'superadmin';
+                const dbUser = db.usuarios.find(u => u.email === currentUser?.email);
+                const isDbSA = dbUser && (dbUser.rol === 'superadmin' || dbUser.rol === 'admin');
+                tabAudit.style.display = (isSA || isDbSA) ? '' : 'none';
+            }
             if (db.account) {
                 document.getElementById('config-business-name').value = db.account.businessName || '';
                 document.getElementById('config-owner-name').value = db.account.ownerName || '';
@@ -11340,6 +12020,459 @@ Estado: ${p.estado}`);
         };
         // ═══════════════════════════════════════════════════════════
 
+        
+        // ═══════════════════════════════════════════════════════════
+        // GOOGLE CALENDAR — OAuth directo (GIS Token Client)
+        // ═══════════════════════════════════════════════════════════
+
+        let _gcalTokenClient = null;
+        let _gcalTokenResolve = null;
+
+        function _initGCalTokenClient() {
+            if (!db.config.gcal.clientId) {
+                mostrarToast('Ingresá el Client ID de Google en Config → Integraciones', 'error');
+                return null;
+            }
+            if (!window.google?.accounts?.oauth2) {
+                mostrarToast('Cargando librería Google...', 'info');
+                return null;
+            }
+            _gcalTokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: db.config.gcal.clientId,
+                scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/userinfo.email',
+                callback: async (tokenResponse) => {
+                    if (tokenResponse.error) {
+                        mostrarToast('Error al conectar Google Calendar: ' + tokenResponse.error, 'error');
+                        if (_gcalTokenResolve) { _gcalTokenResolve(null); _gcalTokenResolve = null; }
+                        return;
+                    }
+                    db.config.gcal.accessToken = tokenResponse.access_token;
+                    db.config.gcal.tokenExpiry  = Date.now() + (tokenResponse.expires_in * 1000);
+                    db.config.gcal.connected    = true;
+
+                    // Obtener email del usuario
+                    try {
+                        const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                            headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+                        });
+                        const info = await r.json();
+                        db.config.gcal.email = info.email || '';
+                    } catch(e) { db.config.gcal.email = ''; }
+
+                    saveDB();
+                    actualizarUIGCal();
+                    mostrarToast('✅ Google Calendar conectado como ' + (db.config.gcal.email || 'usuario'), 'success');
+                    if (_gcalTokenResolve) { _gcalTokenResolve(tokenResponse.access_token); _gcalTokenResolve = null; }
+                }
+            });
+            return _gcalTokenClient;
+        }
+
+        function iniciarGCalOAuth() {
+            if (!db.config.gcal.clientId) {
+                mostrarToast('Primero ingresá el Client ID de Google en el campo de arriba', 'error');
+                return;
+            }
+            const client = _initGCalTokenClient();
+            if (client) client.requestAccessToken({ prompt: 'consent' });
+        }
+
+        function desconectarGCal() {
+            if (db.config.gcal.accessToken) {
+                google?.accounts?.oauth2?.revoke(db.config.gcal.accessToken, () => {});
+            }
+            db.config.gcal = { ...db.config.gcal, accessToken: null, tokenExpiry: null, email: null, connected: false };
+            saveDB();
+            actualizarUIGCal();
+            mostrarToast('Google Calendar desconectado', 'info');
+        }
+
+        async function getGCalAccessToken() {
+            // Si el token es válido (con 2 min de margen), devolverlo
+            if (db.config.gcal.accessToken && db.config.gcal.tokenExpiry > Date.now() + 120000) {
+                return db.config.gcal.accessToken;
+            }
+            // Si expiró, solicitar nuevo token silenciosamente
+            return new Promise((resolve) => {
+                _gcalTokenResolve = resolve;
+                const client = _initGCalTokenClient();
+                if (client) {
+                    client.requestAccessToken({ prompt: '' }); // sin prompt = silencioso si ya autorizó
+                } else {
+                    resolve(null);
+                }
+            });
+        }
+
+        async function crearEventoGCalDirecto({ fechaInicio, fechaFin, titulo, emailCliente, emailResponsable, notas, turnoId }) {
+            const token = await getGCalAccessToken();
+            if (!token) throw new Error('No hay token de Google Calendar');
+
+            const attendees = [];
+            if (emailCliente)     attendees.push({ email: emailCliente });
+            if (emailResponsable) attendees.push({ email: emailResponsable });
+
+            const evento = {
+                summary:     titulo,
+                description: (notas || '') + (notas ? '\n\n' : '') + 'ID Turno: ' + turnoId,
+                start: { dateTime: fechaInicio, timeZone: 'America/Argentina/Buenos_Aires' },
+                end:   { dateTime: fechaFin,    timeZone: 'America/Argentina/Buenos_Aires' },
+                attendees
+            };
+
+            const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+                method:  'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body:    JSON.stringify(evento)
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error?.message || 'Error Google Calendar API');
+            }
+            return res.json();
+        }
+
+        async function testGCalConexion() {
+            if (!db.config.gcal.connected) {
+                mostrarToast('Primero conectá Google Calendar', 'error');
+                return;
+            }
+            try {
+                mostrarToast('⏳ Probando conexión...', 'info');
+                const token = await getGCalAccessToken();
+                const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary', {
+                    headers: { Authorization: 'Bearer ' + token }
+                });
+                const cal = await res.json();
+                mostrarToast('✅ Conexión OK: ' + (cal.summary || cal.id), 'success');
+            } catch(e) {
+                mostrarToast('❌ Error: ' + e.message, 'error');
+            }
+        }
+
+        function actualizarUIGCal() {
+            const clientIdInput   = document.getElementById('gcal-client-id');
+            const statusBadge     = document.getElementById('gcal-status-badge');
+            const connectBtn      = document.getElementById('gcal-connect-btn');
+            const disconnectBtn   = document.getElementById('gcal-disconnect-btn');
+            if (!clientIdInput) return;
+
+            clientIdInput.value = db.config.gcal.clientId || '';
+
+            if (db.config.gcal.connected && db.config.gcal.email) {
+                statusBadge.style.display  = 'block';
+                statusBadge.style.background = 'rgba(22,163,74,0.1)';
+                statusBadge.style.color    = '#16a34a';
+                statusBadge.innerHTML      = '✅ Conectado como <strong>' + escapeHTML(db.config.gcal.email) + '</strong>';
+                connectBtn.style.display   = 'none';
+                disconnectBtn.style.display = '';
+            } else {
+                statusBadge.style.display  = 'none';
+                connectBtn.style.display   = '';
+                disconnectBtn.style.display = 'none';
+            }
+
+            // Webhook input
+            const webhookInput = document.getElementById('config-webhook-gcal');
+            if (webhookInput) webhookInput.value = db.config.webhookGCal || '';
+        }
+
+        // Llamar actualizarUIGCal cuando se muestra la tab integraciones
+        // (se hookea en showPage y en el tab switch de config)
+
+        
+        // ═══════════════════════════════════════════════════════════
+        // CENTRO DE SEGURIDAD — Modal
+        // ═══════════════════════════════════════════════════════════
+        function abrirModalSeguridad() {
+            document.getElementById('security-modal-overlay').classList.add('active');
+        }
+        function cerrarModalSeguridad() {
+            document.getElementById('security-modal-overlay').classList.remove('active');
+        }
+        // Cerrar con Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') cerrarModalSeguridad();
+        });
+
+        
+        // ═══════════════════════════════════════════════════════════
+        // MODALES LEGALES — Privacidad & Términos
+        // ═══════════════════════════════════════════════════════════
+        function abrirModalLegal(tipo) {
+            const id = tipo === 'privacidad' ? 'modal-privacidad-overlay' : 'modal-terminos-overlay';
+            document.getElementById(id).classList.add('active');
+        }
+        function cerrarModalLegal(tipo) {
+            const id = tipo === 'privacidad' ? 'modal-privacidad-overlay' : 'modal-terminos-overlay';
+            document.getElementById(id).classList.remove('active');
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarModalLegal('privacidad');
+                cerrarModalLegal('terminos');
+            }
+        });
+
+        
+        // ═══════════════════════════════════════════════════════════
+        // MIGRACIÓN DE DATOS — Importar / Exportar CSV
+        // ═══════════════════════════════════════════════════════════
+
+        let _csvParsedData = [];    // filas parseadas pendientes de importar
+        let _csvHeaders    = [];    // encabezados detectados
+
+        const CSV_COLUMN_INFO = {
+            clientes:    { hint: 'nombre, telefono, email, direccion, cuit, notas', required: ['nombre'] },
+            productos:   { hint: 'nombre, precio, costo, stock, categoria, codigo, descripcion', required: ['nombre'] },
+            proveedores: { hint: 'nombre, telefono, email, direccion, cuit, contacto, notas', required: ['nombre'] }
+        };
+
+        function _parseCSV(text) {
+            // Detectar separador (coma o punto y coma)
+            const sep = (text.split(';').length > text.split(',').length) ? ';' : ',';
+            const lines = text.trim().split(/
+?
+/).filter(l => l.trim());
+            if (lines.length < 2) return { headers: [], rows: [] };
+
+            const parseRow = line => {
+                const result = [];
+                let current = '', inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const ch = line[i];
+                    if (ch === '"') { inQuotes = !inQuotes; }
+                    else if (ch === sep && !inQuotes) { result.push(current.trim()); current = ''; }
+                    else { current += ch; }
+                }
+                result.push(current.trim());
+                return result;
+            };
+
+            const headers = parseRow(lines[0]).map(h => h.replace(/['"]/g, '').trim().toLowerCase()
+                .normalize('NFD').replace(/[̀-ͯ]/g, ''));
+            const rows = lines.slice(1).map(l => {
+                const cells = parseRow(l);
+                const obj = {};
+                headers.forEach((h, i) => { obj[h] = (cells[i] || '').replace(/['"]/g, '').trim(); });
+                return obj;
+            }).filter(r => Object.values(r).some(v => v));
+
+            return { headers, rows };
+        }
+
+        function previsualizarCSV(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const tipo = document.getElementById('csv-import-tipo').value;
+
+            // Actualizar hint de columnas
+            const info = CSV_COLUMN_INFO[tipo];
+            document.getElementById('csv-columnas-info').innerHTML =
+                '<strong>' + tipo.charAt(0).toUpperCase() + tipo.slice(1) + ' — columnas esperadas:</strong> ' + info.hint +
+                '<br><span style="font-size:11px;opacity:0.8;">La primera fila debe ser el encabezado. Separador: coma (,) o punto y coma (;).</span>';
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                const { headers, rows } = _parseCSV(e.target.result);
+                if (!headers.length) {
+                    mostrarToast('No se pudo leer el archivo. Verificá el formato.', 'error');
+                    return;
+                }
+                _csvHeaders = headers;
+                _csvParsedData = rows;
+
+                // Preview
+                const preview5 = rows.slice(0, 5);
+                const thead = document.getElementById('csv-preview-head');
+                const tbody = document.getElementById('csv-preview-body');
+                thead.innerHTML = '<tr>' + headers.map(h =>
+                    '<th style="padding:7px 10px;text-align:left;font-size:11px;white-space:nowrap;">' + escapeHTML(h) + '</th>'
+                ).join('') + '</tr>';
+                tbody.innerHTML = preview5.map(row =>
+                    '<tr style="border-top:1px solid var(--border);">' + headers.map(h =>
+                        '<td style="padding:6px 10px;font-size:11px;color:var(--text-secondary);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'
+                        + escapeHTML(row[h] || '') + '</td>'
+                    ).join('') + '</tr>'
+                ).join('');
+
+                document.getElementById('csv-preview-count').textContent = rows.length + ' registros encontrados';
+                document.getElementById('csv-preview-container').style.display = 'block';
+                document.getElementById('csv-import-actions').style.display = 'flex';
+                document.getElementById('csv-import-resultado').textContent = '';
+
+                // Validar columna requerida
+                const req = info.required[0];
+                const hasReq = headers.some(h => h.includes(req) || req.includes(h));
+                document.getElementById('csv-mapeo-info').textContent = hasReq
+                    ? '✅ Columna "' + req + '" detectada — listo para importar'
+                    : '⚠️ No se detectó columna "' + req + '" — verificá el encabezado';
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function cancelarImportCSV() {
+            _csvParsedData = [];
+            _csvHeaders = [];
+            document.getElementById('csv-preview-container').style.display = 'none';
+            document.getElementById('csv-import-actions').style.display = 'none';
+            document.getElementById('csv-file-input').value = '';
+            document.getElementById('csv-import-resultado').textContent = '';
+        }
+
+        function confirmarImportCSV() {
+            const tipo = document.getElementById('csv-import-tipo').value;
+            if (!_csvParsedData.length) { mostrarToast('No hay datos para importar', 'error'); return; }
+
+            let importados = 0, omitidos = 0;
+
+            if (tipo === 'clientes') {
+                _csvParsedData.forEach(row => {
+                    const nombre = row['nombre'] || row['name'] || row['razon social'] || row['razonsocial'] || '';
+                    if (!nombre) { omitidos++; return; }
+                    const newId = safeMaxId(db.clientes) + 1;
+                    db.clientes.push({
+                        id: newId,
+                        nombre: nombre,
+                        telefono: row['telefono'] || row['tel'] || row['phone'] || '',
+                        email: row['email'] || row['correo'] || '',
+                        direccion: row['direccion'] || row['domicilio'] || row['address'] || '',
+                        cuit: row['cuit'] || row['dni'] || '',
+                        notas: row['notas'] || row['observaciones'] || row['notes'] || '',
+                        fechaAlta: new Date().toISOString().slice(0, 10)
+                    });
+                    importados++;
+                });
+            } else if (tipo === 'productos') {
+                _csvParsedData.forEach(row => {
+                    const nombre = row['nombre'] || row['name'] || row['descripcion'] || row['producto'] || '';
+                    if (!nombre) { omitidos++; return; }
+                    const newId = safeMaxId(db.inventario) + 1;
+                    const precio = parseFloat(row['precio'] || row['price'] || row['pvp'] || 0) || 0;
+                    const costo  = parseFloat(row['costo'] || row['cost'] || 0) || 0;
+                    const stock  = parseInt(row['stock'] || row['cantidad'] || row['qty'] || 0) || 0;
+                    db.inventario.push({
+                        id: newId,
+                        nombre: nombre,
+                        precio: precio,
+                        costo: costo,
+                        stock: stock,
+                        stockMin: 0,
+                        categoria: row['categoria'] || row['category'] || row['rubro'] || 'General',
+                        codigo: row['codigo'] || row['sku'] || row['code'] || '',
+                        descripcion: row['descripcion'] || row['description'] || '',
+                        activo: true
+                    });
+                    importados++;
+                });
+            } else if (tipo === 'proveedores') {
+                _csvParsedData.forEach(row => {
+                    const nombre = row['nombre'] || row['name'] || row['razon social'] || row['razonsocial'] || '';
+                    if (!nombre) { omitidos++; return; }
+                    const newId = safeMaxId(db.proveedores) + 1;
+                    db.proveedores.push({
+                        id: newId,
+                        nombre: nombre,
+                        telefono: row['telefono'] || row['tel'] || '',
+                        email: row['email'] || row['correo'] || '',
+                        direccion: row['direccion'] || row['domicilio'] || '',
+                        cuit: row['cuit'] || '',
+                        contacto: row['contacto'] || row['responsable'] || '',
+                        notas: row['notas'] || row['observaciones'] || '',
+                        fechaAlta: new Date().toISOString().slice(0, 10)
+                    });
+                    importados++;
+                });
+            }
+
+            saveDB();
+            const resultEl = document.getElementById('csv-import-resultado');
+            resultEl.style.color = importados > 0 ? '#22c55e' : '#ef4444';
+            resultEl.textContent = importados > 0
+                ? '✅ ' + importados + ' registros importados correctamente' + (omitidos ? ' (' + omitidos + ' omitidos por falta de nombre)' : '')
+                : '❌ No se importó ningún registro — verificá el formato del archivo';
+
+            if (importados > 0) mostrarToast('✅ ' + importados + ' ' + tipo + ' importados', 'success');
+            cancelarImportCSV();
+        }
+
+        // ─── EXPORTAR CSV ───────────────────────────────────────────
+        function _arrayToCSV(headers, rows) {
+            const escape = v => {
+                const s = String(v === null || v === undefined ? '' : v).replace(/"/g, '""');
+                return (s.includes(',') || s.includes('"') || s.includes('\n')) ? '"' + s + '"' : s;
+            };
+            const lines = [headers.map(escape).join(',')];
+            rows.forEach(row => lines.push(headers.map(h => escape(row[h] ?? '')).join(',')));
+            return lines.join('\n');
+        }
+
+        function _downloadCSV(filename, csvContent) {
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportarCSV(tipo) {
+            const ts = new Date().toISOString().slice(0, 10);
+            if (tipo === 'clientes') {
+                const headers = ['id','nombre','telefono','email','direccion','cuit','notas','fechaAlta'];
+                _downloadCSV('clientes_' + ts + '.csv', _arrayToCSV(headers, db.clientes || []));
+                mostrarToast('Clientes exportados (' + (db.clientes||[]).length + ' registros)', 'success');
+            } else if (tipo === 'productos') {
+                const headers = ['id','nombre','precio','costo','stock','stockMin','categoria','codigo','descripcion'];
+                _downloadCSV('productos_' + ts + '.csv', _arrayToCSV(headers, db.inventario || []));
+                mostrarToast('Productos exportados (' + (db.inventario||[]).length + ' registros)', 'success');
+            } else if (tipo === 'ventas') {
+                const headers = ['id','fecha','clienteNombre','total','estado','items'];
+                const rows = (db.ventas || []).map(v => ({
+                    ...v,
+                    clienteNombre: (db.clientes||[]).find(c => c.id == v.clienteId)?.nombre || v.clienteId || '',
+                    items: (v.items||[]).map(i => i.nombre + ' x' + i.cantidad).join(' | ')
+                }));
+                _downloadCSV('ventas_' + ts + '.csv', _arrayToCSV(headers, rows));
+                mostrarToast('Ventas exportadas (' + rows.length + ' registros)', 'success');
+            } else if (tipo === 'proveedores') {
+                const headers = ['id','nombre','telefono','email','direccion','cuit','contacto','notas'];
+                _downloadCSV('proveedores_' + ts + '.csv', _arrayToCSV(headers, db.proveedores || []));
+                mostrarToast('Proveedores exportados (' + (db.proveedores||[]).length + ' registros)', 'success');
+            } else if (tipo === 'empleados') {
+                const headers = ['id','nombre','dni','cargo','email','telefono','salario','fechaIngreso'];
+                _downloadCSV('empleados_' + ts + '.csv', _arrayToCSV(headers, db.empleados || []));
+                mostrarToast('Empleados exportados (' + (db.empleados||[]).length + ' registros)', 'success');
+            } else if (tipo === 'all') {
+                // Exportar cada entidad por separado (ZIP simulado: múltiples descargas con delay)
+                const exports = [
+                    { name: 'clientes', headers: ['id','nombre','telefono','email','cuit'], data: db.clientes||[] },
+                    { name: 'productos', headers: ['id','nombre','precio','stock','categoria'], data: db.inventario||[] },
+                    { name: 'proveedores', headers: ['id','nombre','telefono','email','cuit'], data: db.proveedores||[] },
+                    { name: 'empleados', headers: ['id','nombre','cargo','salario'], data: db.empleados||[] },
+                ];
+                exports.forEach((exp, i) => {
+                    setTimeout(() => _downloadCSV(exp.name + '_' + ts + '.csv', _arrayToCSV(exp.headers, exp.data)), i * 300);
+                });
+                mostrarToast('Exportando todos los módulos...', 'info');
+            }
+        }
+
+        // Actualizar hint de columnas al cambiar el tipo de importación
+        document.addEventListener('change', e => {
+            if (e.target.id === 'csv-import-tipo') {
+                const tipo = e.target.value;
+                const info = CSV_COLUMN_INFO[tipo];
+                if (info) {
+                    document.getElementById('csv-columnas-info').innerHTML =
+                        '<strong>' + tipo.charAt(0).toUpperCase() + tipo.slice(1) + ' — columnas esperadas:</strong> ' + info.hint +
+                        '<br><span style="font-size:11px;opacity:0.8;">La primera fila debe ser el encabezado. Separador: coma (,) o punto y coma (;).</span>';
+                }
+                cancelarImportCSV();
+            }
+        });
+
         </script>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
@@ -11402,7 +12535,217 @@ Estado: ${p.estado}`);
 }
 #bug-toast.bug-toast-visible { opacity: 1; transform: translateY(0); }
 #bug-toast.bug-toast-error { background: #ef4444; }
-</style>
+
+        /* ══ TRUST BADGES & SECURITY MODAL ══ */
+        .trust-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.65);
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px;
+            padding: 4px 10px;
+            white-space: nowrap;
+        }
+        .trust-badge i { font-size: 11px; color: #4ade80; }
+        .trust-badge-dark {
+            color: var(--text-secondary);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+        }
+        .trust-badge-dark i { color: #22c55e; }
+
+        .security-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .security-modal-overlay.active { display: flex; }
+        .security-modal {
+            background: var(--card-bg, #1e293b);
+            border: 1px solid var(--border, #334155);
+            border-radius: 16px;
+            max-width: 580px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 32px;
+            position: relative;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+        }
+        .security-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .security-modal-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .security-item {
+            display: flex;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border, #334155);
+        }
+        .security-item:last-child { border-bottom: none; }
+        .security-item-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .security-item-icon.green  { background: rgba(34,197,94,0.12);  color: #22c55e; }
+        .security-item-icon.blue   { background: rgba(59,130,246,0.12); color: #3b82f6; }
+        .security-item-icon.purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+        .security-item-icon.orange { background: rgba(249,115,22,0.12); color: #f97316; }
+        .security-item h4 { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: var(--text, #f1f5f9); }
+        .security-item p  { margin: 0; font-size: 12px; color: var(--text-secondary, #94a3b8); line-height: 1.6; }
+        .security-footer-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border, #334155);
+        }
+        .sec-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #22c55e;
+            background: rgba(34,197,94,0.08);
+            border: 1px solid rgba(34,197,94,0.2);
+            border-radius: 6px;
+            padding: 4px 10px;
+        }
+
+        
+        /* ══ MODALES LEGALES ══ */
+        .legal-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .legal-modal-overlay.active { display: flex; }
+        .legal-modal {
+            background: var(--card-bg, #1e293b);
+            border: 1px solid var(--border, #334155);
+            border-radius: 16px;
+            max-width: 680px;
+            width: 100%;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+        .legal-modal-header {
+            padding: 20px 28px 16px;
+            border-bottom: 1px solid var(--border, #334155);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .legal-modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .legal-modal-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            flex: 1;
+            line-height: 1.7;
+            font-size: 13.5px;
+            color: var(--text, #f1f5f9);
+        }
+        .legal-modal-body h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary, #6366f1);
+            margin: 20px 0 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border, #334155);
+        }
+        .legal-modal-body h3:first-child { margin-top: 0; }
+        .legal-modal-body p { margin: 0 0 10px; color: var(--text-secondary, #94a3b8); }
+        .legal-modal-body ul { margin: 0 0 10px; padding-left: 20px; color: var(--text-secondary, #94a3b8); }
+        .legal-modal-body li { margin-bottom: 4px; }
+        .legal-modal-body strong { color: var(--text, #f1f5f9); }
+        .legal-modal-footer {
+            padding: 14px 28px;
+            border-top: 1px solid var(--border, #334155);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            font-size: 11px;
+            color: var(--text-secondary, #94a3b8);
+        }
+        .legal-footer-bar {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            padding: 10px 0 4px;
+            font-size: 11px;
+        }
+        .legal-footer-bar button {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.45);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 11px;
+            padding: 0;
+        }
+        .legal-footer-bar button:hover { color: rgba(255,255,255,0.75); }
+        .legal-footer-bar-dark button {
+            color: var(--text-secondary);
+        }
+        .legal-footer-bar-dark button:hover { color: var(--text); }
+
+        </style>
 
 <button id="bug-fab" onclick="abrirModalBug()" title="Reportar un bug">🐞</button>
 
