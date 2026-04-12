@@ -2,8 +2,35 @@
 <html lang="es-AR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SistemaVOS - CRM para Pymes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SistemaVOS — CRM & ERP para Pymes</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#6C3AE1">
+    <meta name="msapplication-TileColor" content="#6C3AE1">
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+
+    <!-- iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SistemaVOS">
+
+    <!-- Android / Chrome -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="SistemaVOS">
+
+    <!-- SEO / Open Graph -->
+    <meta name="description" content="CRM y ERP multi-rubro para gestión de clientes, ventas, inventario y facturación.">
+    <meta property="og:title" content="SistemaVOS — CRM & ERP">
+    <meta property="og:description" content="Gestioná tu negocio desde cualquier dispositivo.">
+    <meta property="og:image" content="/icons/icon-512x512.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -6941,6 +6968,64 @@
         .empty-state h3 { margin:0 0 8px; font-size:18px; font-weight:700; color:var(--text); }
         .empty-state p  { margin:0 0 22px; font-size:14px; color:var(--text-secondary); max-width:300px; line-height:1.5; }
         .empty-state .btn-primary { padding:10px 28px; font-size:14px; border-radius:8px; box-shadow:0 4px 14px rgba(108,58,225,0.22); }
+
+        /* PWA Install Banner */
+        #pwa-install-banner {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e1b4b;
+            color: #fff;
+            border-radius: 16px;
+            padding: 14px 20px;
+            box-shadow: 0 8px 32px rgba(108,58,225,0.45);
+            z-index: 9990;
+            width: min(380px, 92vw);
+            align-items: center;
+            gap: 14px;
+            border: 1px solid rgba(167,139,250,0.3);
+            animation: pwaSlideUp 0.4s ease;
+        }
+        #pwa-install-banner.show { display: flex; }
+        @keyframes pwaSlideUp {
+            from { opacity:0; transform: translateX(-50%) translateY(20px); }
+            to   { opacity:1; transform: translateX(-50%) translateY(0); }
+        }
+        #pwa-install-banner .pwa-icon { font-size: 32px; flex-shrink: 0; }
+        #pwa-install-banner .pwa-text { flex: 1; }
+        #pwa-install-banner .pwa-text strong { display: block; font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+        #pwa-install-banner .pwa-text span { font-size: 12px; color: #c4b5fd; }
+        #pwa-btn-install {
+            background: #6C3AE1; color: #fff; border: none;
+            border-radius: 8px; padding: 8px 16px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            white-space: nowrap; flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        #pwa-btn-install:hover { background: #7c3aed; }
+        #pwa-btn-dismiss {
+            background: transparent; color: #94a3b8;
+            border: none; font-size: 18px; cursor: pointer;
+            padding: 4px; flex-shrink: 0; line-height: 1;
+        }
+        /* Update toast */
+        #pwa-update-toast {
+            display: none; position: fixed; top: 16px; left: 50%;
+            transform: translateX(-50%);
+            background: #1e1b4b; color: #fff;
+            border-radius: 12px; padding: 12px 18px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 9995; align-items: center; gap: 10px;
+            font-size: 13px; border: 1px solid rgba(167,139,250,0.3);
+        }
+        #pwa-update-toast.show { display: flex; }
+        #pwa-update-toast button {
+            background: #6C3AE1; color: #fff; border: none;
+            border-radius: 6px; padding: 5px 12px;
+            font-size: 12px; cursor: pointer; font-weight: 600;
+        }
         </style></head><body>
             <div class="factura-wrap">
                 <div class="factura-header">
@@ -7279,6 +7364,23 @@
             </div>
         </div>
     </div>
+
+
+<!-- ═══════════ PWA INSTALL BANNER ═══════════ -->
+<div id="pwa-install-banner">
+    <div class="pwa-icon">📱</div>
+    <div class="pwa-text">
+        <strong>Instalar SistemaVOS</strong>
+        <span>Agregá el ícono a tu pantalla de inicio</span>
+    </div>
+    <button id="pwa-btn-install" onclick="pwaTriggerInstall()">Instalar</button>
+    <button id="pwa-btn-dismiss" onclick="pwaDismiss()" title="Cerrar">×</button>
+</div>
+
+<div id="pwa-update-toast">
+    <span>🔄 Hay una nueva versión disponible</span>
+    <button onclick="pwaUpdate()">Actualizar</button>
+</div>
 
 </body></html>`);
             win.document.close();
@@ -8352,6 +8454,85 @@
             var btn = document.querySelector('#facturacion .tab-button:last-child');
             if (btn) btn.click();
         }
+
+        // ══════════════════════════════════════════════════════
+        // PWA — Service Worker + Install Prompt
+        // ══════════════════════════════════════════════════════
+        let _pwaInstallEvent = null;
+        let _pwaRegistration  = null;
+
+        (function initPWA() {
+            // Registrar Service Worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(reg => {
+                            _pwaRegistration = reg;
+                            console.log('[PWA] Service Worker registrado:', reg.scope);
+
+                            // Detectar nueva versión disponible
+                            reg.addEventListener('updatefound', () => {
+                                const newWorker = reg.installing;
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        document.getElementById('pwa-update-toast')?.classList.add('show');
+                                    }
+                                });
+                            });
+                        })
+                        .catch(err => console.warn('[PWA] SW error:', err));
+                });
+            }
+
+            // Capturar el evento de instalación del navegador
+            window.addEventListener('beforeinstallprompt', e => {
+                e.preventDefault();
+                _pwaInstallEvent = e;
+
+                // No mostrar si ya fue dismisseado recientemente
+                const dismissed = localStorage.getItem('pwa_banner_dismissed');
+                if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) return;
+
+                // Mostrar banner después de 4 segundos (no intrusivo)
+                setTimeout(() => {
+                    const banner = document.getElementById('pwa-install-banner');
+                    if (banner) banner.classList.add('show');
+                }, 4000);
+            });
+
+            // Ya instalada como PWA
+            window.addEventListener('appinstalled', () => {
+                _pwaInstallEvent = null;
+                document.getElementById('pwa-install-banner')?.classList.remove('show');
+                console.log('[PWA] App instalada correctamente');
+            });
+        })();
+
+        function pwaTriggerInstall() {
+            if (!_pwaInstallEvent) return;
+            _pwaInstallEvent.prompt();
+            _pwaInstallEvent.userChoice.then(choice => {
+                if (choice.outcome === 'accepted') {
+                    console.log('[PWA] Usuario aceptó instalar');
+                }
+                _pwaInstallEvent = null;
+                document.getElementById('pwa-install-banner')?.classList.remove('show');
+            });
+        }
+
+        function pwaDismiss() {
+            document.getElementById('pwa-install-banner')?.classList.remove('show');
+            localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+        }
+
+        function pwaUpdate() {
+            document.getElementById('pwa-update-toast')?.classList.remove('show');
+            if (_pwaRegistration && _pwaRegistration.waiting) {
+                _pwaRegistration.waiting.postMessage('SKIP_WAITING');
+            }
+            window.location.reload();
+        }
+
         // ─── HOOKS showPage para nuevos módulos ───────────────────────────────────
         const _origShowPage = showPage;
 
