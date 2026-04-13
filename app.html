@@ -9293,11 +9293,9 @@
             localStorage.setItem(alertKey, '1');
             setTimeout(() => {
                 const confirmed = confirm(
-                    '⚠️ Cuota de automatizaciones al ' + pct + '%
-
-' +
-                    'Estás por alcanzar el límite mensual de Make.com. ' +
-                    '¿Querés ampliar tu plan ahora para no perder automatizaciones?'
+                    '\u26A0\uFE0F Cuota de automatizaciones al ' + pct + '%\n\n' +
+                    'Est\u00E1s por alcanzar el l\u00EDmite mensual de Make.com. ' +
+                    '\u00BFQuer\u00E9s ampliar tu plan ahora para no perder automatizaciones?'
                 );
                 if (confirmed) abrirUpgradeModal();
             }, 1500);
@@ -10487,10 +10485,6 @@
                 console.warn('Error sincronizando GCal:', syncErr);
                 statusEl.style.color = '#d97706';
                 statusEl.textContent = '⚠️ Turno guardado, error al sincronizar Google Calendar';
-            }
- else {
-                statusEl.style.color = '#15803d';
-                statusEl.textContent = '✅ Turno guardado. (Webhook GCal no configurado)';
             }
 
             // Refrescar lista
@@ -13472,9 +13466,7 @@ Estado: ${p.estado}`);
         function _parseCSV(text) {
             // Detectar separador (coma o punto y coma)
             const sep = (text.split(';').length > text.split(',').length) ? ';' : ',';
-            const lines = text.trim().split(/
-?
-/).filter(l => l.trim());
+            const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
             if (lines.length < 2) return { headers: [], rows: [] };
 
             const parseRow = line => {
@@ -13780,29 +13772,29 @@ Estado: ${p.estado}`);
     <div class="vos-form-group">
       <label for="vos-email">Email *</label>
       <input type="email" id="vos-email" name="email" placeholder="tu@email.com" required>
-    </div>${conTel ? """
+    </div>${conTel ? `
     <div class="vos-form-group">
-      <label for="vos-telefono">Teléfono</label>
+      <label for="vos-telefono">Tel\u00E9fono</label>
       <input type="tel" id="vos-telefono" name="telefono" placeholder="+54 11 1234-5678">
-    </div>""" : ''}${conEmp ? """
+    </div>` : ''}${conEmp ? `
     <div class="vos-form-group">
       <label for="vos-empresa">Empresa</label>
       <input type="text" id="vos-empresa" name="empresa" placeholder="Nombre de tu empresa">
-    </div>""" : ''}${conServ ? """
+    </div>` : ''}${conServ ? `
     <div class="vos-form-group">
-      <label for="vos-servicio">Servicio de interés</label>
+      <label for="vos-servicio">Servicio de inter\u00E9s</label>
       <select id="vos-servicio" name="servicio">
-        <option value="">— Seleccioná —</option>
+        <option value="">\u2014 Selecci\u00F3n \u2014</option>
         <option>Consulta general</option>
         <option>Presupuesto</option>
         <option>Soporte</option>
         <option>Otro</option>
       </select>
-    </div>""" : ''}${conMsg ? """
+    </div>` : ''}${conMsg ? `
     <div class="vos-form-group">
       <label for="vos-mensaje">Mensaje</label>
-      <textarea id="vos-mensaje" name="mensaje" placeholder="Contanos en qué podemos ayudarte..."></textarea>
-    </div>""" : ''}
+      <textarea id="vos-mensaje" name="mensaje" placeholder="Cont\u00E1nos en qu\u00E9 podemos ayudarte..."></textarea>
+    </div>` : ''}
     <button type="submit" class="vos-btn-submit">${btnTxt}</button>
     <div class="vos-form-msg" id="vos-form-msg"></div>
   </form>
