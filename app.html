@@ -456,12 +456,13 @@
             height: 100%;
             background-color: rgba(0,0,0,0.5);
             animation: fadeIn 0.3s;
+            /* ── Overlay-scroll: permite scroll nativo si el contenido es largo ── */
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: block;     /* block, no flex — el overlay scrollea entero */
         }
 
         @keyframes fadeIn {
@@ -469,20 +470,19 @@
             to { opacity: 1; }
         }
 
-        /* ── MODAL FLEXBOX FIX (estructural) ─────────────────────── */
+        /* ── MODAL: overlay-scroll + flex interno ─────────────────── */
         .modal-content {
             background-color: var(--white);
             border-radius: 12px;
             padding: 0;
             max-width: 500px;
             width: 90%;
+            margin: 5vh auto 60px;   /* centrado horizontal + espacio inferior para scroll */
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             animation: slideUp 0.3s;
-            /* Flexbox: evita que el modal crezca más allá del viewport */
+            /* Flex interno para header/body/footer */
             display: flex;
             flex-direction: column;
-            max-height: 90vh;
-            overflow: hidden;
         }
 
         @keyframes slideUp {
@@ -1235,8 +1235,7 @@
                 width: 95% !important;
                 max-width: 95% !important;
                 margin: 10px auto;
-                max-height: 90vh;
-                overflow-y: auto;
+                /* max-height manejado por overlay — no necesario aquí */
             }
 
             .grid-2, .grid-3, .grid-4 {
@@ -4038,21 +4037,7 @@
                             </div>
                         </div>
 
-                    <!-- COCKPIT CLÍNICO PAGE -->
-                    <div id="cockpit-agenda" class="page">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Dashboard de tu agenda: métricas de ocupación, turnos y rendimiento operativo en tiempo real.</p>
-                            <div style="display:flex;gap:8px;">
-                                <button class="btn-secondary" onclick="sincronizarGCal()" id="btn-sync-gcal" style="font-size:13px;">
-                                    <i class="fas fa-calendar-arrow-up" style="margin-right:6px;"></i>Sync Google Calendar
-                                </button>
-                                <button class="btn-primary" onclick="abrirModalNuevoTurno()" style="font-size:13px;">
-                                    <i class="fas fa-plus" style="margin-right:6px;"></i>Nuevo Turno
-                                </button>
-                            </div>
-                        </div>
-                        <!-- ══ INTEGRACIONES ══ -->
-                        <div id="config-integraciones" class="tab-content" style="display:none">
+<div id="config-integraciones" class="tab-content">
                             <h3 style="margin-bottom:20px;color:var(--primary)">Integraciones</h3>
 
                             <!-- Google Calendar -->
@@ -4137,33 +4122,8 @@
                                     oninput="db.config.webhookCampanaEmail=this.value;saveDB()">
                             </div>
                         </div>
-                        <!-- Lista de próximos turnos -->
-                        <div class="card" style="margin-bottom:16px;">
-                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                                <h3 style="font-size:14px;font-weight:600;margin:0;"><i class="fas fa-clock" style="color:var(--primary);margin-right:6px;"></i>Próximos Turnos</h3>
-                                <span id="turnos-count" style="font-size:12px;color:var(--gray-500);"></span>
-                            </div>
-                            <div id="proximos-turnos-list" style="font-size:13px;color:var(--gray-500);">Cargando...</div>
-                        </div>
-                        <div class="clinic-kpi-grid" id="cockpit-kpi-grid">
-                            <div class="clinic-kpi-card teal">
-                                <div class="kpi-label">Ocupación</div>
-                                <div class="kpi-value" id="ck-ocupacion">—</div>
-                                <div class="kpi-sub">turnos de hoy cubiertos</div>
-                                <div class="kpi-delta" id="ck-ocupacion-delta"></div>
-                            </div>
-                            <div class="clinic-kpi-card">
-                                <div class="kpi-label">Facturación MTD</div>
-                                <div class="kpi-value" id="ck-facturacion">$0</div>
-                                <div class="kpi-sub">facturación estimada</div>
-                            </div>
-                            <div class="clinic-kpi-card">
-                                <div class="kpi-label">No-Shows</div>
-                                <div class="kpi-value" id="ck-noshows">0</div>
-                                <div class="kpi-sub">riesgo en 24h</div>
-                        <!-- ══ MIGRACIÓN DE DATOS ══ -->
-                        <!-- ═══ INTEGRACIÓN WEB ═══ -->
-                        <div id="config-webform" class="tab-content" style="display:none">
+
+<div id="config-webform" class="tab-content">
                             <h3 style="margin-bottom:4px;color:var(--primary)">🌐 Integración Web — Captador de Leads</h3>
                             <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">Copiá este formulario y pegalo en tu sitio web. Cada envío llegará directo a Make.com y se insertará en tu CRM automáticamente.</p>
 
@@ -4241,7 +4201,7 @@
                             </div>
                         </div>
 
-                        <div id="config-audit" class="tab-content" style="display:none">
+<div id="config-audit" class="tab-content">
                             <div class="card">
                                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
                                     <h2 style="margin:0">📋 Registro de Actividad</h2>
@@ -4297,7 +4257,7 @@
                             </div>
                         </div>
 
-                        <div id="config-migracion" class="tab-content" style="display:none">
+<div id="config-migracion" class="tab-content">
                             <h3 style="margin-bottom:4px;color:var(--primary)">Migración de Datos</h3>
                             <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">Importá masivamente desde Excel/CSV o exportá tu base de datos actual.</p>
 
@@ -4400,6 +4360,54 @@
                                 </div>
                             </div>
                         </div>
+
+
+                    <!-- COCKPIT CLÍNICO PAGE -->
+                    <div id="cockpit-agenda" class="page">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+                            <p style="color:var(--gray-500);font-size:13px;margin:0;">Dashboard de tu agenda: métricas de ocupación, turnos y rendimiento operativo en tiempo real.</p>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn-secondary" onclick="sincronizarGCal()" id="btn-sync-gcal" style="font-size:13px;">
+                                    <i class="fas fa-calendar-arrow-up" style="margin-right:6px;"></i>Sync Google Calendar
+                                </button>
+                                <button class="btn-primary" onclick="abrirModalNuevoTurno()" style="font-size:13px;">
+                                    <i class="fas fa-plus" style="margin-right:6px;"></i>Nuevo Turno
+                                </button>
+                            </div>
+                        </div>
+                        <!-- ══ INTEGRACIONES ══ -->
+                        
+                        <!-- Lista de próximos turnos -->
+                        <div class="card" style="margin-bottom:16px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                                <h3 style="font-size:14px;font-weight:600;margin:0;"><i class="fas fa-clock" style="color:var(--primary);margin-right:6px;"></i>Próximos Turnos</h3>
+                                <span id="turnos-count" style="font-size:12px;color:var(--gray-500);"></span>
+                            </div>
+                            <div id="proximos-turnos-list" style="font-size:13px;color:var(--gray-500);">Cargando...</div>
+                        </div>
+                        <div class="clinic-kpi-grid" id="cockpit-kpi-grid">
+                            <div class="clinic-kpi-card teal">
+                                <div class="kpi-label">Ocupación</div>
+                                <div class="kpi-value" id="ck-ocupacion">—</div>
+                                <div class="kpi-sub">turnos de hoy cubiertos</div>
+                                <div class="kpi-delta" id="ck-ocupacion-delta"></div>
+                            </div>
+                            <div class="clinic-kpi-card">
+                                <div class="kpi-label">Facturación MTD</div>
+                                <div class="kpi-value" id="ck-facturacion">$0</div>
+                                <div class="kpi-sub">facturación estimada</div>
+                            </div>
+                            <div class="clinic-kpi-card">
+                                <div class="kpi-label">No-Shows</div>
+                                <div class="kpi-value" id="ck-noshows">0</div>
+                                <div class="kpi-sub">riesgo en 24h</div>
+                            </div>
+                        </div>
+                        
+
+                        
+
+                        
                             </div>
                             <div class="clinic-kpi-card">
                                 <div class="kpi-label">Tareas SLA</div>
