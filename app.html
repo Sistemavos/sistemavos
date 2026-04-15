@@ -3935,8 +3935,6 @@
                                 <button class="btn-danger" onclick="resetCompleto()">Resetear Sistema Completo</button>
                             </div>
                         </div>
-                    </div>
-                </div>
 
 
                         <!-- MI MENÚ CONFIG -->
@@ -4360,6 +4358,8 @@
                                 </div>
                             </div>
                         </div>
+
+                </div><!-- /#config -->
 
 
                     <!-- COCKPIT CLÍNICO PAGE -->
@@ -5342,70 +5342,90 @@
             return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
         }
 
+        // ── Restaurar sesión: sincroniza nube y abre la app ─────────────────────
+        async function _restoreSession(session) {
+            if (navigator.onLine) {
+                try {
+                    const { data: cloudData } = await supabaseClient
+                        .from('usuarios_datos')
+                        .select('db_json')
+                        .eq('id', session.user.id)
+                        .single();
+                    if (cloudData && cloudData.db_json) {
+                        localStorage.setItem('sistemavos_db', JSON.stringify(cloudData.db_json));
+                        db = cloudData.db_json;
+                        if (!db.config) db.config = { modulosOcultos: [] };
+                        if (!db.config.modulosOcultos) db.config.modulosOcultos = [];
+                    }
+                } catch (e) {
+                    console.warn('[Auth] Sin sync nube, usando datos locales:', e);
+                }
+            }
+            currentUser = {
+                email: session.user.email,
+                name: (db.account && db.account.ownerName) || session.user.email.split('@')[0],
+                role: 'admin'
+            };
+            showApp();
+        }
+
         async function initializeApp() {
             loadDB();
             const urlParams = new URLSearchParams(window.location.search);
             const wantsLogin = urlParams.get('login') === '1';
 
-            // Restaurar sesión de Supabase — funciona online y offline
-            // getSession() lee del localStorage de Supabase, no requiere red
+            // Si el usuario pidió login explícitamente, no intentar recuperar sesión
+            if (wantsLogin) { showLogin(); return; }
+
+            // ── Intento 1: getSession() lee token del localStorage de Supabase ────
+            let session = null;
             try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session && session.user && !wantsLogin) {
-                    // Hay sesión activa — intentar sincronizar con la nube si hay red
-                    if (navigator.onLine) {
-                        try {
-                            const { data: cloudData } = await supabaseClient
-                                .from('usuarios_datos')
-                                .select('db_json')
-                                .eq('id', session.user.id)
-                                .single();
-
-                            if (cloudData && cloudData.db_json) {
-                                localStorage.setItem('sistemavos_db', JSON.stringify(cloudData.db_json));
-                                db = cloudData.db_json;
-                                // Re-asegurar db.config después de cargar de la nube
-                                if (!db.config) db.config = { modulosOcultos: [] };
-                                if (!db.config.modulosOcultos) db.config.modulosOcultos = [];
-                            }
-                        } catch (e) {
-                            console.warn('No se pudieron sincronizar datos de la nube, usando datos locales:', e);
-                        }
-                    }
-
-                    // Sesión válida: mostrar la app con datos locales o de nube
-                    // No requerir db.account.email — la sesión Supabase es suficiente
-                    currentUser = {
-                        email: session.user.email,
-                        name: (db.account && db.account.ownerName) || session.user.email.split('@')[0],
-                        role: 'admin'
-                    };
-                    showApp();
-                    return;
-                }
+                const { data } = await supabaseClient.auth.getSession();
+                session = data?.session ?? null;
             } catch (e) {
-                console.warn('No se pudo verificar sesión de Supabase:', e);
+                console.warn('[Auth] getSession error:', e);
             }
 
-            // Si quedaron datos demo en localStorage y el usuario viene a loguearse, limpiar
-            if (db.account?.email === 'demo@sistemavos.com' && (wantsLogin || !db.account)) {
+            // ── Intento 2: token expirado → pedir refresh explícito ──────────────
+            if (!session) {
+                try {
+                    const { data } = await supabaseClient.auth.refreshSession();
+                    session = data?.session ?? null;
+                    if (session) console.log('[Auth] Sesión recuperada vía refreshSession');
+                } catch (e) {
+                    console.warn('[Auth] refreshSession error:', e);
+                }
+            }
+
+            // ── Red de seguridad: onAuthStateChange captura refreshes tardíos ────
+            // Supabase a veces completa el refresh DESPUÉS de que initializeApp
+            // termina (ej. deploy reciente, tab que estaba en background).
+            // Si eso ocurre y currentUser es null, lo capturamos aquí.
+            supabaseClient.auth.onAuthStateChange((event, newSession) => {
+                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user && !currentUser) {
+                    console.log('[Auth] onAuthStateChange capturó sesión tardía:', event);
+                    _restoreSession(newSession);
+                }
+                if (event === 'SIGNED_OUT' && currentUser) {
+                    currentUser = null;
+                    showLogin();
+                }
+            });
+
+            // ── Sesión válida encontrada ──────────────────────────────────────────
+            if (session?.user) {
+                await _restoreSession(session);
+                return;
+            }
+
+            // ── Sin sesión: decidir entre registro o login ────────────────────────
+            if (db.account?.email === 'demo@sistemavos.com') {
                 localStorage.removeItem('sistemavos_db');
                 db = {};
             }
-
-            if (wantsLogin) {
-                // Siempre mostrar login si viene de "Iniciar Sesion"
-                showLogin();
-            } else if (!db.account || !db.account.email) {
-                // Sin cuenta registrada y sin param login -> registro
+            if (!db.account || !db.account.email) {
                 showRegistration();
-            } else if (db.account.email === 'demo@sistemavos.com') {
-                // Datos demo sin sesión activa → mostrar login limpio
-                localStorage.removeItem('sistemavos_db');
-                db = {};
-                showLogin();
             } else {
-                // Tiene cuenta real -> login
                 showLogin();
             }
         }
