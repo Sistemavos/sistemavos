@@ -469,14 +469,20 @@
             to { opacity: 1; }
         }
 
+        /* ── MODAL FLEXBOX FIX (estructural) ─────────────────────── */
         .modal-content {
             background-color: var(--white);
             border-radius: 12px;
-            padding: 32px;
+            padding: 0;
             max-width: 500px;
             width: 90%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             animation: slideUp 0.3s;
+            /* Flexbox: evita que el modal crezca más allá del viewport */
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            overflow: hidden;
         }
 
         @keyframes slideUp {
@@ -488,14 +494,45 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            flex-shrink: 0;
+            padding: 24px 28px 18px;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .modal-header h2 {
+        .modal-header h2,
+        .modal-header h3 {
             font-size: 18px;
             font-weight: 600;
             margin: 0;
         }
+
+        /* ── Modal Body: scroll solo aquí ──────────────────────────── */
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 24px 28px 12px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gray-300) transparent;
+        }
+        .modal-body::-webkit-scrollbar { width: 5px; }
+        .modal-body::-webkit-scrollbar-track { background: transparent; }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 10px;
+        }
+
+        /* ── Modal Footer: siempre visible, pegado abajo ────────────── */
+        .modal-footer {
+            flex-shrink: 0;
+            display: flex;
+            gap: 12px;
+            padding: 14px 28px 22px;
+            background: var(--white);
+            border-top: 1px solid var(--border);
+        }
+        .modal-footer button { flex: 1; }
 
         .modal-close {
             background: none;
@@ -726,17 +763,42 @@
         }
 
         /* CHARTS */
+        .chart-card {
+            border-radius: 16px !important;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.09) !important;
+            transition: box-shadow 0.2s, transform 0.15s;
+            overflow: hidden;
+        }
+        .chart-card:hover {
+            box-shadow: 0 8px 32px rgba(108,58,225,0.13) !important;
+            transform: translateY(-1px);
+        }
         .chart-container {
             position: relative;
             height: 300px;
-            margin-bottom: 24px;
+            margin-bottom: 0;
+            padding: 4px 0 8px;
         }
-
         .chart-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 2fr 1fr;
             gap: 24px;
             margin-bottom: 24px;
+        }
+        .chart-header-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .chart-badge {
+            font-size: 11px;
+            color: var(--text-secondary);
+            background: var(--gray-100, #f1f5f9);
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-weight: 500;
         }
 
         /* REGISTRATION */
@@ -1081,7 +1143,7 @@
             }
 
             .chart-row {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
             }
 
             .plan-grid {
@@ -2083,27 +2145,29 @@
                     <div id="dashboard" class="page active">
                         <div class="stats-grid" id="dashboard-stats"></div>
 
+                        <!-- Charts Row: Flujo de Caja Mensual + Distribución de Gastos -->
                         <div class="chart-row">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h2>Ventas últimos 7 días</h2>
+                            <div class="card chart-card">
+                                <div class="card-header chart-header-meta">
+                                    <h2>📊 Flujo de Caja Mensual</h2>
+                                    <span class="chart-badge">Últimas 4 semanas</span>
                                 </div>
-                                <div class="chart-container">
-                                    <canvas id="salesChart"></canvas>
+                                <div class="chart-container" style="height:280px;">
+                                    <canvas id="flujoCajaChart"></canvas>
                                 </div>
                             </div>
-                            <div class="card">
+                            <div class="card chart-card">
                                 <div class="card-header">
-                                    <h2>Top Productos</h2>
+                                    <h2>🍩 Distribución de Gastos</h2>
                                 </div>
-                                <div class="chart-container">
-                                    <canvas id="topProductsChart"></canvas>
+                                <div class="chart-container" style="height:280px;">
+                                    <canvas id="distribucionGastosChart"></canvas>
                                 </div>
                             </div>
                         </div>
 
                         <!-- SPRINT 2: Flujo de Caja Predictivo -->
-                        <div class="card" id="cashflow-card">
+                        <div class="card chart-card" id="cashflow-card">
                             <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
                                 <h2>💰 Flujo de Caja Predictivo — 30 días</h2>
                                 <button class="btn-secondary" onclick="renderCashflowChart()" style="font-size:13px;padding:6px 14px;">↻ Actualizar</button>
@@ -3411,6 +3475,7 @@
                                     <h2 id="oportunidad-modal-title">Nueva Oportunidad</h2>
                                     <button class="modal-close" onclick="closeModal('oportunidad-modal')">&times;</button>
                                 </div>
+            <div class="modal-body">
                                 <input type="hidden" id="op-id">
                                 <div class="grid-2">
                                     <div class="form-group" style="grid-column:1/-1;">
@@ -3453,7 +3518,9 @@
                                         <textarea id="op-notas" rows="3" placeholder="Detalles relevantes, próximos pasos..."></textarea>
                                     </div>
                                 </div>
-                                <div style="display:flex;gap:12px;margin-top:16px;">
+                                
+            </div>
+            <div style="display:flex;gap:12px;margin-top:16px;">
                                     <button class="btn-secondary" style="flex:1;" onclick="closeModal('oportunidad-modal')">Cancelar</button>
                                     <button class="btn-primary" style="flex:1;" onclick="guardarOportunidad()"><i class="fas fa-save" style="margin-right:6px;"></i>Guardar</button>
                                 </div>
@@ -3467,12 +3534,15 @@
                                     <h2>\u1F517 Conectar con tus Campañas</h2>
                                     <button class="modal-close" onclick="closeModal('modal-pipeline-integraciones')">&times;</button>
                                 </div>
+            <div class="modal-body">
                                 <div style="padding:20px;border-top:1px solid var(--gray-200);">
                                     <p style="color:var(--gray-600);margin-bottom:16px;">Pegá esta URL en tus campañas de Facebook/Instagram Ads vía Make.com para que tus leads caigan directamente en este embudo.</p>
 
                                     <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:16px;margin-bottom:20px;">
                                         <label style="font-weight:600;color:var(--gray-800);display:block;margin-bottom:8px;">URL de Webhook Simulada:</label>
-                                        <div style="display:flex;gap:8px;align-items:center;">
+                                        
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
                                             <input type="text" id="webhook-url" readonly style="flex:1;padding:8px;border:1px solid var(--gray-300);border-radius:4px;background:white;font-size:12px;font-family:monospace;" value="">
                                             <button class="btn-primary" onclick="copiarWebhookUrl()"><i class="fas fa-copy"></i></button>
                                         </div>
@@ -4555,6 +4625,7 @@
                 <h2 id="modal-cliente-title">Nuevo Cliente</h2>
                 <button class="modal-close" onclick="closeModal('cliente-modal')">&times;</button>
             </div>
+            <div class="modal-body">
             <div class="form-group">
                 <label>Nombre</label>
                 <input type="text" id="modal-cliente-nombre">
@@ -4569,7 +4640,9 @@
             </div>
             <div id="modal-cliente-campos-extra"></div>
             <div id="modal-cliente-docs-zone"></div>
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
+            
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 20px;">
                 <button class="btn-secondary" style="flex: 1;" onclick="closeModal('cliente-modal')">Cancelar</button>
                 <button class="btn-primary" style="flex: 1;" onclick="guardarCliente()">Guardar</button>
             </div>
@@ -4582,6 +4655,7 @@
                 <h2>Nuevo Producto</h2>
                 <button class="modal-close" onclick="closeModal('producto-modal')">&times;</button>
             </div>
+            <div class="modal-body">
             <div class="form-group">
                 <label>Código de Producto</label>
                 <input type="text" id="modal-producto-codigo">
@@ -4608,7 +4682,9 @@
             </div>
             <div id="modal-producto-campos-extra"></div>
             <div id="modal-producto-docs-zone"></div>
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
+            
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 20px;">
                 <button class="btn-secondary" style="flex: 1;" onclick="closeModal('producto-modal')">Cancelar</button>
                 <button class="btn-primary" style="flex: 1;" onclick="guardarProducto()">Guardar</button>
             </div>
@@ -4621,6 +4697,8 @@
                 <h2>Registrar Movimiento</h2>
                 <button class="modal-close" onclick="closeModal('arqueo-modal')">&times;</button>
             </div>
+            <div class="modal-body">
+            <div class="modal-body">
             <div class="form-group">
                 <label>Tipo</label>
                 <select id="modal-arqueo-tipo">
@@ -4636,8 +4714,12 @@
                 <label>Monto</label>
                 <input type="number" id="modal-arqueo-monto" step="0.01">
             </div>
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
-                <button class="btn-secondary" style="flex: 1;" onclick="closeModal('arqueo-modal')">Cancelar</button>
+            
+            </div>
+            
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 20px;">
+                <button class="modal-footer modal-footer btn-secondary" style="flex: 1;" onclick="closeModal('arqueo-modal')">Cancelar</button>
                 <button class="btn-primary" style="flex: 1;" onclick="guardarArqueo()">Registrar</button>
             </div>
         </div>
@@ -4649,6 +4731,7 @@
                 <h2>Nuevo Gasto</h2>
                 <button class="modal-close" onclick="closeModal('gasto-modal')">&times;</button>
             </div>
+            <div class="modal-body">
             <!-- SPRINT 2: OCR Simulado -->
             <div id="ocr-zone" style="background:var(--gray-50,#f9fafb);border:2px dashed var(--gray-300,#d1d5db);border-radius:10px;padding:14px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
@@ -4693,7 +4776,9 @@
                 <input type="date" id="modal-gasto-fecha">
             </div>
             <div id="modal-gasto-docs-zone"></div>
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
+            
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 20px;">
                 <button class="btn-secondary" style="flex: 1;" onclick="closeModal('gasto-modal')">Cancelar</button>
                 <button class="btn-primary" style="flex: 1;" onclick="guardarGasto()">Guardar</button>
             </div>
@@ -4706,6 +4791,7 @@
                 <h2>Nuevo Empleado</h2>
                 <button class="modal-close" onclick="closeModal('empleado-modal')">&times;</button>
             </div>
+            <div class="modal-body">
             <div class="form-group">
                 <label>Nombre</label>
                 <input type="text" id="modal-empleado-nombre">
@@ -4730,7 +4816,9 @@
                 </select>
             </div>
             <div id="modal-empleado-docs-zone"></div>
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
+            
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 20px;">
                 <button class="btn-secondary" style="flex: 1;" onclick="closeModal('empleado-modal')">Cancelar</button>
                 <button class="btn-primary" style="flex: 1;" onclick="guardarEmpleado()">Guardar</button>
             </div>
@@ -4743,6 +4831,7 @@
                 <h2>Nueva Sucursal</h2>
                 <button class="modal-close" onclick="closeModal('sucursal-modal')">&times;</button>
             </div>
+            <div class="modal-body">
             <div class="form-group">
                 <label>Nombre</label>
                 <input type="text" id="modal-sucursal-nombre">
@@ -4756,7 +4845,9 @@
                 <input type="tel" id="modal-sucursal-telefono">
             </div>
             <div id="modal-sucursal-docs-zone"></div>
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
+            
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 20px;">
                 <button class="btn-secondary" style="flex: 1;" onclick="closeModal('sucursal-modal')">Cancelar</button>
                 <button class="btn-primary" style="flex: 1;" onclick="guardarSucursal()">Guardar</button>
             </div>
@@ -4769,6 +4860,7 @@
                 <h2>Nuevo Proveedor</h2>
                 <button class="modal-close" onclick="closeModal('proveedor-modal')">&times;</button>
             </div>
+            <div class="modal-body">
             <div class="form-group">
                 <label>Nombre</label>
                 <input type="text" id="modal-proveedor-nombre">
@@ -4786,7 +4878,9 @@
                 <input type="text" id="modal-proveedor-productos" placeholder="Ej: Repuestos, Telas, etc">
             </div>
             <div id="modal-proveedor-docs-zone"></div>
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
+            
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 20px;">
                 <button class="btn-secondary" style="flex: 1;" onclick="closeModal('proveedor-modal')">Cancelar</button>
                 <button class="btn-primary" style="flex: 1;" onclick="guardarProveedor()">Guardar</button>
             </div>
@@ -4799,6 +4893,7 @@
                 <h2 id="usuario-modal-title">Nuevo Usuario</h2>
                 <button class="modal-close" onclick="closeModal('usuario-modal')">&times;</button>
             </div>
+            <div class="modal-body">
             <div class="form-group">
                 <label>Nombre</label>
                 <input type="text" id="modal-usuario-nombre">
@@ -4829,7 +4924,9 @@
                 </select>
             </div>
             <div id="modal-usuario-docs-zone"></div>
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
+            
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 20px;">
                 <button class="btn-secondary" style="flex: 1;" onclick="closeModal('usuario-modal')">Cancelar</button>
                 <button class="btn-primary" style="flex: 1;" onclick="guardarUsuario()">Guardar</button>
             </div>
@@ -6333,6 +6430,7 @@
             if (page === 'presupuestos') { try { renderPresupuestos(); } catch(e){} }
             if (page === 'remitos') { try { renderRemitos(); } catch(e){} }
             if (page === 'pipeline-ventas') { try { renderPipelineVentas(); actualizarWebhookUrl(); } catch(e){} }
+            if (page === 'dashboard') { try { renderizarGraficos(); } catch(e){ console.warn('Dashboard charts:', e); } }
             setTimeout(aplicarModoLectura, 200);
         }
 
@@ -6447,73 +6545,173 @@
 
             document.getElementById('dashboard-stats').innerHTML = statsHTML;
 
-            try { renderSalesChart(); } catch(e) { console.warn('Chart render error:', e); }
-            try { renderTopProductsChart(); } catch(e) { console.warn('Chart render error:', e); }
+            try { renderizarGraficos(); } catch(e) { console.warn('Dashboard chart render error:', e); }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // CHARTS — Fase 2: Procesamiento de datos
+        // ═══════════════════════════════════════════════════════════════
+        function procesarDatosGraficos() {
+            const ventas = Array.isArray(db.ventas) ? db.ventas : [];
+            const gastos = Array.isArray(db.gastos) ? db.gastos : [];
+            const hoy = new Date();
+
+            // ── Flujo de Caja: agrupar por semana (últimas 4 semanas) ──
+            const semanas = [], ingPorSemana = [], gastoPorSemana = [];
+            for (let i = 3; i >= 0; i--) {
+                const ini = new Date(hoy); ini.setDate(hoy.getDate() - i*7 - 6); ini.setHours(0,0,0,0);
+                const fin = new Date(hoy); fin.setDate(hoy.getDate() - i*7);     fin.setHours(23,59,59,999);
+                semanas.push(`${ini.getDate()}/${ini.getMonth()+1} – ${fin.getDate()}/${fin.getMonth()+1}`);
+                ingPorSemana.push(Math.round(
+                    ventas.filter(v => { const d=new Date(v.fecha); return d>=ini && d<=fin; })
+                          .reduce((s,v) => s+(v.total||0), 0)
+                ));
+                gastoPorSemana.push(Math.round(
+                    gastos.filter(g => { const d=new Date(g.fecha); return d>=ini && d<=fin; })
+                          .reduce((s,g) => s+(g.monto||0), 0)
+                ));
+            }
+
+            // ── Distribución de Gastos por categoría ──
+            const catMap = {};
+            gastos.forEach(g => { const c = g.categoria||'Sin categoría'; catMap[c]=(catMap[c]||0)+(g.monto||0); });
+            const catLabels = Object.keys(catMap);
+            const catData   = catLabels.map(k => Math.round(catMap[k]));
+
+            return { semanas, ingPorSemana, gastoPorSemana, catLabels, catData };
+        }
+
+        // ── Fase 3: Orquestador principal ──────────────────────────────
+        function renderizarGraficos() {
+            if (typeof Chart === 'undefined') return;
+            const datos = procesarDatosGraficos();
+            renderFlujoCajaChart(datos);
+            renderDistribucionGastosChart(datos);
             try { renderCashflowChart(); } catch(e) { console.warn('Cashflow render error:', e); }
             renderRecentActivity();
         }
 
-        function renderSalesChart() {
-            const canvas = document.getElementById('salesChart');
+        function renderFlujoCajaChart(datos) {
+            const canvas = document.getElementById('flujoCajaChart');
             if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            if (typeof Chart === 'undefined') return;
-            const ventas = Array.isArray(db.ventas) ? db.ventas : [];
-            const labels = [];
-            const data = [];
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                labels.push(date.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' }));
-                const dayVentas = ventas.filter(v => new Date(v.fecha).toDateString() === date.toDateString()).reduce((sum, v) => sum + (v.total || 0), 0);
-                data.push(dayVentas);
-            }
-            new Chart(ctx, {
-                type: 'line',
+            const existing = Chart.getChart(canvas);
+            if (existing) existing.destroy();
+
+            const { semanas, ingPorSemana, gastoPorSemana } = datos;
+            const fmt = v => new Intl.NumberFormat('es-AR', { style:'currency', currency:'ARS', notation:'compact', compactDisplay:'short' }).format(v);
+            const fmtFull = v => new Intl.NumberFormat('es-AR', { style:'currency', currency:'ARS' }).format(v);
+
+            new Chart(canvas.getContext('2d'), {
+                type: 'bar',
                 data: {
-                    labels,
-                    datasets: [{
-                        label: 'Ventas',
-                        data,
-                        borderColor: 'var(--primary)',
-                        backgroundColor: 'rgba(108, 58, 225, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: 'var(--primary)',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
+                    labels: semanas,
+                    datasets: [
+                        {
+                            label: '💚 Ingresos',
+                            data: ingPorSemana,
+                            backgroundColor: 'rgba(16,185,129,0.75)',
+                            borderColor: '#10b981',
+                            borderWidth: 2,
+                            borderRadius: 7,
+                            borderSkipped: false
+                        },
+                        {
+                            label: '🔴 Gastos',
+                            data: gastoPorSemana,
+                            backgroundColor: 'rgba(239,68,68,0.7)',
+                            borderColor: '#ef4444',
+                            borderWidth: 2,
+                            borderRadius: 7,
+                            borderSkipped: false
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
+                    interaction: { mode:'index', intersect:false },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { usePointStyle:true, pointStyle:'rectRounded', padding:16, font:{ size:12 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.dataset.label.replace(/^[^ ]+ /,'')}: ${fmtFull(ctx.parsed.y)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color:'rgba(0,0,0,0.05)' },
+                            ticks: { font:{ size:11 } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color:'rgba(0,0,0,0.05)' },
+                            ticks: { callback: fmt, font:{ size:11 } }
+                        }
+                    }
                 }
             });
         }
 
-        function renderTopProductsChart() {
-            const canvas = document.getElementById('topProductsChart');
+        function renderDistribucionGastosChart(datos) {
+            const canvas = document.getElementById('distribucionGastosChart');
             if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            if (typeof Chart === 'undefined') return;
-            const topProducts = (Array.isArray(db.productos) ? db.productos : []).slice(0, 5);
-            new Chart(ctx, {
+            const existing = Chart.getChart(canvas);
+            if (existing) existing.destroy();
+
+            const { catLabels, catData } = datos;
+            const palette = ['#6c3ae1','#8b5cf6','#10b981','#f59e0b','#ef4444','#3b82f6','#ec4899','#14b8a6','#f97316','#84cc16'];
+            const fmtFull = v => new Intl.NumberFormat('es-AR', { style:'currency', currency:'ARS' }).format(v);
+
+            if (!catLabels.length) {
+                new Chart(canvas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Sin gastos aún'],
+                        datasets: [{ data:[1], backgroundColor:['#e2e8f0'], borderWidth:0 }]
+                    },
+                    options: {
+                        responsive:true, maintainAspectRatio:false,
+                        plugins: { legend:{ display:false }, tooltip:{ enabled:false } }
+                    }
+                });
+                return;
+            }
+
+            new Chart(canvas.getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: topProducts.map(p => p.nombre),
+                    labels: catLabels,
                     datasets: [{
-                        data: topProducts.map(p => p.stock),
-                        backgroundColor: ['var(--primary)', 'var(--accent)', 'var(--accent2)', '#10b981', '#f59e0b'],
-                        borderColor: '#fff',
-                        borderWidth: 2
+                        data: catData,
+                        backgroundColor: catLabels.map((_,i) => palette[i % palette.length]),
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                        hoverOffset: 10
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    cutout: '62%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { usePointStyle:true, pointStyle:'circle', padding:10, font:{ size:11 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+                                    const pct = total ? ((ctx.parsed/total)*100).toFixed(1) : 0;
+                                    return ` ${ctx.label}: ${fmtFull(ctx.parsed)} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -6873,6 +7071,7 @@
             document.getElementById('venta-pago').value = 'efectivo';
             renderCarrito();
             renderVentas();
+            try { if(document.getElementById('flujoCajaChart')) renderizarGraficos(); } catch(e){}
             alert('Venta completada exitosamente');
         }
 
@@ -8085,6 +8284,7 @@
             saveDB();
             closeModal('gasto-modal');
             renderGastos();
+            try { if(document.getElementById('distribucionGastosChart')) renderizarGraficos(); } catch(e){}
         }
 
         function renderGastos() {
