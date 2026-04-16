@@ -5132,16 +5132,25 @@
 
         // AUDIT LOG
         // ═══════════════════════════════════════════════
-        function logAudit(accion, modulo, detalle) {
+        function logAudit(accion, modulo, detalle, severidad) {
             try {
                 if (!Array.isArray(db.audit_logs)) db.audit_logs = [];
+                // Severidad auto-inferida para acciones sensibles
+                var sev = severidad || 'BAJA';
+                var accStr = (accion||'').toString().toUpperCase();
+                if (!severidad) {
+                    if (accStr.indexOf('EXPORT') >= 0 || accStr.indexOf('EXFIL') >= 0) sev = 'ALTA';
+                    else if (accStr.indexOf('ELIMIN') >= 0 || accStr.indexOf('BORR') >= 0 || accStr.indexOf('DELETE') >= 0) sev = 'MEDIA';
+                    else if (accStr.indexOf('RATE_LIMIT') >= 0 || accStr.indexOf('MALWARE') >= 0 || accStr.indexOf('SEGURIDAD') >= 0) sev = 'ALTA';
+                }
                 db.audit_logs.unshift({
                     id: safeMaxId(db.audit_logs),
                     timestamp: new Date().toISOString(),
                     usuario: currentUser?.name || currentUser?.email || 'Sistema',
                     accion,
                     modulo,
-                    detalle
+                    detalle,
+                    severidad: sev
                 });
                 // Mantener máximo 1000 registros
                 if (db.audit_logs.length > 1000) db.audit_logs = db.audit_logs.slice(0, 1000);
@@ -5976,6 +5985,8 @@
         }
 
         async function performLogin() {
+            // 🛡️ SEC - rate limit login (anti-brute force / DDoS)
+            if (!window._rateLimitCheck || !window._rateLimitCheck('login_attempt', 1200)) { return; }
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
 
@@ -6858,12 +6869,15 @@
 
         function eliminarCliente(id) {
             const c = db.clientes.find(c => c.id === id);
-            if (confirm('¿Eliminar este cliente?')) {
-                logAudit('Eliminó', 'Clientes', `Cliente "${c?.nombre}" eliminado`);
-                db.clientes = db.clientes.filter(c => c.id !== id);
+            if (!c) return;
+            const detalle = 'Cliente ID ' + id + ' — "' + (c.nombre||'') + '". Esta acción es irreversible y quedará registrada en el log de auditoría.';
+            window.confirmarEliminarCritico('Eliminar cliente', detalle, function(){
+                logAudit('ELIMINACION', 'Clientes', 'Cliente ID=' + id + ' "' + (c.nombre||'') + '" eliminado definitivamente', 'MEDIA');
+                db.clientes = db.clientes.filter(x => x.id !== id);
                 saveDB();
                 renderClientes();
-            }
+                mostrarToast('Cliente eliminado', 'success');
+            });
         }
 
         // PRODUCTOS CRUD
@@ -6965,11 +6979,16 @@
         }
 
         function eliminarProducto(id) {
-            if (confirm('¿Eliminar este producto?')) {
-                db.productos = db.productos.filter(p => p.id !== id);
+            const p = (db.productos||[]).find(x => x.id === id);
+            if (!p) return;
+            const detalle = 'Producto ID ' + id + ' — "' + (p.nombre||'') + '". Se perderá el historial en inventario.';
+            window.confirmarEliminarCritico('Eliminar producto', detalle, function(){
+                logAudit('ELIMINACION', 'Inventario', 'Producto ID=' + id + ' "' + (p.nombre||'') + '" eliminado', 'MEDIA');
+                db.productos = db.productos.filter(x => x.id !== id);
                 saveDB();
                 renderProductos();
-            }
+                mostrarToast('Producto eliminado', 'success');
+            });
         }
 
         // VENTAS
@@ -9178,10 +9197,15 @@
                 const fecha = ts ? ts.toLocaleDateString('es-AR') : '';
                 const hora  = ts ? ts.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '';
                 const color = ACCION_COLORS[log.accion] || '#6b7280';
-                html += `<tr>
+                const sev = log.severidad || 'BAJA';
+                const sevColors = { ALTA:'#dc2626', MEDIA:'#d97706', BAJA:'#64748b' };
+                const sevIcons  = { ALTA:'🔴', MEDIA:'🟡', BAJA:'⚪' };
+                const sevBg = sev === 'ALTA' ? 'background:rgba(220,38,38,0.08);' : (sev === 'MEDIA' ? 'background:rgba(217,119,6,0.06);' : '');
+                const sevPill = `<span style="background:${sevColors[sev]}22;color:${sevColors[sev]};padding:1px 7px;border-radius:10px;font-size:10.5px;font-weight:700;margin-left:6px;">${sevIcons[sev]} ${sev}</span>`;
+                html += `<tr style="${sevBg}">
                     <td style="white-space:nowrap;font-size:12px">${fecha}<br><span style="color:var(--text-secondary)">${hora}</span></td>
                     <td style="font-size:13px">${escapeHTML(log.usuario || '')}</td>
-                    <td><span style="background:${color}20;color:${color};padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600">${escapeHTML(log.accion || '')}</span></td>
+                    <td><span style="background:${color}20;color:${color};padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600">${escapeHTML(log.accion || '')}</span>${sevPill}</td>
                     <td style="font-size:13px">${escapeHTML(log.modulo || '')}</td>
                     <td style="font-size:12px;color:var(--text-secondary)">${escapeHTML(log.detalle || '')}</td>
                 </tr>`;
@@ -13725,6 +13749,18 @@ Estado: ${p.estado}`);
         function previsualizarCSV(input) {
             const file = input.files[0];
             if (!file) return;
+            // 🛡️ SEC - Validación MIME estricta (anti-malware)
+            try {
+                const valid = window._validarMimeCSV ? window._validarMimeCSV(file) : {ok:true};
+                if (!valid.ok) {
+                    mostrarToast('🚫 Acción denegada por políticas de seguridad: ' + valid.motivo, 'security');
+                    if (typeof logAudit === 'function') {
+                        logAudit('MALWARE_BLOQUEADO', 'Seguridad', 'Upload rechazado: ' + (file.name||'?') + ' (' + valid.motivo + ')', 'ALTA');
+                    }
+                    input.value = '';
+                    return;
+                }
+            } catch(e){ console.warn('[SEC] MIME check fail', e); }
             const tipo = document.getElementById('csv-import-tipo').value;
 
             // Actualizar hint de columnas
@@ -14169,15 +14205,33 @@ Estado: ${p.estado}`);
         }
 
         function exportarCSV(tipo) {
+            // 🛡️ SEC - Rate limit + límite de exportación para SubCuentas
+            if (!window._rateLimitCheck || !window._rateLimitCheck('export_csv_'+tipo, 1500)) { return; }
             const ts = new Date().toISOString().slice(0, 10);
+            const MAX_SUB = 500;
+            const esSub = (typeof window._esSubCuenta === 'function') && window._esSubCuenta();
+            const _limitar = function(arr){
+                if (esSub && Array.isArray(arr) && arr.length > MAX_SUB) {
+                    mostrarToast('⚠️ Límite de seguridad: exportación restringida a ' + MAX_SUB + ' registros (sub-cuenta)', 'warning');
+                    return arr.slice(0, MAX_SUB);
+                }
+                return arr || [];
+            };
+            const _logExport = function(modulo, cantidad){
+                try { logAudit('EXPORTACION_CSV', modulo, 'Exportados ' + cantidad + ' registros' + (esSub ? ' (sub-cuenta, limitado)' : ''), 'ALTA'); } catch(e){}
+            };
             if (tipo === 'clientes') {
                 const headers = ['id','nombre','telefono','email','direccion','cuit','notas','fechaAlta'];
-                _downloadCSV('clientes_' + ts + '.csv', _arrayToCSV(headers, db.clientes || []));
-                mostrarToast('Clientes exportados (' + (db.clientes||[]).length + ' registros)', 'success');
+                const _rows = _limitar(db.clientes || []);
+                _downloadCSV('clientes_' + ts + '.csv', _arrayToCSV(headers, _rows));
+                _logExport('Clientes', _rows.length);
+                mostrarToast('Clientes exportados (' + _rows.length + ' registros)', 'success');
             } else if (tipo === 'productos') {
                 const headers = ['id','nombre','precio','costo','stock','stockMin','categoria','codigo','descripcion'];
-                _downloadCSV('productos_' + ts + '.csv', _arrayToCSV(headers, db.inventario || []));
-                mostrarToast('Productos exportados (' + (db.inventario||[]).length + ' registros)', 'success');
+                const _rows = _limitar(db.inventario || []);
+                _downloadCSV('productos_' + ts + '.csv', _arrayToCSV(headers, _rows));
+                _logExport('Inventario', _rows.length);
+                mostrarToast('Productos exportados (' + _rows.length + ' registros)', 'success');
             } else if (tipo === 'ventas') {
                 const headers = ['id','fecha','clienteNombre','total','estado','items'];
                 const rows = (db.ventas || []).map(v => ({
@@ -14185,16 +14239,22 @@ Estado: ${p.estado}`);
                     clienteNombre: (db.clientes||[]).find(c => c.id == v.clienteId)?.nombre || v.clienteId || '',
                     items: (v.items||[]).map(i => i.nombre + ' x' + i.cantidad).join(' | ')
                 }));
-                _downloadCSV('ventas_' + ts + '.csv', _arrayToCSV(headers, rows));
-                mostrarToast('Ventas exportadas (' + rows.length + ' registros)', 'success');
+                const _rows = _limitar(rows);
+                _downloadCSV('ventas_' + ts + '.csv', _arrayToCSV(headers, _rows));
+                _logExport('Ventas', _rows.length);
+                mostrarToast('Ventas exportadas (' + _rows.length + ' registros)', 'success');
             } else if (tipo === 'proveedores') {
                 const headers = ['id','nombre','telefono','email','direccion','cuit','contacto','notas'];
-                _downloadCSV('proveedores_' + ts + '.csv', _arrayToCSV(headers, db.proveedores || []));
-                mostrarToast('Proveedores exportados (' + (db.proveedores||[]).length + ' registros)', 'success');
+                const _rows = _limitar(db.proveedores || []);
+                _downloadCSV('proveedores_' + ts + '.csv', _arrayToCSV(headers, _rows));
+                _logExport('Proveedores', _rows.length);
+                mostrarToast('Proveedores exportados (' + _rows.length + ' registros)', 'success');
             } else if (tipo === 'empleados') {
                 const headers = ['id','nombre','dni','cargo','email','telefono','salario','fechaIngreso'];
-                _downloadCSV('empleados_' + ts + '.csv', _arrayToCSV(headers, db.empleados || []));
-                mostrarToast('Empleados exportados (' + (db.empleados||[]).length + ' registros)', 'success');
+                const _rows = _limitar(db.empleados || []);
+                _downloadCSV('empleados_' + ts + '.csv', _arrayToCSV(headers, _rows));
+                _logExport('Empleados', _rows.length);
+                mostrarToast('Empleados exportados (' + _rows.length + ' registros)', 'success');
             } else if (tipo === 'all') {
                 // Exportar cada entidad por separado (ZIP simulado: múltiples descargas con delay)
                 const exports = [
@@ -14204,9 +14264,11 @@ Estado: ${p.estado}`);
                     { name: 'empleados', headers: ['id','nombre','cargo','salario'], data: db.empleados||[] },
                 ];
                 exports.forEach((exp, i) => {
-                    setTimeout(() => _downloadCSV(exp.name + '_' + ts + '.csv', _arrayToCSV(exp.headers, exp.data)), i * 300);
+                    const _rows = _limitar(exp.data);
+                    _logExport(exp.name, _rows.length);
+                    setTimeout(() => _downloadCSV(exp.name + '_' + ts + '.csv', _arrayToCSV(exp.headers, _rows)), i * 300);
                 });
-                mostrarToast('Exportando todos los módulos...', 'info');
+                mostrarToast('Exportando todos los módulos...' + (esSub ? ' (límite sub-cuenta aplicado)' : ''), 'info');
             }
         }
 
@@ -14421,6 +14483,201 @@ Estado: ${p.estado}`);
                 alert('Error al enviar la campaña. Verificá tu configuración de webhook.');
             });
         }
+
+        // ═══════════════════════════════════════════════════════════
+        // 🛡️ SISTEMAVOS SECURITY LAYER  (DevSecOps v1)
+        //   Anti-Malware · Anti-DDoS · Anti-Exfiltración · Anti-Phishing
+        // ═══════════════════════════════════════════════════════════
+        (function(){
+            try {
+                // ── Toast seguro (fallback si no existe) ──────────────
+                if (typeof window.mostrarToast !== 'function') {
+                    window.mostrarToast = function(msg, tipo){
+                        try {
+                            var cont = document.getElementById('sec-toast-cont');
+                            if(!cont){
+                                cont = document.createElement('div');
+                                cont.id = 'sec-toast-cont';
+                                cont.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;';
+                                document.body.appendChild(cont);
+                            }
+                            var colors = {success:'#16a34a',error:'#dc2626',warning:'#d97706',info:'#2563eb',security:'#b91c1c'};
+                            var color = colors[tipo] || colors.info;
+                            var t = document.createElement('div');
+                            t.style.cssText = 'background:'+color+';color:#fff;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.35);max-width:360px;pointer-events:auto;animation:slideInRight .25s ease;';
+                            t.textContent = msg;
+                            cont.appendChild(t);
+                            setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(20px)';t.style.transition='all .3s';},3200);
+                            setTimeout(function(){try{cont.removeChild(t);}catch(e){}},3600);
+                        } catch(e){ console.warn('[SEC] toast fail',e); }
+                    };
+                }
+
+                // ── Rate Limiting (throttle por clave) ────────────────
+                var _SEC_RATE = {};
+                window._rateLimit = function(key, ms){
+                    var now = Date.now();
+                    var last = _SEC_RATE[key] || 0;
+                    if (now - last < (ms||800)) return false;
+                    _SEC_RATE[key] = now;
+                    return true;
+                };
+                window._rateLimitCheck = function(key, ms, silent){
+                    if (!window._rateLimit(key, ms)) {
+                        if (!silent) window.mostrarToast('⏱️ Acción denegada: demasiado rápido. Reintentá en unos segundos.', 'warning');
+                        try { if (typeof logAudit === 'function') logAudit('RATE_LIMIT', 'Seguridad', 'Clic excesivo bloqueado: '+key, 'MEDIA'); } catch(e){}
+                        return false;
+                    }
+                    return true;
+                };
+
+                // ── Validación MIME para uploads CSV ──────────────────
+                // Acepta SOLO text/csv | application/vnd.ms-excel con .csv
+                window._validarMimeCSV = function(file){
+                    if (!file) return { ok:false, motivo:'Archivo vacío' };
+                    var nombre = (file.name||'').toLowerCase();
+                    var tipo = (file.type||'').toLowerCase();
+                    // Detectar doble extensión (ej: .csv.exe)
+                    var partes = nombre.split('.');
+                    if (partes.length > 2) {
+                        var ext1 = partes[partes.length-2];
+                        var ext2 = partes[partes.length-1];
+                        var peligrosas = ['exe','bat','cmd','sh','js','vbs','ps1','scr','com','msi','jar','py','php','dll'];
+                        if (peligrosas.indexOf(ext2) >= 0 || peligrosas.indexOf(ext1) >= 0) {
+                            return { ok:false, motivo:'Doble extensión detectada ('+ext1+'.'+ext2+') — posible malware' };
+                        }
+                    }
+                    if (!nombre.endsWith('.csv') && !nombre.endsWith('.txt')) {
+                        return { ok:false, motivo:'Extensión no permitida ('+nombre.split('.').pop()+'). Solo .csv' };
+                    }
+                    var mimesOK = ['text/csv','application/csv','application/vnd.ms-excel','text/plain',''];
+                    if (mimesOK.indexOf(tipo) < 0) {
+                        return { ok:false, motivo:'MIME type sospechoso: '+tipo };
+                    }
+                    if (file.size > 20 * 1024 * 1024) {
+                        return { ok:false, motivo:'Archivo demasiado grande (>20MB)' };
+                    }
+                    return { ok:true };
+                };
+
+                // ── Detectar si el usuario actual es Sub-Cuenta ───────
+                window._esSubCuenta = function(){
+                    try {
+                        if (!window.currentUser) return false;
+                        if (window.currentUser.role === 'admin' || window.currentUser.role === 'master' || window.currentUser.role === 'superadmin' || window.currentUser.role === 'founder') return false;
+                        var dbUser = (db.usuarios||[]).find(function(u){ return u.email === window.currentUser.email; });
+                        return dbUser && (dbUser.rol === 'subcuenta' || dbUser.rol === 'empleado');
+                    } catch(e) { return false; }
+                };
+
+                // ── Modal de confirmación destructiva "ELIMINAR" ──────
+                window.confirmarEliminarCritico = function(titulo, detalle, onConfirm){
+                    // Construir modal si no existe
+                    var m = document.getElementById('sec-delete-modal');
+                    if (!m) {
+                        m = document.createElement('div');
+                        m.id = 'sec-delete-modal';
+                        m.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:100000;align-items:center;justify-content:center;';
+                        m.innerHTML = ''
+                            + '<div style="background:#1e293b;border:1px solid #dc2626;border-radius:16px;padding:28px;max-width:460px;width:92%;color:#f1f5f9;box-shadow:0 20px 60px rgba(0,0,0,0.6);">'
+                            + '  <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;">'
+                            + '    <div style="font-size:28px;">⚠️</div>'
+                            + '    <h3 id="sec-del-title" style="margin:0;color:#fecaca;font-size:17px;">Acción destructiva</h3>'
+                            + '  </div>'
+                            + '  <p id="sec-del-detail" style="margin:0 0 14px;font-size:13px;color:#cbd5e1;line-height:1.5;"></p>'
+                            + '  <p style="margin:0 0 8px;font-size:12px;color:#fbbf24;">Escribí <b>ELIMINAR</b> para confirmar:</p>'
+                            + '  <input id="sec-del-input" type="text" autocomplete="off" spellcheck="false" style="width:100%;background:#0f172a;border:1.5px solid #334155;border-radius:10px;padding:10px 12px;color:#f1f5f9;font-size:14px;box-sizing:border-box;margin-bottom:14px;" placeholder="ELIMINAR">'
+                            + '  <div style="display:flex;gap:8px;justify-content:flex-end;">'
+                            + '    <button id="sec-del-cancel" style="padding:9px 18px;background:#334155;color:#f1f5f9;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Cancelar</button>'
+                            + '    <button id="sec-del-ok" style="padding:9px 18px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;" disabled>Eliminar definitivamente</button>'
+                            + '  </div>'
+                            + '</div>';
+                        document.body.appendChild(m);
+                    }
+                    var title  = m.querySelector('#sec-del-title');
+                    var detail = m.querySelector('#sec-del-detail');
+                    var input  = m.querySelector('#sec-del-input');
+                    var okBtn  = m.querySelector('#sec-del-ok');
+                    var cnBtn  = m.querySelector('#sec-del-cancel');
+                    title.textContent  = titulo || 'Confirmar eliminación';
+                    detail.textContent = detalle || 'Esta acción no se puede deshacer.';
+                    input.value = '';
+                    okBtn.disabled = true;
+                    m.style.display = 'flex';
+                    setTimeout(function(){ input.focus(); }, 80);
+
+                    function cerrar(){ m.style.display = 'none'; }
+                    input.oninput = function(){
+                        okBtn.disabled = (input.value.trim().toUpperCase() !== 'ELIMINAR');
+                    };
+                    cnBtn.onclick = function(){ cerrar(); };
+                    okBtn.onclick = function(){
+                        if (input.value.trim().toUpperCase() !== 'ELIMINAR') return;
+                        cerrar();
+                        try { onConfirm && onConfirm(); } catch(e){ console.error(e); }
+                    };
+                    // Cerrar con ESC
+                    m.onkeydown = function(ev){ if (ev.key === 'Escape') cerrar(); };
+                };
+
+                // ── Último acceso (anti-phishing) ─────────────────────
+                window._registrarUltimoAcceso = function(){
+                    try {
+                        if (!db.account) return;
+                        var ua = (navigator.userAgent||'').slice(0, 120);
+                        var prev = db.account.lastLogin || null;
+                        db.account.previousLogin = prev;
+                        db.account.lastLogin = {
+                            ts: new Date().toISOString(),
+                            ua: ua,
+                            lang: navigator.language || ''
+                        };
+                        if (typeof saveDB === 'function') saveDB();
+                    } catch(e) { console.warn('[SEC] último acceso fail', e); }
+                };
+
+                window._renderBannerUltimoAcceso = function(){
+                    try {
+                        if (!db.account || !db.account.previousLogin) return;
+                        var prev = db.account.previousLogin;
+                        var d = new Date(prev.ts);
+                        var fecha = d.toLocaleDateString('es-AR') + ' ' + d.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
+                        var nav = (prev.ua||'').match(/(Chrome|Firefox|Safari|Edge|Opera)\/?\s*([\d.]+)?/i);
+                        var navStr = nav ? nav[1] : 'Navegador desconocido';
+                        var dash = document.getElementById('dashboard');
+                        if (!dash) return;
+                        var existing = document.getElementById('sec-last-login-banner');
+                        if (existing) existing.remove();
+                        var div = document.createElement('div');
+                        div.id = 'sec-last-login-banner';
+                        div.style.cssText = 'margin:0 0 14px;padding:10px 14px;background:linear-gradient(90deg,rgba(99,102,241,0.12),rgba(16,185,129,0.08));border:1px solid rgba(99,102,241,0.35);border-radius:10px;font-size:12.5px;color:var(--text-secondary,#94a3b8);display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
+                        div.innerHTML = '<span style="font-size:16px;">🔐</span>'
+                            + '<span><b style="color:var(--text,#f1f5f9);">Último acceso:</b> ' + fecha
+                            + ' · <span style="opacity:.85;">'+ navStr +'</span></span>'
+                            + '<button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:inherit;cursor:pointer;font-size:14px;opacity:.6;">✕</button>'
+                            + '<span style="flex-basis:100%;font-size:11px;opacity:.75;">Si no reconocés este acceso, cambiá tu contraseña inmediatamente.</span>';
+                        dash.insertBefore(div, dash.firstChild);
+                    } catch(e){}
+                };
+
+                // Hook en showApp para registrar/renderizar último acceso
+                if (typeof window.showApp === 'function') {
+                    var _origShowApp = window.showApp;
+                    window.showApp = function(){
+                        var r = _origShowApp.apply(this, arguments);
+                        try {
+                            window._renderBannerUltimoAcceso();
+                            window._registrarUltimoAcceso();
+                        } catch(e){}
+                        return r;
+                    };
+                }
+
+                console.log('[🛡️ SEC] Capa de seguridad SistemaVOS activa');
+            } catch(err) {
+                console.error('[SEC] init error', err);
+            }
+        })();
 
         </script>
 
