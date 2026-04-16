@@ -34,6 +34,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- 🤖 Tesseract.js para OCR de tickets -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
     <style>
         :root {
             --primary: #6C3AE1;
@@ -4646,6 +4648,21 @@
                 <label>Teléfono</label>
                 <input type="tel" id="modal-cliente-telefono">
             </div>
+            <!-- 🤖 Bot AFIP: CUIT con varita mágica -->
+            <div class="form-group">
+                <label>Documento / CUIT</label>
+                <div style="display:flex;gap:8px;align-items:stretch;">
+                    <input type="text" id="modal-cliente-cuit" placeholder="20-12345678-9" style="flex:1;">
+                    <button type="button" onclick="autocompletarCUIT()" title="🤖 Autocompletar datos desde AFIP" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;padding:0 16px;border-radius:8px;cursor:pointer;font-size:18px;min-width:54px;box-shadow:0 4px 12px rgba(14,165,233,0.3);display:flex;align-items:center;justify-content:center;">
+                        <span id="afip-bot-icon">🪄</span>
+                    </button>
+                </div>
+                <small style="color:var(--text-secondary);font-size:11px;display:block;margin-top:4px;">Ingresá el CUIT y tocá la varita para completar automáticamente.</small>
+            </div>
+            <div class="form-group">
+                <label>Dirección</label>
+                <input type="text" id="modal-cliente-direccion" placeholder="Calle 123, Ciudad">
+            </div>
             <div id="modal-cliente-campos-extra"></div>
             <div id="modal-cliente-docs-zone"></div>
             
@@ -4740,7 +4757,26 @@
                 <button class="modal-close" onclick="closeModal('gasto-modal')">&times;</button>
             </div>
             <div class="modal-body">
-            <!-- SPRINT 2: OCR Simulado -->
+            <!-- 🤖 Bot OCR REAL con Tesseract.js -->
+            <div id="ocr-bot-zone" style="margin-bottom:14px;">
+                <button type="button" onclick="document.getElementById('ocr-bot-input').click()" style="width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;padding:13px 16px;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;box-shadow:0 6px 18px rgba(124,58,237,0.35);display:flex;align-items:center;justify-content:center;gap:8px;transition:transform 0.15s,box-shadow 0.15s;">
+                    <span style="font-size:18px;">🤖</span>
+                    <span>Escanear Ticket con IA</span>
+                </button>
+                <input type="file" id="ocr-bot-input" accept="image/*" capture="environment" style="display:none;" onchange="escanearTicketOCR(event)">
+                <!-- Loader del bot OCR -->
+                <div id="ocr-bot-loader" style="display:none;margin-top:10px;padding:12px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.3);border-radius:10px;text-align:center;">
+                    <div style="font-size:14px;color:#6d28d9;font-weight:600;margin-bottom:6px;">
+                        <span id="ocr-bot-icono" style="display:inline-block;animation:spin 1.2s linear infinite;">🤖</span>
+                        <span id="ocr-bot-msg">El bot está leyendo el ticket...</span>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.08);border-radius:6px;height:6px;overflow:hidden;">
+                        <div id="ocr-bot-bar" style="background:linear-gradient(90deg,#7c3aed,#a855f7);height:100%;width:0%;transition:width .3s;"></div>
+                    </div>
+                    <div id="ocr-bot-pct" style="font-size:11px;color:#64748b;margin-top:4px;">Inicializando...</div>
+                </div>
+            </div>
+            <!-- OCR Simulado (legacy) -->
             <div id="ocr-zone" style="background:var(--gray-50,#f9fafb);border:2px dashed var(--gray-300,#d1d5db);border-radius:10px;padding:14px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
                     <span style="font-size:20px;">📷</span>
@@ -6789,6 +6825,8 @@
                 document.getElementById('modal-cliente-nombre').value = cliente.nombre;
                 document.getElementById('modal-cliente-email').value = cliente.email;
                 document.getElementById('modal-cliente-telefono').value = cliente.telefono;
+                var _c1 = document.getElementById('modal-cliente-cuit'); if(_c1) _c1.value = cliente.cuit || '';
+                var _d1 = document.getElementById('modal-cliente-direccion'); if(_d1) _d1.value = cliente.direccion || '';
                 document.getElementById('cliente-modal').dataset.id = id;
                 if (db.industryConfig.customClientFields) {
                     db.industryConfig.customClientFields.forEach(field => {
@@ -6799,6 +6837,8 @@
                 document.getElementById('modal-cliente-nombre').value = '';
                 document.getElementById('modal-cliente-email').value = '';
                 document.getElementById('modal-cliente-telefono').value = '';
+                var _c2 = document.getElementById('modal-cliente-cuit'); if(_c2) _c2.value = '';
+                var _d2 = document.getElementById('modal-cliente-direccion'); if(_d2) _d2.value = '';
                 delete document.getElementById('cliente-modal').dataset.id;
             }
             openModal('cliente-modal');
@@ -6811,6 +6851,8 @@
             const nombre = document.getElementById('modal-cliente-nombre').value;
             const email = document.getElementById('modal-cliente-email').value;
             const telefono = document.getElementById('modal-cliente-telefono').value;
+            const cuit = (document.getElementById('modal-cliente-cuit')?.value || '').trim();
+            const direccion = (document.getElementById('modal-cliente-direccion')?.value || '').trim();
 
             if (!nombre || !email || !telefono) {
                 alert('Completa todos los campos requeridos');
@@ -6818,7 +6860,7 @@
             }
 
             const id = document.getElementById('cliente-modal').dataset.id;
-            const clienteData = { nombre, email, telefono };
+            const clienteData = { nombre, email, telefono , cuit: cuit, direccion: direccion};
             if (db.industryConfig.customClientFields) {
                 db.industryConfig.customClientFields.forEach(field => {
                     clienteData[field.name] = document.getElementById(`modal-cliente-${field.name}`).value;
@@ -14678,6 +14720,276 @@ Estado: ${p.estado}`);
                 console.error('[SEC] init error', err);
             }
         })();
+
+        // ═══════════════════════════════════════════════════════════
+        // 🤖 SISTEMAVOS MICRO-BOTS
+        //   1) OCR Tickets (Tesseract.js)   2) AFIP CUIT autocompletar
+        // ═══════════════════════════════════════════════════════════
+        (function(){
+            // ── Toast fallback (reutiliza el de la capa SEC si existe) ──
+            function _bToast(msg, tipo){
+                try {
+                    if (typeof window.mostrarToast === 'function') return window.mostrarToast(msg, tipo);
+                    if (typeof window.mostrarToastBug === 'function') return window.mostrarToastBug(msg, tipo);
+                    console.log('[BOT] '+msg);
+                } catch(e){ console.log('[BOT] '+msg); }
+            }
+
+            // ═══════════════════════════════════════════════════════
+            // FASE 1 — BOT OCR DE TICKETS (Tesseract.js)
+            // ═══════════════════════════════════════════════════════
+            window.escanearTicketOCR = async function(event){
+                var file = event && event.target && event.target.files && event.target.files[0];
+                if (!file) return;
+
+                // Validación básica
+                if (!file.type.startsWith('image/')) {
+                    _bToast('⚠️ El archivo debe ser una imagen (JPG/PNG/HEIC)', 'error');
+                    return;
+                }
+                if (file.size > 10 * 1024 * 1024) {
+                    _bToast('⚠️ La imagen es muy grande (>10MB). Probá con una foto más chica.', 'error');
+                    return;
+                }
+
+                var loader = document.getElementById('ocr-bot-loader');
+                var bar    = document.getElementById('ocr-bot-bar');
+                var pct    = document.getElementById('ocr-bot-pct');
+                var msg    = document.getElementById('ocr-bot-msg');
+                if (loader) loader.style.display = 'block';
+                if (bar)    bar.style.width = '0%';
+                if (msg)    msg.textContent = 'El bot está leyendo el ticket...';
+
+                if (typeof Tesseract === 'undefined') {
+                    if (loader) loader.style.display = 'none';
+                    _bToast('🤖 El motor OCR aún no se cargó. Esperá unos segundos y reintentá.', 'warning');
+                    return;
+                }
+
+                try {
+                    var resultado = await Tesseract.recognize(file, 'spa', {
+                        logger: function(m){
+                            if (m.status && pct) {
+                                var p = Math.round((m.progress||0) * 100);
+                                pct.textContent = m.status + ' · ' + p + '%';
+                                if (bar) bar.style.width = p + '%';
+                            }
+                        }
+                    });
+                    var texto = (resultado && resultado.data && resultado.data.text) || '';
+                    if (!texto.trim()) {
+                        _bToast('🤖 No pude leer nada en la imagen. Probá con mejor iluminación o una foto más nítida.', 'error');
+                        if (loader) loader.style.display = 'none';
+                        return;
+                    }
+                    _aplicarOCRAlFormulario(texto, file.name);
+                    _bToast('🤖 Ticket escaneado con éxito', 'success');
+                } catch(err) {
+                    console.error('[OCR]', err);
+                    _bToast('🤖 Error al procesar la imagen. Intentá de nuevo con mejor iluminación.', 'error');
+                } finally {
+                    if (loader) setTimeout(function(){ loader.style.display = 'none'; }, 600);
+                    try { event.target.value = ''; } catch(e){}
+                }
+            };
+
+            // Extrae monto total de un texto de ticket
+            function _extraerMontoTotal(texto){
+                if (!texto) return null;
+                var lineas = texto.split(/\r?\n/);
+                var candidatos = [];
+
+                // 1) Buscar línea con "TOTAL" y capturar número cercano
+                var regexTotal = /\bTOTAL\b[^\d]*([\d][\d\.,]*)/i;
+                var regexSubtotal = /\bSUB[- ]?TOTAL\b/i;
+                var regexTotalSolo = /\bTOTAL\s*[:.$]?\s*\$?\s*([\d][\d\.,]*)/i;
+
+                for (var i = 0; i < lineas.length; i++) {
+                    var l = lineas[i].trim();
+                    if (!l) continue;
+                    if (regexSubtotal.test(l)) continue;
+                    var m = l.match(regexTotal) || l.match(regexTotalSolo);
+                    if (m && m[1]) {
+                        var num = _parsearNumero(m[1]);
+                        if (num != null && num > 0) candidatos.push({ valor: num, peso: 100 - i, fuente: 'TOTAL' });
+                    }
+                }
+
+                // 2) Buscar el número más grande del ticket (fallback)
+                var regexNum = /\$?\s*([\d]{1,3}(?:[\.,]\d{3})+(?:[\.,]\d{1,2})?|\d+[\.,]\d{1,2})/g;
+                var match;
+                var texto2 = texto;
+                while ((match = regexNum.exec(texto2)) !== null) {
+                    var n = _parsearNumero(match[1]);
+                    if (n != null && n > 0) candidatos.push({ valor: n, peso: 1, fuente: 'numero' });
+                }
+
+                if (!candidatos.length) return null;
+                // Priorizar TOTAL si hay, y dentro de ellos el mayor
+                var conTotal = candidatos.filter(function(c){ return c.fuente === 'TOTAL'; });
+                var pool = conTotal.length ? conTotal : candidatos;
+                pool.sort(function(a,b){ return b.valor - a.valor; });
+                return pool[0].valor;
+            }
+
+            function _parsearNumero(str){
+                if (!str) return null;
+                // Formato argentino: 1.234,56 — también soporta 1,234.56
+                var s = String(str).trim();
+                // Si tiene ambos, el último determina el decimal
+                var ultPunto = s.lastIndexOf('.');
+                var ultComa  = s.lastIndexOf(',');
+                if (ultPunto > -1 && ultComa > -1) {
+                    if (ultComa > ultPunto) {
+                        // 1.234,56 => quitar puntos, cambiar coma por punto
+                        s = s.replace(/\./g, '').replace(',', '.');
+                    } else {
+                        // 1,234.56 => quitar comas
+                        s = s.replace(/,/g, '');
+                    }
+                } else if (ultComa > -1) {
+                    // Si hay solo coma y parece decimal (dos dígitos tras coma)
+                    if (/,\d{1,2}$/.test(s)) s = s.replace(',', '.');
+                    else s = s.replace(/,/g, '');
+                }
+                var n = parseFloat(s);
+                return isNaN(n) ? null : n;
+            }
+
+            function _extraerDescripcion(texto, nombreArchivo){
+                if (!texto) return 'Ticket escaneado';
+                // Primera línea no vacía y con letras = suele ser el nombre del comercio
+                var lineas = texto.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
+                for (var i = 0; i < Math.min(lineas.length, 5); i++) {
+                    var l = lineas[i];
+                    // Evitar líneas solo numéricas
+                    if (l.length >= 4 && l.length <= 60 && /[a-záéíóúñA-ZÁÉÍÓÚÑ]/.test(l)) {
+                        // Evitar encabezados fiscales muy técnicos
+                        if (/CUIT|IIBB|IVA|RESPONSABLE|CONSUMIDOR|TICKET/i.test(l)) continue;
+                        return l.replace(/\s{2,}/g, ' ').slice(0, 60);
+                    }
+                }
+                return 'Ticket OCR ' + (nombreArchivo || '').slice(0, 30);
+            }
+
+            function _aplicarOCRAlFormulario(texto, nombreArchivo){
+                var monto = _extraerMontoTotal(texto);
+                var desc  = _extraerDescripcion(texto, nombreArchivo);
+
+                var descEl  = document.getElementById('modal-gasto-descripcion');
+                var montoEl = document.getElementById('modal-gasto-monto');
+                var fechaEl = document.getElementById('modal-gasto-fecha');
+
+                if (descEl)  descEl.value = desc;
+                if (monto != null && montoEl) montoEl.value = monto.toFixed(2);
+                if (fechaEl && !fechaEl.value) fechaEl.value = new Date().toISOString().split('T')[0];
+
+                if (monto == null) {
+                    _bToast('🤖 Leí el ticket pero no encontré un monto claro. Ingresalo manualmente.', 'warning');
+                }
+                try { if (typeof logAudit === 'function') logAudit('OCR_TICKET', 'Gastos', 'Ticket escaneado: ' + desc + ' · $' + (monto || 'sin_monto'), 'BAJA'); } catch(e){}
+            }
+
+            // ═══════════════════════════════════════════════════════
+            // FASE 2 — BOT AFIP: AUTOCOMPLETAR POR CUIT
+            // ═══════════════════════════════════════════════════════
+            // Endpoints soportados (se intenta en orden):
+            //  1) API pública TangoFactura
+            //  2) Webhook Make.com (configurable en db.config.webhookCUIT)
+            window.autocompletarCUIT = async function(){
+                var inp = document.getElementById('modal-cliente-cuit');
+                if (!inp) return;
+                var cuit = (inp.value || '').replace(/[^\d]/g, '');
+                if (cuit.length !== 11) {
+                    _bToast('🤖 Ingresá un CUIT válido de 11 dígitos (sin guiones también sirve).', 'error');
+                    inp.focus();
+                    return;
+                }
+
+                // Animar varita
+                var icon = document.getElementById('afip-bot-icon');
+                var origIcon = icon ? icon.textContent : '🪄';
+                if (icon) { icon.textContent = '⏳'; icon.style.animation = 'spin 1s linear infinite'; }
+
+                var urls = [
+                    'https://afip.tangofactura.com/Rest/GetContribuyente?cuit=' + cuit
+                ];
+                try {
+                    if (db && db.config && db.config.webhookCUIT) {
+                        urls.unshift(db.config.webhookCUIT + (db.config.webhookCUIT.indexOf('?') >= 0 ? '&' : '?') + 'cuit=' + cuit);
+                    }
+                } catch(e){}
+
+                var datos = null;
+                var ultimoError = null;
+
+                for (var i = 0; i < urls.length; i++) {
+                    try {
+                        var ctrl = new AbortController();
+                        var to = setTimeout(function(){ ctrl.abort(); }, 8000);
+                        var resp = await fetch(urls[i], { method: 'GET', signal: ctrl.signal });
+                        clearTimeout(to);
+                        if (!resp.ok) { ultimoError = 'HTTP ' + resp.status; continue; }
+                        var json = await resp.json();
+                        datos = _normalizarAFIP(json);
+                        if (datos && (datos.nombre || datos.direccion)) break;
+                    } catch(err) {
+                        ultimoError = err && err.message ? err.message : 'fetch';
+                        console.warn('[AFIP]', urls[i], err);
+                    }
+                }
+
+                if (icon) { icon.textContent = origIcon; icon.style.animation = ''; }
+
+                if (!datos || (!datos.nombre && !datos.direccion)) {
+                    _bToast('🤖 No pude consultar el CUIT (API sin respuesta). Completá manualmente.', 'error');
+                    return;
+                }
+
+                var nomEl = document.getElementById('modal-cliente-nombre');
+                var dirEl = document.getElementById('modal-cliente-direccion');
+                if (nomEl && datos.nombre)    nomEl.value = datos.nombre;
+                if (dirEl && datos.direccion) dirEl.value = datos.direccion;
+
+                _bToast('🤖 Datos de AFIP importados con éxito', 'success');
+                try { if (typeof logAudit === 'function') logAudit('AFIP_LOOKUP', 'Clientes', 'CUIT consultado: ' + cuit + ' · ' + (datos.nombre||''), 'BAJA'); } catch(e){}
+            };
+
+            // Normaliza respuestas de varias APIs de CUIT al mismo shape
+            function _normalizarAFIP(json){
+                if (!json || typeof json !== 'object') return null;
+                // TangoFactura / ARCA shape
+                var nombre =
+                    json.razonSocial || json.RazonSocial ||
+                    json.nombre || json.Nombre ||
+                    json.denominacion || json.Denominacion ||
+                    (json.persona && (json.persona.razonSocial || json.persona.nombre)) ||
+                    (json.data && (json.data.razonSocial || json.data.nombre)) ||
+                    null;
+
+                var domicilio =
+                    json.domicilio || json.Domicilio || json.direccion || json.Direccion ||
+                    (json.persona && json.persona.domicilio) ||
+                    (json.data && (json.data.domicilio || json.data.direccion)) ||
+                    null;
+                // Si domicilio es objeto
+                if (domicilio && typeof domicilio === 'object') {
+                    var parts = [];
+                    if (domicilio.direccion) parts.push(domicilio.direccion);
+                    if (domicilio.calle) parts.push(domicilio.calle);
+                    if (domicilio.numero) parts.push(domicilio.numero);
+                    if (domicilio.localidad) parts.push(domicilio.localidad);
+                    if (domicilio.provincia) parts.push(domicilio.provincia);
+                    domicilio = parts.filter(Boolean).join(', ');
+                }
+
+                if (!nombre && !domicilio) return null;
+                return { nombre: (nombre||'').toString().trim(), direccion: (domicilio||'').toString().trim() };
+            }
+
+            console.log('[🤖 BOTS] Micro-RPA activos: OCR tickets + AFIP CUIT');
+        })();
+
 
         </script>
 
