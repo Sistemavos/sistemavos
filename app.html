@@ -5404,7 +5404,77 @@
                 name: (db.account && db.account.ownerName) || session.user.email.split('@')[0],
                 role: 'admin'
             };
+            _saveSession(currentUser);
             showApp();
+        }
+
+        // ═════════════════════════════════════════════════════════════════
+        // PERSISTENCIA DE SESIÓN — sobrevive al reload de la página
+        // Cubre las cuentas locales (master/demo/founder) que NO usan Supabase.
+        // Para cuentas admin reales, Supabase auth es la fuente de verdad y
+        // este storage es sólo un hint rápido mientras resuelve getSession().
+        // ═════════════════════════════════════════════════════════════════
+        const SESSION_KEY = 'sistemaVos_session';
+
+        function _saveSession(userData) {
+            try {
+                const payload = {
+                    email: userData.email,
+                    name: userData.name,
+                    role: userData.role,
+                    plan: userData.plan || null,
+                    isBetaTester: !!userData.isBetaTester,
+                    permisos: userData.permisos || null,
+                    lastPage: userData.lastPage || 'dashboard',
+                    savedAt: Date.now()
+                };
+                localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+            } catch(e) { console.warn('[Auth] _saveSession error:', e); }
+        }
+
+        function _loadSession() {
+            try {
+                const raw = localStorage.getItem(SESSION_KEY);
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                // Validación mínima: debe tener email y role
+                if (!data || !data.email || !data.role) return null;
+                return data;
+            } catch(e) {
+                console.warn('[Auth] _loadSession parse error:', e);
+                localStorage.removeItem(SESSION_KEY);
+                return null;
+            }
+        }
+
+        function _clearSession() {
+            try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+        }
+
+        // Rehidrata currentUser desde la sesión persistida y muestra la app.
+        // Usado SOLO para cuentas locales (master/demo/founder) — las admin
+        // se rehidratan vía supabaseClient.auth.getSession().
+        function verificarSesionActiva() {
+            const saved = _loadSession();
+            if (!saved) return false;
+
+            // Las cuentas admin se validan con Supabase, no con este flag.
+            if (saved.role === 'admin') return false;
+
+            currentUser = {
+                email: saved.email,
+                name: saved.name,
+                role: saved.role,
+                plan: saved.plan || undefined,
+                isBetaTester: saved.isBetaTester || false,
+                permisos: saved.permisos || undefined
+            };
+            showApp(); // ya internamente llama aplicarVisibilidadModulos() + showPage('dashboard')
+            // Restaurar última página si existía
+            if (saved.lastPage && saved.lastPage !== 'dashboard') {
+                setTimeout(() => { try { showPage(saved.lastPage); } catch(e) {} }, 50);
+            }
+            return true;
         }
 
         async function initializeApp() {
@@ -5413,7 +5483,11 @@
             const wantsLogin = urlParams.get('login') === '1';
 
             // Si el usuario pidió login explícitamente, no intentar recuperar sesión
-            if (wantsLogin) { showLogin(); return; }
+            if (wantsLogin) { _clearSession(); showLogin(); return; }
+
+            // ── Intento 0: Sesión LOCAL persistida (master/demo/founder) ──────────
+            // Se hace PRIMERO para que sea instantáneo (sin round-trip de red).
+            if (verificarSesionActiva()) return;
 
             // ── Intento 1: getSession() lee token del localStorage de Supabase ────
             let session = null;
@@ -5445,6 +5519,7 @@
                     _restoreSession(newSession);
                 }
                 if (event === 'SIGNED_OUT' && currentUser) {
+                    _clearSession();
                     currentUser = null;
                     showLogin();
                 }
@@ -6028,6 +6103,7 @@
             if (email === MASTER_CREDENTIALS.email && password === MASTER_CREDENTIALS.rawPass) {
                 clearLoginError();
                 currentUser = { email, name: MASTER_CREDENTIALS.name, role: 'master' };
+                _saveSession(currentUser);
                 showApp();
                 return;
             }
@@ -6039,6 +6115,7 @@
                 db = _cargarDBDemo(industriaActual);
                 localStorage.setItem('sistemavos_db', JSON.stringify(db));
                 currentUser = { email, name: DEMO_CREDENTIALS.name, role: 'demo' };
+                _saveSession(currentUser);
                 showApp();
                 return;
             }
@@ -6100,6 +6177,7 @@
                 }
                 if (!db.industryConfig) db.industryConfig = INDUSTRY_CONFIGS['general'];
                 saveDB();
+                _saveSession(currentUser);
                 showApp();
                 setTimeout(() => actualizarVisibilidadBugFab(), 300);
                 return;
@@ -6185,6 +6263,7 @@
                             name: db.account?.ownerName || authData.user.user_metadata?.owner_name || 'Usuario',
                             role: 'admin'
                         };
+                        _saveSession(currentUser);
                         if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Iniciar Sesión'; }
 
                         // ── FASE 2: Check 2FA requirement ──
@@ -6250,6 +6329,7 @@
             if (email === db.account.email && db.account.password && btoa(password) === db.account.password) {
                 clearLoginError();
                 currentUser = { email, name: db.account.ownerName, role: 'admin' };
+                _saveSession(currentUser);
                 showApp();
             } else if (!navigator.onLine) {
                 showLoginError('Sin conexión a internet. Conectate para verificar tus credenciales.');
@@ -6334,6 +6414,8 @@
                 try { await _doSync(); } catch(e) {}
                 // Cerrar sesión en Supabase
                 try { await supabaseClient.auth.signOut(); } catch(e) {}
+                // ── FASE 3: Limpiar persistencia local ────────────────────
+                _clearSession();
                 currentUser = null;
                 showLogin();
             }
@@ -6481,6 +6563,17 @@
             if (target) {
                 target.classList.add('active');
                 target.style.display = 'block';  // fuerza visibilidad del módulo activo
+            }
+            // ── Persistir última página visitada (para restore en reload) ──
+            if (currentUser && pageName && pageName !== 'login-page' && pageName !== 'registration-page') {
+                try {
+                    const raw = localStorage.getItem(SESSION_KEY);
+                    if (raw) {
+                        const s = JSON.parse(raw);
+                        s.lastPage = pageName;
+                        localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+                    }
+                } catch(e) {}
             }
             document.querySelectorAll('.sidebar-menu button').forEach(btn => btn.classList.remove('active'));
             try {
