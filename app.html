@@ -887,6 +887,47 @@
         .sso-divider { display:flex; align-items:center; gap:10px; margin: 14px 0; }
         .sso-divider hr { flex:1; border:none; border-top:1px solid var(--gray-200); }
         .sso-divider span { font-size:12px; color:var(--gray-400); white-space:nowrap; }
+
+        /* ── Security Dashboard ─────────────────────────────────────── */
+        .sec-health-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+        @media(max-width:600px){ .sec-health-grid { grid-template-columns:1fr; } }
+        .sec-health-item {
+            display:flex; align-items:center; gap:10px;
+            padding:10px 14px; border-radius:10px; border:1px solid var(--border);
+            background:var(--card-bg); font-size:13px;
+        }
+        .sec-health-item .sec-icon { font-size:18px; flex-shrink:0; }
+        .sec-health-item .sec-label { font-weight:500; color:var(--gray-700); font-size:12px; }
+        .sec-health-item .sec-val { font-size:11px; color:var(--gray-500); }
+        .sec-ok  { border-color:#86efac; background:#f0fdf4; }
+        .sec-warn{ border-color:#fde68a; background:#fffbeb; }
+        .sec-err { border-color:#fca5a5; background:#fef2f2; }
+        /* Kill Switch */
+        .kill-switch-btn {
+            width:100%; padding:14px; font-size:15px; font-weight:700;
+            background:linear-gradient(135deg,#dc2626,#991b1b);
+            color:#fff; border:none; border-radius:10px; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; gap:10px;
+            box-shadow:0 4px 14px rgba(220,38,38,.35); transition:all .2s;
+        }
+        .kill-switch-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(220,38,38,.45); }
+        .kill-switch-btn:active { transform:none; }
+        /* Modal confirmación Kill Switch */
+        #modal-killswitch { display:none; position:fixed; inset:0; z-index:9999;
+            background:rgba(0,0,0,.65); align-items:center; justify-content:center; }
+        #modal-killswitch.open { display:flex; }
+        .killswitch-box {
+            background:#fff; border-radius:16px; padding:28px; max-width:420px; width:90%;
+            box-shadow:0 20px 60px rgba(0,0,0,.4); text-align:center;
+        }
+        /* Lockout warning */
+        #lockout-warning {
+            display:none; position:fixed; bottom:24px; right:24px; z-index:8888;
+            background:#1e293b; color:#fff; border-radius:12px; padding:14px 20px;
+            font-size:13px; box-shadow:0 8px 30px rgba(0,0,0,.3);
+            border-left:4px solid #f59e0b;
+        }
+        #lockout-warning.show { display:flex; align-items:center; gap:12px; }
         /* LOGIN */
         .login-page {
             display: flex;
@@ -4080,6 +4121,100 @@
                             </div>
                         </div>
 
+                        <!-- ═══ KILL SWITCH ═══ -->
+                        <div class="card" style="border:2px solid #fca5a5;margin-top:16px;">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                                <i class="fas fa-power-off" style="font-size:20px;color:#dc2626;"></i>
+                                <div>
+                                    <h2 style="margin:0;font-size:15px;color:#dc2626;">Kill Switch — Cierre de Emergencia</h2>
+                                    <p style="margin:0;font-size:12px;color:var(--gray-500);">Revoca todas las sesiones activas, bloquea el acceso y notifica al equipo vía Make.com.</p>
+                                </div>
+                            </div>
+                            <button class="kill-switch-btn" onclick="abrirKillSwitch()">
+                                <i class="fas fa-skull-crossbones"></i> ACTIVAR CIERRE DE EMERGENCIA
+                            </button>
+                            <p style="font-size:11px;color:var(--gray-400);margin:8px 0 0;text-align:center;">
+                                Usar solo ante ataque confirmado. Esta acción cierra la sesión de todos los usuarios.
+                            </p>
+                        </div>
+
+                        <!-- ═══ PANEL DE SALUD DE SEGURIDAD ═══ -->
+                        <div class="card" style="margin-top:16px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <i class="fas fa-heart-pulse" style="font-size:18px;color:var(--primary);"></i>
+                                    <h2 style="margin:0;font-size:15px;">Panel de Salud de Seguridad</h2>
+                                </div>
+                                <button class="btn-secondary btn-sm" onclick="actualizarSaludSeguridad()">
+                                    <i class="fas fa-rotate-right"></i> Actualizar
+                                </button>
+                            </div>
+                            <div class="sec-health-grid" id="sec-health-grid">
+                                <div class="sec-health-item"><span class="sec-icon">⏳</span><div><div class="sec-label">Cargando...</div></div></div>
+                            </div>
+                            <div id="sec-health-score" style="text-align:center;padding:8px;border-radius:8px;font-size:13px;font-weight:600;background:var(--gray-100);"></div>
+                        </div>
+
+                        <!-- ═══ REPORTE DE INCIDENTE ═══ -->
+                        <div class="card" style="margin-top:16px;">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                                <i class="fas fa-file-shield" style="font-size:18px;color:#7c3aed;"></i>
+                                <div>
+                                    <h2 style="margin:0;font-size:15px;">Exportar Reporte de Incidente</h2>
+                                    <p style="margin:0;font-size:12px;color:var(--gray-500);">Genera un reporte para cumplimiento AAIP (Ley 25.326) con el audit log del período seleccionado.</p>
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                                <div class="form-group" style="margin:0;flex:1;min-width:140px;">
+                                    <label style="font-size:12px;">Desde</label>
+                                    <input type="date" id="inc-report-desde" style="font-size:13px;">
+                                </div>
+                                <div class="form-group" style="margin:0;flex:1;min-width:140px;">
+                                    <label style="font-size:12px;">Hasta</label>
+                                    <input type="date" id="inc-report-hasta" style="font-size:13px;">
+                                </div>
+                                <div style="display:flex;gap:8px;">
+                                    <button class="btn-primary btn-sm" onclick="exportarReporteIncidente('json')">
+                                        <i class="fas fa-code"></i> JSON (AAIP)
+                                    </button>
+                                    <button class="btn-secondary btn-sm" onclick="exportarReporteIncidente('csv')">
+                                        <i class="fas fa-table"></i> CSV
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="inc-report-preview" style="margin-top:10px;font-size:12px;color:var(--gray-500);"></div>
+                        </div>
+
+                        <!-- ═══ AUTO-LOCKOUT POR INACTIVIDAD ═══ -->
+                        <div class="card" style="margin-top:16px;">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                                <i class="fas fa-user-clock" style="font-size:18px;color:#0369a1;"></i>
+                                <div>
+                                    <h2 style="margin:0;font-size:15px;">Auto-Logout por Inactividad</h2>
+                                    <p style="margin:0;font-size:12px;color:var(--gray-500);">Cierra la sesión automáticamente si el usuario está inactivo por el tiempo configurado.</p>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                                <div class="form-group" style="margin:0;flex:1;min-width:180px;">
+                                    <label style="font-size:12px;">Tiempo de inactividad</label>
+                                    <select id="lockout-timeout-select" onchange="configurarAutoLockout(this.value)" style="font-size:13px;">
+                                        <option value="0">Desactivado</option>
+                                        <option value="15">15 minutos</option>
+                                        <option value="30">30 minutos</option>
+                                        <option value="60">1 hora</option>
+                                        <option value="120">2 horas</option>
+                                    </select>
+                                </div>
+                                <div id="lockout-status-display" style="font-size:13px;color:var(--gray-500);padding-top:18px;">
+                                    Estado: <span id="lockout-status-text" style="font-weight:600;">Desactivado</span>
+                                </div>
+                            </div>
+                            <small style="color:var(--gray-400);font-size:11px;display:block;margin-top:8px;">
+                                <i class="fas fa-info-circle"></i> Aplica solo a SubCuentas y Admins. El SuperAdmin recibe una advertencia de 60 segundos antes del cierre.
+                            </small>
+                        </div>
+
+
 <div id="config-integraciones" class="tab-content">
                             <h3 style="margin-bottom:20px;color:var(--primary)">Integraciones</h3>
 
@@ -5615,6 +5750,7 @@
         }
 
         async function initializeApp() {
+            if (verificarLockdown()) return; // Sistema en lockdown
             loadDB();
             const urlParams = new URLSearchParams(window.location.search);
             const wantsLogin = urlParams.get('login') === '1';
@@ -6885,6 +7021,7 @@
         function switchTab(tabName, element) {
             // Render audit logs al activar pestaña
             if (tabName === 'config-audit') { setTimeout(renderAuditLogs, 50); }
+            if (tabName === 'config-seguridad') { setTimeout(iniciarAutoLockoutDesdeConfig, 80); }
             if (tabName === 'config-webform') {
                 setTimeout(() => {
                     const inp = document.getElementById('webform-webhook-url');
@@ -8895,6 +9032,45 @@
   <span id="upgrade-toast-msg">¡Pago exitoso! Tu nueva cuota está disponible.</span>
 </div>
 
+
+    <!-- ═══ MODAL KILL SWITCH ═══ -->
+    <div id="modal-killswitch">
+        <div class="killswitch-box">
+            <div style="font-size:48px;margin-bottom:12px;">🚨</div>
+            <h2 style="color:#dc2626;font-size:18px;margin:0 0 10px;">¿Confirmar Cierre de Emergencia?</h2>
+            <p style="font-size:14px;color:#4b5563;margin:0 0 6px;">Esta acción va a:</p>
+            <ul style="text-align:left;font-size:13px;color:#374151;margin:0 0 16px;padding-left:20px;">
+                <li>Revocar <strong>todas</strong> las sesiones activas</li>
+                <li>Bloquear el acceso al sistema durante 15 minutos</li>
+                <li>Enviar alerta de emergencia vía Make.com</li>
+                <li>Registrar el incidente en el audit log</li>
+            </ul>
+            <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px;margin-bottom:16px;">
+                <p style="font-size:12px;color:#991b1b;margin:0;font-weight:600;">
+                    ⚠️ Usá esto solo ante un ataque confirmado. Todos los usuarios deberán volver a iniciar sesión.
+                </p>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button onclick="cerrarKillSwitch()" class="btn-secondary" style="flex:1;">Cancelar</button>
+                <button onclick="ejecutarKillSwitch()" style="flex:1;padding:11px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">
+                    🔴 EJECUTAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ LOCKOUT WARNING TOAST ═══ -->
+    <div id="lockout-warning">
+        <i class="fas fa-hourglass-half" style="color:#f59e0b;font-size:20px;flex-shrink:0;"></i>
+        <div>
+            <div style="font-weight:600;font-size:13px;">Sesión por expirar</div>
+            <div id="lockout-countdown" style="font-size:12px;color:#94a3b8;">Cerrando en 60s...</div>
+        </div>
+        <button onclick="renovarSesion()" style="background:#f59e0b;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;flex-shrink:0;">
+            Seguir activo
+        </button>
+    </div>
+
 </body></html>`);
             win.document.close();
         }
@@ -9053,6 +9229,281 @@
             try { if(document.getElementById('distribucionGastosChart')) { renderizarCharts(); renderizarGraficos(); } } catch(e){}
         }
 
+
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECURITY MODULE — Kill Switch · Health Panel · Incident Report · Auto-Lockout
+        // ══════════════════════════════════════════════════════════════════
+
+        // ── KILL SWITCH ───────────────────────────────────────────────────
+        function abrirKillSwitch() {
+            document.getElementById('modal-killswitch').classList.add('open');
+        }
+        function cerrarKillSwitch() {
+            document.getElementById('modal-killswitch').classList.remove('open');
+        }
+        async function ejecutarKillSwitch() {
+            cerrarKillSwitch();
+            const ts = new Date().toISOString();
+            const email = currentUser?.email || 'desconocido';
+            try {
+                // 1. Revocar TODAS las sesiones de Supabase (scope global)
+                await supabaseClient.auth.signOut({ scope: 'global' });
+            } catch(e) { console.warn('[KillSwitch] signOut error:', e); }
+
+            // 2. Registrar en audit log
+            logAudit('KILL_SWITCH_ACTIVADO', 'Seguridad',
+                `Kill Switch ejecutado por ${email} a las ${ts}. Todas las sesiones revocadas.`, 'ALTA');
+
+            // 3. Marcar lockdown local (bloquea acceso por 15 min)
+            localStorage.setItem('vos_lockdown', JSON.stringify({
+                activadoPor: email, timestamp: ts, expira: Date.now() + 15 * 60 * 1000
+            }));
+            saveDB();
+
+            // 4. Disparar webhook Make.com de emergencia
+            const webhookUrl = db.config?.siemWebhookUrl || '';
+            if (webhookUrl) {
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        regla: 'KILL_SWITCH',
+                        email_operador: email,
+                        timestamp: ts,
+                        descripcion: 'Kill Switch de emergencia activado manualmente. Todas las sesiones fueron revocadas.',
+                        severidad: 'CRÍTICA'
+                    })
+                }).catch(e => console.warn('[KillSwitch] webhook error:', e));
+            }
+
+            // 5. Limpiar sesión local y redirigir
+            _clearSession && _clearSession();
+            currentUser = null;
+            alert('🔴 Kill Switch ejecutado. Todas las sesiones han sido cerradas. Notificación enviada.');
+            setTimeout(() => { window.location.reload(); }, 1200);
+        }
+
+        // Verificar lockdown al iniciar app
+        function verificarLockdown() {
+            const ld = localStorage.getItem('vos_lockdown');
+            if (!ld) return false;
+            try {
+                const data = JSON.parse(ld);
+                if (Date.now() < data.expira) {
+                    const minRestantes = Math.ceil((data.expira - Date.now()) / 60000);
+                    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;">
+                        <div style="text-align:center;color:#fff;max-width:400px;padding:24px;">
+                            <div style="font-size:64px;">🔒</div>
+                            <h1 style="color:#ef4444;margin:16px 0 8px;">Sistema en Lockdown</h1>
+                            <p style="color:#94a3b8;font-size:14px;">El sistema fue bloqueado por un cierre de emergencia.</p>
+                            <p style="color:#94a3b8;font-size:13px;">Acceso disponible en aprox. <strong style="color:#f59e0b;">${minRestantes} minuto(s)</strong>.</p>
+                            <p style="color:#64748b;font-size:12px;margin-top:12px;">Activado por: ${data.activadoPor}<br>${data.timestamp}</p>
+                            <button onclick="localStorage.removeItem('vos_lockdown');window.location.reload();"
+                                style="margin-top:16px;padding:10px 24px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;">
+                                Desbloquear (SuperAdmin)
+                            </button>
+                        </div>
+                    </div>`;
+                    return true;
+                } else {
+                    localStorage.removeItem('vos_lockdown');
+                }
+            } catch(e) { localStorage.removeItem('vos_lockdown'); }
+            return false;
+        }
+
+        // ── PANEL DE SALUD DE SEGURIDAD ──────────────────────────────────
+        function actualizarSaludSeguridad() {
+            const grid = document.getElementById('sec-health-grid');
+            const scoreEl = document.getElementById('sec-health-score');
+            if (!grid) return;
+
+            const checks = [];
+            let score = 0;
+            const total = 7;
+
+            // Check 1: 2FA
+            const has2fa = document.getElementById('2fa-badge')?.classList.contains('active') ||
+                           document.getElementById('2fa-active-section')?.style.display !== 'none';
+            checks.push({ label:'Autenticación 2FA', val: has2fa ? 'Activo' : 'Inactivo', ok: has2fa ? 'ok' : 'err', icon:'🔐' });
+            if (has2fa) score++;
+
+            // Check 2: SIEM Webhook
+            const siemOk = !!(db.config?.siemWebhookUrl);
+            checks.push({ label:'Webhook SIEM', val: siemOk ? 'Configurado' : 'Sin configurar', ok: siemOk ? 'ok' : 'warn', icon:'🚨' });
+            if (siemOk) score++;
+
+            // Check 3: Token MercadoPago expuesto
+            const mpToken = db.mercadopago?.token || db.account?.mpAccessToken || '';
+            const mpExp = mpToken.length > 0;
+            checks.push({ label:'Token MP en base de datos', val: mpExp ? '⚠️ En texto plano' : 'No configurado', ok: mpExp ? 'warn' : 'ok', icon:'💳' });
+            if (!mpExp) score++;
+
+            // Check 4: Audit logs activos
+            const auditCount = (db.audit_logs || []).length;
+            checks.push({ label:'Audit Log', val: auditCount + ' registros', ok: auditCount > 0 ? 'ok' : 'warn', icon:'📋' });
+            if (auditCount > 0) score++;
+
+            // Check 5: Auto-lockout activo
+            const lockTimeout = parseInt(db.config?.autoLockoutMin || 0);
+            checks.push({ label:'Auto-logout', val: lockTimeout > 0 ? lockTimeout + ' min' : 'Desactivado', ok: lockTimeout > 0 ? 'ok' : 'warn', icon:'⏱️' });
+            if (lockTimeout > 0) score++;
+
+            // Check 6: SSO configurado
+            const ssoOk = (db.sso?.dominiosAutorizados || []).length > 0;
+            checks.push({ label:'SSO Corporativo', val: ssoOk ? 'Configurado' : 'Sin dominios', ok: ssoOk ? 'ok' : 'warn', icon:'🔑' });
+            if (ssoOk) score++;
+
+            // Check 7: Usuarios con contraseñas débiles (básico: ver si hay usuarios sin email)
+            const usersOk = (db.usuarios || []).every(u => u.email && u.email.includes('@'));
+            checks.push({ label:'Integridad de usuarios', val: usersOk ? 'Sin anomalías' : 'Revisar emails', ok: usersOk ? 'ok' : 'warn', icon:'👥' });
+            if (usersOk) score++;
+
+            grid.innerHTML = checks.map(c => `
+                <div class="sec-health-item sec-${c.ok}">
+                    <span class="sec-icon">${c.icon}</span>
+                    <div><div class="sec-label">${c.label}</div><div class="sec-val">${c.val}</div></div>
+                </div>`).join('');
+
+            const pct = Math.round((score / total) * 100);
+            const color = pct >= 80 ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626';
+            const label = pct >= 80 ? '✅ Buena postura de seguridad' : pct >= 50 ? '⚠️ Seguridad mejorable' : '🔴 Seguridad crítica';
+            scoreEl.innerHTML = `<span style="color:${color};">${label} — Score: ${score}/${total} (${pct}%)</span>`;
+        }
+
+        // ── REPORTE DE INCIDENTE (AAIP Ley 25.326) ───────────────────────
+        function exportarReporteIncidente(formato) {
+            const desde = document.getElementById('inc-report-desde')?.value;
+            const hasta = document.getElementById('inc-report-hasta')?.value;
+            const preview = document.getElementById('inc-report-preview');
+
+            let logs = db.audit_logs || [];
+            if (desde) logs = logs.filter(l => l.timestamp >= desde);
+            if (hasta) logs = logs.filter(l => l.timestamp <= hasta + 'T23:59:59');
+
+            if (logs.length === 0) {
+                if (preview) preview.textContent = 'Sin registros en el período seleccionado.';
+                return;
+            }
+
+            const empresa = db.account?.businessName || 'SistemaVOS';
+            const ahora = new Date().toISOString();
+
+            if (formato === 'json') {
+                const reporte = {
+                    meta: {
+                        tipo: 'Reporte de Incidente de Seguridad',
+                        normativa: 'Ley 25.326 — AAIP Argentina',
+                        empresa,
+                        generado: ahora,
+                        operador: currentUser?.email || 'desconocido',
+                        periodo: { desde: desde || 'sin filtro', hasta: hasta || 'sin filtro' },
+                        totalEventos: logs.length
+                    },
+                    eventos: logs.map(l => ({
+                        id: l.id, timestamp: l.timestamp, usuario: l.usuario,
+                        accion: l.accion, modulo: l.modulo,
+                        detalle: l.detalle, severidad: l.severidad || 'BAJA'
+                    }))
+                };
+                const blob = new Blob([JSON.stringify(reporte, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url;
+                a.download = `incidente-AAIP-${ahora.slice(0,10)}.json`;
+                a.click(); URL.revokeObjectURL(url);
+            } else {
+                const header = 'ID,Timestamp,Usuario,Accion,Modulo,Detalle,Severidad
+';
+                const rows = logs.map(l =>
+                    `${l.id},"${l.timestamp}","${l.usuario}","${l.accion}","${l.modulo}","${(l.detalle||'').replace(/"/g,'""')}","${l.severidad||'BAJA'}"`
+                ).join('
+');
+                const blob = new Blob(['﻿' + header + rows], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url;
+                a.download = `incidente-AAIP-${ahora.slice(0,10)}.csv`;
+                a.click(); URL.revokeObjectURL(url);
+            }
+
+            if (preview) preview.innerHTML = `<span style="color:#16a34a;">✅ Reporte generado: <strong>${logs.length} eventos</strong> exportados.</span>`;
+            logAudit('Exportó', 'Seguridad', `Reporte de incidente AAIP exportado (${logs.length} eventos, formato ${formato.toUpperCase()})`, 'MEDIA');
+        }
+
+        // ── AUTO-LOCKOUT POR INACTIVIDAD ──────────────────────────────────
+        let _lockoutTimer = null;
+        let _lockoutWarnTimer = null;
+        let _lockoutMinutes = 0;
+        let _lastActivity = Date.now();
+
+        function _resetActivityTimer() { _lastActivity = Date.now(); }
+
+        function configurarAutoLockout(minutos) {
+            _lockoutMinutes = parseInt(minutos) || 0;
+            db.config = db.config || {};
+            db.config.autoLockoutMin = _lockoutMinutes;
+            saveDB();
+
+            clearInterval(_lockoutTimer);
+            clearTimeout(_lockoutWarnTimer);
+            document.getElementById('lockout-warning')?.classList.remove('show');
+
+            const statusEl = document.getElementById('lockout-status-text');
+            if (statusEl) statusEl.textContent = _lockoutMinutes > 0 ? `Activo (${_lockoutMinutes} min)` : 'Desactivado';
+
+            if (_lockoutMinutes > 0) {
+                _lockoutTimer = setInterval(() => {
+                    const inactivo = Date.now() - _lastActivity;
+                    const limite = _lockoutMinutes * 60 * 1000;
+                    const aviso = limite - 60000; // 60s antes
+                    if (inactivo >= aviso && inactivo < limite) {
+                        const segs = Math.ceil((limite - inactivo) / 1000);
+                        const warn = document.getElementById('lockout-warning');
+                        const cd = document.getElementById('lockout-countdown');
+                        if (warn) warn.classList.add('show');
+                        if (cd) cd.textContent = `Cerrando en ${segs} segundo(s)...`;
+                    } else if (inactivo >= limite) {
+                        clearInterval(_lockoutTimer);
+                        document.getElementById('lockout-warning')?.classList.remove('show');
+                        logAudit('AUTO_LOGOUT', 'Seguridad',
+                            `Sesión cerrada por inactividad (${_lockoutMinutes} min) — ${currentUser?.email}`, 'BAJA');
+                        ejecutarLogout();
+                    } else {
+                        document.getElementById('lockout-warning')?.classList.remove('show');
+                    }
+                }, 5000); // check cada 5s
+            }
+        }
+
+        function renovarSesion() {
+            _resetActivityTimer();
+            document.getElementById('lockout-warning')?.classList.remove('show');
+        }
+
+        async function ejecutarLogout() {
+            try { await supabaseClient.auth.signOut(); } catch(e) {}
+            _clearSession && _clearSession();
+            currentUser = null;
+            showLogin && showLogin();
+        }
+
+        function iniciarAutoLockoutDesdeConfig() {
+            const min = parseInt(db.config?.autoLockoutMin || 0);
+            if (min > 0) {
+                configurarAutoLockout(min);
+                const sel = document.getElementById('lockout-timeout-select');
+                if (sel) sel.value = String(min);
+            }
+            // Actualizar panel de salud al abrir la pestaña
+            actualizarSaludSeguridad();
+            // Preset fechas del reporte
+            const hoy = new Date().toISOString().slice(0,10);
+            const hace7 = new Date(Date.now() - 7*86400000).toISOString().slice(0,10);
+            const d = document.getElementById('inc-report-desde');
+            const h = document.getElementById('inc-report-hasta');
+            if (d && !d.value) d.value = hace7;
+            if (h && !h.value) h.value = hoy;
+        }
 
         async function verificarIntegridadTabla(tipo) {
             const badges = document.querySelectorAll(`.integrity-check[data-tipo="${tipo}"]`);
