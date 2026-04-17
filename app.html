@@ -873,6 +873,20 @@
             flex: 1;
         }
 
+
+        /* ── SSO Buttons ───────────────────────────────────────────── */
+        .btn-sso {
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; width: 100%; padding: 11px 16px;
+            border: 1.5px solid var(--gray-200); border-radius: 8px;
+            background: #fff; font-size: 14px; font-weight: 500;
+            color: var(--gray-700); cursor: pointer; transition: all .18s;
+        }
+        .btn-sso:hover { background: var(--gray-50); border-color: var(--primary); box-shadow: 0 2px 8px rgba(99,102,241,.12); }
+        .btn-sso svg { flex-shrink: 0; }
+        .sso-divider { display:flex; align-items:center; gap:10px; margin: 14px 0; }
+        .sso-divider hr { flex:1; border:none; border-top:1px solid var(--gray-200); }
+        .sso-divider span { font-size:12px; color:var(--gray-400); white-space:nowrap; }
         /* LOGIN */
         .login-page {
             display: flex;
@@ -2035,6 +2049,19 @@
                                 <i class="fas fa-shield-halved" style="margin-right:4px;"></i>Centro de Seguridad
                             </button>
                         </div>
+                </div>
+
+                <!-- SSO Login -->
+                <div class="sso-divider"><hr><span>o continúa con</span><hr></div>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+                    <button type="button" class="btn-sso" onclick="signInWithOAuthSSO('google')">
+                        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.4 0 6.3 1.2 8.6 3.1l6.4-6.4C35.1 2.8 29.9 0 24 0 14.6 0 6.6 5.6 2.7 13.8l7.5 5.8C12.2 13.2 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.4 5.7c4.3-4 6.7-9.8 6.7-16.9z" /><path fill="#FBBC05" d="M10.2 28.4A14.5 14.5 0 0 1 9.5 24c0-1.5.2-3 .6-4.4L2.7 13.8A24 24 0 0 0 0 24c0 3.8.9 7.4 2.7 10.6l7.5-6.2z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.2-8.5 2.2-6.3 0-11.7-3.7-13.8-9.3l-7.5 6.2C6.6 42.4 14.6 48 24 48z"/></svg>
+                        Continuar con Google
+                    </button>
+                    <button type="button" class="btn-sso" onclick="signInWithOAuthSSO('azure')">
+                        <svg width="18" height="18" viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/></svg>
+                        Continuar con Microsoft
+                    </button>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
                     <a href="#" onclick="showRegistration(); return false;" style="font-size: 13px; color: var(--primary); text-decoration: none;">¿No tienes cuenta? Registrate</a>
@@ -3787,6 +3814,22 @@
                                         <input type="tel" id="config-whatsapp" placeholder="+54...">
                                     </div>
                                 </div>
+                                <!-- WEBHOOK SIEM — Alertas de Seguridad -->
+                                <div style="background:linear-gradient(135deg,#fff1f2,#ffe4e6);border-radius:12px;padding:14px 16px;margin-bottom:16px;border:1px solid #fecaca;">
+                                    <h3 style="font-size:13px;font-weight:600;margin-bottom:8px;color:#991b1b;">
+                                        <i class="fas fa-shield-exclamation" style="margin-right:6px;"></i>
+                                        Mini-SIEM — Webhook Alertas Críticas (Make.com)
+                                    </h3>
+                                    <div class="form-group" style="margin:0 0 6px 0;">
+                                        <label style="font-size:12px;">URL del Webhook de Seguridad</label>
+                                        <input type="url" id="config-siem-webhook"
+                                            placeholder="https://hook.eu1.make.com/..."
+                                            style="font-size:12px;font-family:monospace;"
+                                            oninput="db.config.siemWebhookUrl=this.value.trim();saveDB()">
+                                        <small style="color:#991b1b;font-size:11px;">Recibe alertas por SMS/WhatsApp ante: brute force, exportación masiva o eliminación de facturas.</small>
+                                    </div>
+                                </div>
+
                                 <!-- WEBHOOK GOOGLE CALENDAR -->
                                 <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:12px;padding:14px 16px;margin-bottom:16px;border:1px solid #bae6fd;">
                                     <h3 style="font-size:13px;font-weight:600;margin-bottom:8px;color:#0369a1;">
@@ -4997,7 +5040,8 @@
             config: { modulosOcultos: [], webhookGCal: 'https://hook.eu1.make.com/uflsn3dizm1qmfyj2y63t3ysmclavo9j', gcal: { clientId: '', accessToken: null, tokenExpiry: null, email: null, connected: false } },
             agenda: { turnos: [] },
             audit_logs: [],
-            bugs: []
+            bugs: [],
+            sso: { dominiosAutorizados: [] }
         };
 
         const INDUSTRY_CONFIGS = {
@@ -5183,7 +5227,100 @@
                 });
                 // Mantener máximo 1000 registros
                 if (db.audit_logs.length > 1000) db.audit_logs = db.audit_logs.slice(0, 1000);
+                // Disparar análisis SIEM en background (no bloquea)
+                try { analizadorSIEM({ accion, modulo, detalle, severidad: sev }); } catch(e) {}
             } catch(e) { /* silencioso */ }
+        }
+
+
+        // ══════════════════════════════════════════════════════════════
+        // MINI-SIEM — Analizador de Anomalías de Seguridad
+        // ══════════════════════════════════════════════════════════════
+
+        // Estado en memoria (no persiste entre recargas, intencionado)
+        const _siemState = {
+            intentosFallidos: {},   // { email: [{ts}] }
+            eliminaciones: [],      // [{ ts, email }]
+            exportaciones: []       // [{ ts, email, cantidad }]
+        };
+
+        async function analizadorSIEM(evento) {
+            try {
+                const webhookUrl = db.config?.siemWebhookUrl || '';
+                const accion = (evento.accion || '').toUpperCase();
+                const modulo = (evento.modulo || '').toUpperCase();
+                const email = currentUser?.email || 'desconocido';
+                const ahora = Date.now();
+
+                // Helper: disparar alerta
+                async function dispararAlerta(regla, payload) {
+                    logAudit('⚠️ ALERTA SIEM', 'Seguridad',
+                        `[${regla}] ${payload.descripcion} — Usuario: ${email}`, 'ALTA');
+                    if (!webhookUrl) { console.warn('[SIEM] Webhook no configurado. Alerta:', regla, payload); return; }
+                    try {
+                        await fetch(webhookUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                regla,
+                                email_atacante: email,
+                                ip: 'N/A (browser)',
+                                accion: evento.accion,
+                                modulo: evento.modulo,
+                                detalle: evento.detalle || '',
+                                timestamp: new Date().toISOString(),
+                                ...payload
+                            })
+                        });
+                    } catch(e) { console.error('[SIEM] Webhook error:', e); }
+                }
+
+                // ── REGLA 1: 5 intentos de contraseña fallidos en 1 minuto ──
+                if (accion.includes('LOGIN_FALLIDO') || accion.includes('PASSWORD_FAIL') || accion.includes('AUTH_FAIL')) {
+                    if (!_siemState.intentosFallidos[email]) _siemState.intentosFallidos[email] = [];
+                    _siemState.intentosFallidos[email].push(ahora);
+                    // Limpiar intentos fuera de la ventana de 1 minuto
+                    _siemState.intentosFallidos[email] = _siemState.intentosFallidos[email].filter(t => ahora - t < 60000);
+                    if (_siemState.intentosFallidos[email].length >= 5) {
+                        _siemState.intentosFallidos[email] = []; // Reset para no disparar continuamente
+                        await dispararAlerta('BRUTE_FORCE', {
+                            descripcion: '5 intentos de contraseña fallidos en menos de 1 minuto',
+                            severidad: 'CRÍTICA',
+                            intentos: 5
+                        });
+                    }
+                }
+
+                // ── REGLA 2: Exportación masiva de más de 300 clientes ──
+                if ((accion.includes('EXPORT') || accion.includes('EXPORTAR')) && modulo.includes('CLIENTES')) {
+                    const matchNum = (evento.detalle || '').match(/\d+/);
+                    const cantidad = matchNum ? parseInt(matchNum[0]) : (db.clientes?.length || 0);
+                    if (cantidad > 300) {
+                        await dispararAlerta('EXFILTRACION_DATOS', {
+                            descripcion: `Exportación masiva de ${cantidad} clientes detectada`,
+                            severidad: 'CRÍTICA',
+                            cantidad
+                        });
+                    }
+                }
+
+                // ── REGLA 3: 3 o más facturas eliminadas en menos de 5 minutos ──
+                if ((accion.includes('ANUL') || accion.includes('ELIMIN') || accion.includes('DELETE') || accion.includes('BORR'))
+                    && modulo.includes('FACTUR')) {
+                    _siemState.eliminaciones.push({ ts: ahora, email });
+                    // Limpiar fuera de ventana de 5 minutos
+                    _siemState.eliminaciones = _siemState.eliminaciones.filter(e => ahora - e.ts < 300000);
+                    if (_siemState.eliminaciones.length >= 3) {
+                        _siemState.eliminaciones = []; // Reset
+                        await dispararAlerta('DESTRUCCION_EVIDENCIA', {
+                            descripcion: '3 o más facturas eliminadas/anuladas en menos de 5 minutos',
+                            severidad: 'CRÍTICA',
+                            cantidad: 3
+                        });
+                    }
+                }
+
+            } catch(e) { console.error('[SIEM] analizadorSIEM error:', e); }
         }
 
         function saveDB() {
@@ -5514,8 +5651,18 @@
             // termina (ej. deploy reciente, tab que estaba en background).
             // Si eso ocurre y currentUser es null, lo capturamos aquí.
             supabaseClient.auth.onAuthStateChange((event, newSession) => {
-                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user && !currentUser) {
+                if (event === 'SIGNED_IN' && newSession?.user && !currentUser) {
+                    const identities = newSession.user.identities || [];
+                    const isOAuth = identities.some(i => i.provider === 'google' || i.provider === 'azure');
+                    if (isOAuth) {
+                        console.log('[Auth] OAuth SSO callback capturado:', newSession.user.email);
+                        handleOAuthLogin(newSession.user);
+                        return;
+                    }
                     console.log('[Auth] onAuthStateChange capturó sesión tardía:', event);
+                    _restoreSession(newSession);
+                }
+                if (event === 'TOKEN_REFRESHED' && newSession?.user && !currentUser) {
                     _restoreSession(newSession);
                 }
                 if (event === 'SIGNED_OUT' && currentUser) {
@@ -6088,6 +6235,106 @@
             };
         }
 
+
+        // ══════════════════════════════════════════════════════════════
+        // SSO — Single Sign-On (Google / Microsoft Azure)
+        // ══════════════════════════════════════════════════════════════
+
+        // Dominios corporativos autorizados: [{dominio:'empresa.com', superAdminEmail:'admin@empresa.com', permisos:[]}]
+        // Se configura desde db.sso.dominiosAutorizados
+
+        async function signInWithOAuthSSO(provider) {
+            try {
+                const btn = event?.target?.closest('button');
+                if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+
+                const { error } = await supabaseClient.auth.signInWithOAuth({
+                    provider,
+                    options: {
+                        redirectTo: window.location.origin + window.location.pathname,
+                        scopes: provider === 'azure' ? 'openid profile email' : undefined
+                    }
+                });
+                if (error) {
+                    showLoginError('Error SSO: ' + error.message);
+                    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+                }
+            } catch(e) {
+                showLoginError('Error al iniciar SSO: ' + e.message);
+            }
+        }
+
+        // Llamado por onAuthStateChange cuando detecta login OAuth
+        async function handleOAuthLogin(user) {
+            try {
+                const email = user.email || '';
+                const dominio = email.split('@')[1] || '';
+
+                // Verificar si el dominio está autorizado como corporativo
+                const dominios = db.sso?.dominiosAutorizados || [];
+                const match = dominios.find(d => d.dominio && dominio.toLowerCase() === d.dominio.toLowerCase());
+
+                if (match) {
+                    // ── Asignar SubCuenta vinculada al SuperAdmin ──
+                    const permisos = match.permisos || ['dashboard','clientes','ventas','facturacion'];
+                    const nombre = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0];
+
+                    if (!db.usuarios) db.usuarios = [];
+                    let dbUser = db.usuarios.find(u => u.email === email);
+                    if (!dbUser) {
+                        dbUser = {
+                            id: safeMaxId(db.usuarios),
+                            nombre,
+                            email,
+                            rol: 'subcuenta',
+                            estado: 'activo',
+                            permisos,
+                            ssoProvider: match.dominio ? (email.includes('microsoft') ? 'azure' : 'google') : 'sso',
+                            superAdminEmail: match.superAdminEmail || '',
+                            creadoViaSSO: true,
+                            creadoEn: new Date().toISOString()
+                        };
+                        db.usuarios.push(dbUser);
+                    } else {
+                        // Actualizar permisos si ya existe
+                        dbUser.permisos = permisos;
+                        dbUser.rol = 'subcuenta';
+                        dbUser.superAdminEmail = match.superAdminEmail || '';
+                    }
+
+                    currentUser = { email, name: nombre, role: 'subcuenta' };
+                    logAudit('SSO Login', 'Auth', `SubCuenta "${nombre}" (${email}) accedió vía SSO — dominio corporativo: ${dominio}`, 'BAJA');
+                    saveDB();
+                    _saveSession(currentUser);
+                    showApp();
+                    setTimeout(() => { mostrarToast && mostrarToast(`👋 Bienvenido/a ${nombre} — Acceso SubCuenta activado`); }, 600);
+                    return;
+                }
+
+                // Dominio no corporativo → tratarlo como admin normal
+                const nombre = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0];
+                try {
+                    const { data: cloudData } = await supabaseClient
+                        .from('usuarios_datos').select('db_json').eq('id', user.id).single();
+                    if (cloudData?.db_json) { localStorage.setItem('sistemavos_db', JSON.stringify(cloudData.db_json)); db = cloudData.db_json; }
+                } catch(e) {}
+                if (!db.account) loadDB();
+                if (!db.account) {
+                    db.account = { email, ownerName: nombre, businessName: 'Mi Negocio', industry: 'general', currency: '$', iva: 21, plan_status: 'trial', fechaRegistro: new Date().toISOString() };
+                    db.selectedIndustry = 'general';
+                    db.industryConfig = INDUSTRY_CONFIGS['general'];
+                    saveDB();
+                }
+                currentUser = { email, name: nombre, role: 'admin' };
+                logAudit('SSO Login', 'Auth', `Admin "${nombre}" (${email}) accedió vía SSO`, 'BAJA');
+                _saveSession(currentUser);
+                showApp();
+            } catch(e) {
+                console.error('[SSO] handleOAuthLogin error:', e);
+                showLoginError('Error al procesar SSO: ' + e.message);
+            }
+        }
+
         async function performLogin() {
             // 🛡️ SEC - rate limit login (anti-brute force / DDoS)
             if (!window._rateLimitCheck || !window._rateLimitCheck('login_attempt', 1200)) { return; }
@@ -6286,6 +6533,8 @@
                     // ═══ Manejo detallado de errores de Supabase ═══
                     if (authError) {
                         if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Iniciar Sesión'; }
+                        // SIEM: registrar intento fallido para análisis
+                        logAudit('LOGIN_FALLIDO', 'Auth', `Intento fallido para ${email}`, 'MEDIA');
                         const msg = authError.message || '';
                         console.warn('Supabase auth error:', msg);
 
@@ -7651,7 +7900,38 @@
             renderFacturaItems();
         }
 
-        function emitirFactura() {
+
+        // ══════════════════════════════════════════════════════════════
+        // INTEGRIDAD CRIPTOGRÁFICA — SHA-256 (Blockchain-style)
+        // ══════════════════════════════════════════════════════════════
+        async function generarSelloIntegridad(obj) {
+            try {
+                // Campos críticos para el hash (orden determinístico)
+                const campos = {
+                    id: obj.id,
+                    monto: obj.total ?? obj.monto,
+                    fecha: obj.fecha ?? obj.creadaEn,
+                    cliente: obj.clienteId ?? obj.cliente ?? '',
+                    tipo: obj.tipo ?? obj.categoria ?? '',
+                    numero: obj.numero ?? obj.numeroCompleto ?? ''
+                };
+                const data = JSON.stringify(campos);
+                const encoded = new TextEncoder().encode(data);
+                const hashBuffer = await window.crypto.subtle.digest('SHA-256', encoded);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch(e) {
+                console.error('[Integridad] generarSelloIntegridad error:', e);
+                return null;
+            }
+        }
+
+        async function verificarIntegridad(obj) {
+            const sello = await generarSelloIntegridad(obj);
+            return sello && obj.sello_integridad && sello === obj.sello_integridad;
+        }
+
+        async function emitirFactura() {
             const tipo = document.getElementById('factura-tipo').value;
             const clienteId = parseInt(document.getElementById('factura-cliente').value);
 
@@ -7696,6 +7976,7 @@
                 ]
             };
 
+            factura.sello_integridad = await generarSelloIntegridad(factura);
             db.facturas.push(factura);
             logAudit('Emitió', 'Facturación', `Factura ${factura.numeroCompleto} por ${formatCurrency(factura.total)}`);
             saveDB();
@@ -7712,6 +7993,7 @@
             db.facturas.forEach(f => {
                 const cliente = db.clientes.find(c => c.id === f.clienteId);
                 const badgeClass = f.estado === 'Autorizada AFIP' ? 'badge-success' : f.estado === 'Anulada' ? 'badge-danger' : 'badge-warning';
+                const adulteradoBadge = f.sello_integridad ? `<span class="integrity-check" data-id="${f.id}" data-tipo="factura" style="font-size:11px;cursor:default;" title="Verificando integridad...">🔒</span>` : '';
                 const acciones = f.estado === 'Autorizada AFIP'
                     ? `<button class="btn-sm" onclick="verFactura(${f.id})">Ver</button>
                        <button class="btn-sm" style="background:#fef2f2;color:#dc2626;margin-left:4px;" onclick="anularFactura(${f.id})">Anular</button>
@@ -8741,7 +9023,7 @@
             setTimeout(() => renderDocList('gastos', gastoId), 100);
         }
 
-        function guardarGasto() {
+        async function guardarGasto() {
             const categoria = document.getElementById('modal-gasto-categoria').value;
             const descripcion = document.getElementById('modal-gasto-descripcion').value;
             const monto = parseFloat(document.getElementById('modal-gasto-monto').value);
@@ -8761,6 +9043,7 @@
                 logAudit('Editó', 'Gastos', `Gasto "${descripcion}" de ${formatCurrency(monto)} editado`);
             } else {
                 gastoData.id = safeMaxId(db.gastos);
+                gastoData.sello_integridad = await generarSelloIntegridad(gastoData);
                 db.gastos.push(gastoData);
                 logAudit('Registró', 'Gastos', `Nuevo gasto "${descripcion}" de ${formatCurrency(monto)}`);
             }
@@ -8768,6 +9051,25 @@
             closeModal('gasto-modal');
             renderGastos();
             try { if(document.getElementById('distribucionGastosChart')) { renderizarCharts(); renderizarGraficos(); } } catch(e){}
+        }
+
+
+        async function verificarIntegridadTabla(tipo) {
+            const badges = document.querySelectorAll(`.integrity-check[data-tipo="${tipo}"]`);
+            const arr = tipo === 'factura' ? db.facturas : db.gastos;
+            for (const badge of badges) {
+                const id = parseInt(badge.dataset.id);
+                const obj = arr.find(x => x.id === id);
+                if (!obj || !obj.sello_integridad) { badge.textContent = ''; continue; }
+                const ok = await verificarIntegridad(obj);
+                if (ok) {
+                    badge.textContent = '🔒';
+                    badge.title = 'Integridad verificada — SHA-256 válido';
+                    badge.style.color = '#16a34a';
+                } else {
+                    badge.outerHTML = `<span style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:700;cursor:help;" title="El hash SHA-256 no coincide. Este documento puede haber sido modificado fuera del sistema.">⚠️ ¡Documento Adulterado!</span>`;
+                }
+            }
         }
 
         function renderGastos() {
@@ -8782,9 +9084,10 @@
 
             let html = '';
             filtered.forEach(g => {
+                const gastoIntBadge = g.sello_integridad ? `<span class="integrity-check" data-id="${g.id}" data-tipo="gasto" style="font-size:11px;cursor:default;" title="Verificando integridad...">🔒</span>` : '';
                 html += `<tr>
                     <td>${formatDate(g.fecha)}</td>
-                    <td>${g.categoria}</td>
+                    <td>${g.categoria} ${gastoIntBadge}</td>
                     <td>${g.descripcion}</td>
                     <td>${formatCurrency(g.monto)}</td>
                     <td>${g.usuario}</td>
@@ -8794,6 +9097,7 @@
                     </td>
                 </tr>`;
             });
+            setTimeout(() => verificarIntegridadTabla('gasto'), 100);
             const totalGastos = filtered.reduce((s, g) => s + (parseFloat(g.monto) || 0), 0);
             if (totalGastos > 0) {
                 html += `<tr style="font-weight:600;background:var(--gray-100);">
@@ -11397,6 +11701,8 @@
                 document.getElementById('config-instagram').value = db.account.instagram || '';
                 document.getElementById('config-whatsapp').value = db.account.whatsapp || '';
                 document.getElementById('config-webhook-gcal').value = (db.config && db.config.webhookGCal) || '';
+                const siemWh = document.getElementById('config-siem-webhook');
+                if (siemWh) siemWh.value = (db.config && db.config.siemWebhookUrl) || '';
                 document.getElementById('config-color').value = db.account.color || '#6C3AE1';
 
                 // Numeración personalizada
