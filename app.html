@@ -4404,13 +4404,6 @@
                                 <div class="kpi-value" id="ck-noshows">0</div>
                                 <div class="kpi-sub">riesgo en 24h</div>
                             </div>
-                        </div>
-                        
-
-                        
-
-                        
-                            </div>
                             <div class="clinic-kpi-card">
                                 <div class="kpi-label">Tareas SLA</div>
                                 <div class="kpi-value" id="ck-sla">—</div>
@@ -6474,14 +6467,20 @@
                 if (overlay) overlay.classList.remove('active');
             }
 
-            document.querySelectorAll('.page', 'div[id][class*="-page"]').forEach(p => {
-                if (p.id !== 'registration-page' && p.id !== 'login-page' && p.id !== 'app-page') {
-                    p.classList.remove('active');
-                }
+            // ── FIX ARQUITECTÓNICO: ocultar TODO primero, mostrar SOLO el activo ──
+            // querySelectorAll solo admite UN selector; el bug previo ignoraba el 2do argumento.
+            // Scope: únicamente las .page internas de .content (NO el shell #app-page).
+            const contentRoot = document.querySelector('.main-content .content') || document;
+            contentRoot.querySelectorAll('.page').forEach(p => {
+                if (p.id === 'registration-page' || p.id === 'login-page' || p.id === 'app-page') return;
+                p.classList.remove('active');
+                p.style.display = 'none';        // refuerzo inline contra reglas CSS residuales
             });
             const pageName = page;
-            if (document.getElementById(pageName)) {
-                document.getElementById(pageName).classList.add('active');
+            const target = document.getElementById(pageName);
+            if (target) {
+                target.classList.add('active');
+                target.style.display = 'block';  // fuerza visibilidad del módulo activo
             }
             document.querySelectorAll('.sidebar-menu button').forEach(btn => btn.classList.remove('active'));
             try {
