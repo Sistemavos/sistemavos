@@ -9721,12 +9721,10 @@
                 a.download = `incidente-AAIP-${ahora.slice(0,10)}.json`;
                 a.click(); URL.revokeObjectURL(url);
             } else {
-                const header = 'ID,Timestamp,Usuario,Accion,Modulo,Detalle,Severidad
-';
+                const header = 'ID,Timestamp,Usuario,Accion,Modulo,Detalle,Severidad\n';
                 const rows = logs.map(l =>
                     `${l.id},"${l.timestamp}","${l.usuario}","${l.accion}","${l.modulo}","${(l.detalle||'').replace(/"/g,'""')}","${l.severidad||'BAJA'}"`
-                ).join('
-');
+                ).join('\n');
                 const blob = new Blob(['﻿' + header + rows], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url;
