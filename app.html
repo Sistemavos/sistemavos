@@ -2669,9 +2669,9 @@
                         </div>
             
                     <div class="legal-footer-bar legal-footer-bar-dark" style="padding:8px 16px 12px;border-top:1px solid var(--border);">
-                        <button onclick="abrirModalLegal('terminos')">Términos y Condiciones</button>
+                        <button id="link-terminos">Términos y Condiciones</button>
                         <span style="color:var(--border);">|</span>
-                        <button onclick="abrirModalLegal('privacidad')">Política de Privacidad</button>
+                        <button id="link-privacidad">Política de Privacidad</button>
                     </div></aside>
 
             <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -16989,6 +16989,30 @@ Estado: ${p.estado}`);
 
         // ══════════════════════════════════════════════════════════════════════════
 
+        
+        // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+        // BOTONES SECUNDARIOS \u2014 addEventListener (Manual Override)
+        // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+        function initBotonesSecundarios() {
+            var btnClean = document.getElementById('btn-stress-clean');
+            if (btnClean) {
+                btnClean.removeAttribute('onclick');
+                btnClean.addEventListener('click', limpiarDatosEstres);
+            }
+            var btnTerminos = document.getElementById('link-terminos');
+            if (btnTerminos) {
+                btnTerminos.removeAttribute('onclick');
+                btnTerminos.addEventListener('click', function() { abrirModalLegal('terminos'); });
+            }
+            var btnPrivacidad = document.getElementById('link-privacidad');
+            if (btnPrivacidad) {
+                btnPrivacidad.removeAttribute('onclick');
+                btnPrivacidad.addEventListener('click', function() { abrirModalLegal('privacidad'); });
+            }
+        }
+        document.addEventListener('DOMContentLoaded', initBotonesSecundarios);
+        setTimeout(initBotonesSecundarios, 1500);
+
         </script>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
@@ -17010,5 +17034,74 @@ Estado: ${p.estado}`);
     </div>
 </div>
 
-</body>
-</html>
+
+
+    <!-- ══ MODAL POLÍTICA DE PRIVACIDAD ══ -->
+    <div id="modal-privacidad-overlay" class="legal-modal-overlay" onclick="if(event.target===this)cerrarModalLegal('privacidad')">
+        <div class="legal-modal">
+            <div class="legal-modal-header">
+                <h2><i class="fas fa-user-shield" style="color:#6366f1;"></i> Política de Privacidad</h2>
+                <button onclick="cerrarModalLegal('privacidad')" style="background:none;border:none;color:var(--text-secondary);font-size:22px;cursor:pointer;line-height:1;">✕</button>
+            </div>
+            <div class="legal-modal-body">
+                <h3>1. Marco Legal</h3>
+                <p>SistemaVOS opera en estricto cumplimiento de la <strong>Ley N° 25.326 de Protección de los Datos Personales</strong> de la República Argentina y su Decreto Reglamentario N° 1558/2001.</p>
+                <h3>2. Datos que Recolectamos</h3>
+                <ul>
+                    <li><strong>Datos de la empresa:</strong> Razón social, CUIT, domicilio fiscal y datos de contacto.</li>
+                    <li><strong>Datos operativos:</strong> Clientes, proveedores, productos, ventas, empleados y demás registros ingresados por el usuario.</li>
+                    <li><strong>Datos de autenticación:</strong> Dirección de correo electrónico y contraseña cifrada.</li>
+                    <li><strong>Datos técnicos:</strong> Dirección IP, tipo de navegador y métricas de uso anónimas.</li>
+                </ul>
+                <h3>3. Infraestructura</h3>
+                <ul>
+                    <li><strong>Supabase Inc. (AWS us-east-1):</strong> Almacenamiento y autenticación. SOC 2 Tipo II.</li>
+                    <li><strong>Vercel Inc.:</strong> Hosting y distribución. SOC 2 Tipo II.</li>
+                    <li><strong>Mercado Pago S.A.:</strong> Procesamiento de pagos. PCI DSS Nivel 1.</li>
+                    <li><strong>Make (Celonis SE):</strong> Automatizaciones opcionales. GDPR y SOC 2.</li>
+                </ul>
+                <h3>4. Derechos ARCO</h3>
+                <p>Conforme al <strong>Artículo 14 de la Ley 25.326</strong>, el titular tiene derecho a Acceso, Rectificación, Cancelación y Oposición. Contacto: <strong>contacto@multigestiones.com</strong>.</p>
+                <h3>5. Seguridad y Retención</h3>
+                <p>Implementamos cifrado TLS 1.2+ en tránsito y en reposo, autenticación multifactor y auditorías periódicas. Los datos se conservan el tiempo requerido por las obligaciones fiscales argentinas (mínimo 10 años para documentación contable).</p>
+                <p style="margin-top:16px;font-size:11px;color:var(--text-secondary);">Última actualización: Abril 2026.</p>
+            </div>
+            <div class="legal-modal-footer">
+                <span>SistemaVOS — Ley 25.326 (Argentina)</span>
+                <button onclick="cerrarModalLegal('privacidad')" style="padding:7px 18px;background:var(--primary,#6366f1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ MODAL TÉRMINOS Y CONDICIONES ══ -->
+    <div id="modal-terminos-overlay" class="legal-modal-overlay" onclick="if(event.target===this)cerrarModalLegal('terminos')">
+        <div class="legal-modal">
+            <div class="legal-modal-header">
+                <h2><i class="fas fa-file-contract" style="color:#6366f1;"></i> Términos y Condiciones de Uso</h2>
+                <button onclick="cerrarModalLegal('terminos')" style="background:none;border:none;color:var(--text-secondary);font-size:22px;cursor:pointer;line-height:1;">✕</button>
+            </div>
+            <div class="legal-modal-body">
+                <h3>1. Objeto del Servicio</h3>
+                <p>SistemaVOS provee una plataforma ERP/CRM en modalidad SaaS. La licencia de uso es personal, intransferible y no exclusiva.</p>
+                <h3>2. Pagos y Suscripción</h3>
+                <ul>
+                    <li>Los pagos se procesan a través de <strong>Mercado Pago</strong>. SistemaVOS no almacena datos de tarjetas.</li>
+                    <li>Las suscripciones se renuevan automáticamente salvo cancelación con 30 días de preaviso.</li>
+                    <li>No se realizan reembolsos por períodos parciales, salvo lo previsto por la legislación argentina del consumidor.</li>
+                </ul>
+                <h3>3. Responsabilidad del Usuario</h3>
+                <p>El usuario es el <strong>único responsable</strong> por la veracidad de los datos ingresados, las facturas emitidas ante AFIP y el uso adecuado de las credenciales de acceso.</p>
+                <h3>4. Limitación de Responsabilidad</h3>
+                <p>SistemaVOS <strong>no será responsable</strong> por interrupciones de servicios de terceros (Supabase, Vercel, AWS), caídas de WebServices de AFIP o BCRA, ni pérdida de datos por fuerza mayor. La responsabilidad máxima se limita al importe abonado en los últimos 3 meses.</p>
+                <h3>5. Jurisdicción</h3>
+                <p>Rigen las leyes de la <strong>República Argentina</strong>. Jurisdicción: Tribunales Ordinarios de CABA.</p>
+                <p style="margin-top:16px;font-size:11px;color:var(--text-secondary);">Última actualización: Abril 2026.</p>
+            </div>
+            <div class="legal-modal-footer">
+                <span>SistemaVOS — República Argentina</span>
+                <button onclick="cerrarModalLegal('terminos')" style="padding:7px 18px;background:var(--primary,#6366f1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+</body></html>
