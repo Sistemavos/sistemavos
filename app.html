@@ -16848,7 +16848,7 @@ Estado: ${p.estado}`);
             try { renderizarDashboard(); } catch(e) { console.warn('[Stress] renderizarDashboard:', e); }
 
             const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
-            setProgress(100, '¡Stress Test finalizado\! ✅', `Completado en ${elapsed}s`);
+            setProgress(100, '¡Stress Test finalizado! ✅', `Completado en ${elapsed}s`);
 
             if (resultDiv) {
                 resultDiv.innerHTML = `
@@ -16870,9 +16870,9 @@ Estado: ${p.estado}`);
         function limpiarDatosEstres() {
             const rol = currentUser?.role || '';
             const isBeta = currentUser?.isBetaTester === true || currentUser?.is_beta_tester === true;
-            if (\!['master','superadmin','founder'].includes(rol) && \!isBeta) return;
+            if (!['master','superadmin','founder'].includes(rol) && !isBeta) return;
 
-            if (\!confirm('¿Eliminar todos los registros generados por el Stress Test?\n(Solo borra los marcados con _stress:true)')) return;
+            if (!confirm('¿Eliminar todos los registros generados por el Stress Test?\n(Solo borra los marcados con _stress:true)')) return;
 
             const antes = {
                 clientes: db.clientes.length,
@@ -16881,10 +16881,10 @@ Estado: ${p.estado}`);
                 citas: db.citas.length
             };
 
-            db.clientes = db.clientes.filter(x => \!x._stress);
-            db.ventas   = db.ventas.filter(x => \!x._stress);
-            db.gastos   = db.gastos.filter(x => \!x._stress);
-            db.citas    = db.citas.filter(x => \!x._stress);
+            db.clientes = db.clientes.filter(x => !x._stress);
+            db.ventas   = db.ventas.filter(x => !x._stress);
+            db.gastos   = db.gastos.filter(x => !x._stress);
+            db.citas    = db.citas.filter(x => !x._stress);
 
             saveDB();
 
