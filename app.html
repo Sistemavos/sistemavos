@@ -104,6 +104,7 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
 
         .container-fluid {
@@ -880,6 +881,9 @@
             height: 300px;
             margin-bottom: 0;
             padding: 4px 0 8px;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
         }
         .chart-row {
             display: grid;
@@ -1375,7 +1379,7 @@
 
             .stats-grid,
             .dashboard-stats {
-                grid-template-columns: repeat(2, 1fr) !important;
+                grid-template-columns: 1fr !important; /* FASE 2: columna unica en movil */
                 gap: 10px !important;
             }
 
@@ -2061,6 +2065,94 @@
         /* Cloud status */
         #cloud-status-container {
             border-bottom-color: rgba(255,255,255,0.07);
+        }
+
+        /* ================================================================
+           RESPONSIVE MOBILE FIX - QA Sprint 2026-04-21
+           ================================================================ */
+
+        @media (max-width: 768px) {
+
+            /* FASE 1: Contencion */
+            body, .container-fluid, .main-content {
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+            .content {
+                padding: 12px 15px;
+                overflow-x: hidden;
+                max-width: 100%;
+            }
+            .page {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            /* FASE 2a: KPIs Dashboard - columna unica */
+            .stats-grid, #dashboard-stats {
+                grid-template-columns: 1fr \!important;
+                gap: 12px \!important;
+            }
+
+            /* FASE 2b: Flujo de Caja Predictivo */
+            #cashflow-kpis {
+                grid-template-columns: 1fr \!important;
+                gap: 10px \!important;
+                padding: 12px 0 6px \!important;
+            }
+            #cashflow-kpis .stat-card { width: 100%; }
+
+            /* FASE 2c: Clinic KPI grid */
+            .clinic-kpi-grid {
+                grid-template-columns: 1fr 1fr \!important;
+                gap: 10px;
+            }
+
+            /* FASE 3: Graficos Chart.js */
+            .chart-container {
+                height: 220px \!important;
+                width: 100% \!important;
+                max-width: 100% \!important;
+                overflow: hidden;
+            }
+            .chart-row .card:last-child .chart-container {
+                height: 240px \!important;
+                max-height: 240px \!important;
+            }
+            .chart-row { gap: 12px; }
+
+            /* FASE 4a: Inputs full-width */
+            input[type="text"], input[type="email"], input[type="password"],
+            input[type="number"], input[type="tel"], input[type="date"],
+            input[type="time"], input[type="url"], select, textarea {
+                width: 100% \!important;
+                max-width: 100% \!important;
+                box-sizing: border-box \!important;
+            }
+
+            /* FASE 4b: Tipografia */
+            h1 { font-size: 20px \!important; }
+            h2 { font-size: 16px \!important; }
+            h3 { font-size: 14px \!important; }
+            .stat-value { font-size: 22px; }
+            .card-header { flex-wrap: wrap; gap: 8px; }
+        }
+
+        @media (max-width: 480px) {
+            .clinic-kpi-grid { grid-template-columns: 1fr \!important; }
+            .chart-container { height: 180px \!important; }
+            .chart-row .card:last-child .chart-container {
+                height: 200px \!important;
+                max-height: 200px \!important;
+            }
+            .card { padding: 12px \!important; border-radius: 8px \!important; }
+            .stat-card { padding: 14px \!important; }
+            .stat-value { font-size: 20px; }
+            h1 { font-size: 18px \!important; }
+            h2 { font-size: 15px \!important; }
+            .card > .btn-primary, .card > .btn-secondary {
+                width: 100%; text-align: center;
+            }
         }
     </style>
 
