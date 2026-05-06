@@ -9626,6 +9626,707 @@
         </button>
     </div>
 
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VOSBot — Agente Interno Customer Success
+     Widget de chat flotante. Comunica con Make.com via webhook.
+     Para activar: reemplazar VOSBOT_WEBHOOK_URL con la URL real.
+════════════════════════════════════════════════════════════════ -->
+
+<style id="vosbot-styles">
+/* ── Variables VOSBot ─────────────────────────────── */
+:root {
+  --vb-primary:     #8B5CF6;
+  --vb-primary-d:   #7C3AED;
+  --vb-primary-l:   #EDE9FE;
+  --vb-bg:          #ffffff;
+  --vb-bg-chat:     #F8F7FF;
+  --vb-border:      #E5E7EB;
+  --vb-text:        #1F2937;
+  --vb-text-muted:  #6B7280;
+  --vb-bot-bubble:  #F3F0FF;
+  --vb-user-bubble: #8B5CF6;
+  --vb-shadow:      0 8px 32px rgba(139,92,246,.22), 0 2px 8px rgba(0,0,0,.08);
+  --vb-radius:      16px;
+  --vb-radius-sm:   10px;
+}
+
+/* ── Botón launcher ───────────────────────────────── */
+#vosbot-launcher {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9998;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--vb-primary), var(--vb-primary-d));
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(139,92,246,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .2s ease, box-shadow .2s ease;
+  outline: none;
+}
+#vosbot-launcher:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(139,92,246,.55);
+}
+#vosbot-launcher svg { pointer-events: none; }
+
+/* Badge de notificación */
+#vosbot-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #EF4444;
+  border: 2px solid #fff;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: none;
+}
+
+/* ── Panel principal ──────────────────────────────── */
+#vosbot-panel {
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  z-index: 9999;
+  width: 360px;
+  max-height: 560px;
+  border-radius: var(--vb-radius);
+  background: var(--vb-bg);
+  box-shadow: var(--vb-shadow);
+  border: 1px solid var(--vb-border);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  animation: vb-appear .22s cubic-bezier(.34,1.56,.64,1);
+}
+#vosbot-panel.open { display: flex; }
+
+@keyframes vb-appear {
+  from { opacity: 0; transform: translateY(16px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ───────────────────────────────────────── */
+#vosbot-header {
+  background: linear-gradient(135deg, var(--vb-primary) 0%, var(--vb-primary-d) 100%);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+}
+#vosbot-header:hover { filter: brightness(1.06); }
+.vb-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  border: 2px solid rgba(255,255,255,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.vb-header-info { flex: 1; }
+.vb-header-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.vb-header-status {
+  font-size: 11px;
+  color: rgba(255,255,255,.8);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+.vb-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ADE80;
+  animation: vb-pulse 2s infinite;
+}
+@keyframes vb-pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .4; }
+}
+.vb-header-actions { display: flex; gap: 6px; }
+.vb-header-btn {
+  background: rgba(255,255,255,.15);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+}
+.vb-header-btn:hover { background: rgba(255,255,255,.28); }
+
+/* ── Área de mensajes ─────────────────────────────── */
+#vosbot-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--vb-bg-chat);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+  min-height: 0;
+}
+#vosbot-messages::-webkit-scrollbar { width: 4px; }
+#vosbot-messages::-webkit-scrollbar-thumb {
+  background: var(--vb-border);
+  border-radius: 4px;
+}
+
+/* Burbujas */
+.vb-msg {
+  max-width: 86%;
+  word-break: break-word;
+  animation: vb-msg-in .18s ease;
+}
+@keyframes vb-msg-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.vb-msg.bot  { align-self: flex-start; }
+.vb-msg.user { align-self: flex-end; }
+
+.vb-bubble {
+  padding: 10px 14px;
+  border-radius: var(--vb-radius-sm);
+  font-size: 13px;
+  line-height: 1.55;
+  position: relative;
+}
+.vb-msg.bot  .vb-bubble {
+  background: var(--vb-bot-bubble);
+  color: var(--vb-text);
+  border-bottom-left-radius: 3px;
+  border: 1px solid #E9E3FF;
+}
+.vb-msg.user .vb-bubble {
+  background: var(--vb-user-bubble);
+  color: #fff;
+  border-bottom-right-radius: 3px;
+}
+.vb-time {
+  font-size: 10px;
+  color: var(--vb-text-muted);
+  margin-top: 3px;
+  padding: 0 2px;
+}
+.vb-msg.user .vb-time { text-align: right; }
+
+/* Markdown renderizado en burbuja bot */
+.vb-bubble strong { font-weight: 700; color: #5B21B6; }
+.vb-msg.user .vb-bubble strong { color: #EDE9FE; }
+.vb-bubble ol { margin: 6px 0 4px 18px; padding: 0; }
+.vb-bubble ol li { margin-bottom: 4px; }
+.vb-bubble em { font-style: italic; }
+.vb-bubble a { color: var(--vb-primary); text-decoration: underline; }
+
+/* Typing indicator */
+#vosbot-typing {
+  align-self: flex-start;
+  display: none;
+  animation: vb-msg-in .18s ease;
+}
+#vosbot-typing.visible { display: block; }
+.vb-typing-bubble {
+  background: var(--vb-bot-bubble);
+  border: 1px solid #E9E3FF;
+  border-radius: var(--vb-radius-sm);
+  border-bottom-left-radius: 3px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.vb-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--vb-primary);
+  animation: vb-dots .9s infinite;
+}
+.vb-dot:nth-child(2) { animation-delay: .15s; }
+.vb-dot:nth-child(3) { animation-delay: .30s; }
+@keyframes vb-dots {
+  0%,60%,100% { transform: translateY(0);   opacity: .4; }
+  30%          { transform: translateY(-5px); opacity: 1; }
+}
+.vb-typing-label {
+  font-size: 11px;
+  color: var(--vb-text-muted);
+  margin-left: 6px;
+  font-style: italic;
+}
+
+/* ── Sugerencias rápidas ──────────────────────────── */
+#vosbot-suggestions {
+  padding: 8px 16px 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: var(--vb-bg-chat);
+  flex-shrink: 0;
+}
+.vb-suggestion-btn {
+  background: var(--vb-bg);
+  border: 1px solid var(--vb-primary);
+  color: var(--vb-primary);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.vb-suggestion-btn:hover {
+  background: var(--vb-primary);
+  color: #fff;
+}
+
+/* ── Input ────────────────────────────────────────── */
+#vosbot-input-area {
+  padding: 12px 14px;
+  border-top: 1px solid var(--vb-border);
+  background: var(--vb-bg);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+#vosbot-input {
+  flex: 1;
+  border: 1.5px solid var(--vb-border);
+  border-radius: 22px;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--vb-text);
+  background: var(--vb-bg-chat);
+  outline: none;
+  resize: none;
+  max-height: 80px;
+  transition: border-color .15s;
+  font-family: inherit;
+  line-height: 1.4;
+}
+#vosbot-input:focus { border-color: var(--vb-primary); }
+#vosbot-input::placeholder { color: #B0B7C3; }
+#vosbot-send {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--vb-primary);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, transform .15s;
+}
+#vosbot-send:hover { background: var(--vb-primary-d); transform: scale(1.06); }
+#vosbot-send:disabled { background: #D1D5DB; cursor: not-allowed; transform: none; }
+#vosbot-send svg { pointer-events: none; }
+
+/* ── Footer branding ──────────────────────────────── */
+#vosbot-footer {
+  padding: 5px 14px 8px;
+  text-align: center;
+  font-size: 10px;
+  color: #C4C9D4;
+  background: var(--vb-bg);
+  flex-shrink: 0;
+}
+
+/* ── Minimizado ───────────────────────────────────── */
+#vosbot-panel.minimized { max-height: 56px; overflow: hidden; }
+#vosbot-panel.minimized #vosbot-messages,
+#vosbot-panel.minimized #vosbot-input-area,
+#vosbot-panel.minimized #vosbot-suggestions,
+#vosbot-panel.minimized #vosbot-footer { display: none; }
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 420px) {
+  #vosbot-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; }
+  #vosbot-launcher { right: 14px; bottom: 14px; }
+}
+</style>
+
+<!-- ── HTML del Widget ───────────────────────────────────── -->
+<div id="vosbot-launcher" title="VOSBot — Soporte SistemaVOS" onclick="vosBotToggle()">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill="rgba(255,255,255,0.15)"/>
+    <path d="M8 9h8M8 12h5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M7 15l-3 3V5a1 1 0 011-1h14a1 1 0 011 1v9a1 1 0 01-1 1H7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/>
+  </svg>
+  <div id="vosbot-badge">1</div>
+</div>
+
+<div id="vosbot-panel">
+  <div id="vosbot-header" onclick="vosBotMinimize()">
+    <div class="vb-avatar">🤖</div>
+    <div class="vb-header-info">
+      <div class="vb-header-name">VOSBot</div>
+      <div class="vb-header-status">
+        <div class="vb-status-dot"></div>
+        Soporte SistemaVOS
+      </div>
+    </div>
+    <div class="vb-header-actions" onclick="event.stopPropagation()">
+      <button class="vb-header-btn" title="Limpiar chat" onclick="vosBotClear()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+        </svg>
+      </button>
+      <button class="vb-header-btn" title="Cerrar" onclick="vosBotToggle()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="vosbot-messages">
+    <!-- Mensaje de bienvenida (se inyecta via JS) -->
+  </div>
+
+  <div id="vosbot-typing">
+    <div class="vb-typing-bubble">
+      <div class="vb-dot"></div>
+      <div class="vb-dot"></div>
+      <div class="vb-dot"></div>
+      <span class="vb-typing-label">VOSBot está escribiendo...</span>
+    </div>
+  </div>
+
+  <div id="vosbot-suggestions">
+    <button class="vb-suggestion-btn" onclick="vosBotSendSuggestion(this)">¿Cómo registro una venta?</button>
+    <button class="vb-suggestion-btn" onclick="vosBotSendSuggestion(this)">¿Cómo emito una factura?</button>
+    <button class="vb-suggestion-btn" onclick="vosBotSendSuggestion(this)">Cargué mal un producto</button>
+  </div>
+
+  <div id="vosbot-input-area">
+    <textarea id="vosbot-input"
+      placeholder="Escribí tu consulta..."
+      rows="1"
+      maxlength="600"
+      onkeydown="vosBotKeydown(event)"
+      oninput="vosBotAutoResize(this)"></textarea>
+    <button id="vosbot-send" onclick="vosBotSend()" title="Enviar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+        <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="vosbot-footer">Powered by SistemaVOS IA</div>
+</div>
+
+<!-- ── JavaScript VOSBot ─────────────────────────────────── -->
+<script id="vosbot-script">
+(function () {
+  'use strict';
+
+  /* ────────────────────────────────────────────
+     CONFIGURACIÓN
+     Reemplazar VOSBOT_WEBHOOK_URL con la URL real
+     del Custom Webhook de Make.com antes del deploy.
+  ──────────────────────────────────────────── */
+  const VOSBOT_WEBHOOK_URL = 'https://hook.eu1.make.com/n1bqa1pile6wek1zufsdud2xrair9x3f';
+
+  /* ── Estado ──────────────────────────────── */
+  let _isOpen      = false;
+  let _minimized   = false;
+  let _isLoading   = false;
+  let _initialized = false;
+
+  /* ── Utilidades DOM ──────────────────────── */
+  const $  = id => document.getElementById(id);
+  const panel      = () => $('vosbot-panel');
+  const msgArea    = () => $('vosbot-messages');
+  const inputEl    = () => $('vosbot-input');
+  const sendBtn    = () => $('vosbot-send');
+  const typingEl   = () => $('vosbot-typing');
+  const suggestEl  = () => $('vosbot-suggestions');
+  const badgeEl    = () => $('vosbot-badge');
+
+  /* ── Captura de contexto del usuario ────── */
+  function _getEmail() {
+    try {
+      /* currentUser es el global de Supabase auth en app.html */
+      if (window.currentUser && window.currentUser.email) return window.currentUser.email;
+    } catch (e) {}
+    return 'anonimo@sistemavos.com';
+  }
+
+  function _getScreen() {
+    try {
+      /* Busca qué .page está activa en el contenido principal */
+      const activePage = document.querySelector('.main-content .content .page.active');
+      if (activePage && activePage.id) return activePage.id;
+      /* Fallback: lastPage guardado en sesión localStorage */
+      const keys = Object.keys(localStorage);
+      for (const k of keys) {
+        try {
+          const raw = localStorage.getItem(k);
+          if (!raw) continue;
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.lastPage) return parsed.lastPage;
+        } catch (_) {}
+      }
+    } catch (e) {}
+    return 'desconocida';
+  }
+
+  /* ── Parseo Markdown simple ──────────────
+     Soporta: **bold**, *italic*, listas 1. 2. 3.
+  ────────────────────────────────────────── */
+  function _parseMd(text) {
+    if (!text) return '';
+    let html = text
+      /* Escapar HTML del servidor (por seguridad) */
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      /* Bold **texto** */
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      /* Italic *texto* (no doble) */
+      .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+
+    /* Listas numeradas: detectar líneas "1. texto" */
+    const lines = html.split('\n');
+    const out   = [];
+    let inList  = false;
+
+    for (const line of lines) {
+      const listMatch = line.match(/^(\d+)\. (.+)/);
+      if (listMatch) {
+        if (!inList) { out.push('<ol>'); inList = true; }
+        out.push(`<li>${listMatch[2]}</li>`);
+      } else {
+        if (inList) { out.push('</ol>'); inList = false; }
+        out.push(line);
+      }
+    }
+    if (inList) out.push('</ol>');
+
+    return out.join('<br>').replace(/<br>(<ol>)/g, '$1').replace(/<\/ol><br>/g, '</ol>');
+  }
+
+  /* ── Hora formateada ─────────────────────── */
+  function _time() {
+    return new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  /* ── Agregar burbuja ─────────────────────── */
+  function _addMsg(text, role /* 'bot' | 'user' */) {
+    const div   = document.createElement('div');
+    div.className = `vb-msg ${role}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'vb-bubble';
+
+    if (role === 'bot') {
+      bubble.innerHTML = _parseMd(text);
+    } else {
+      /* Mensaje del usuario: solo escapar HTML */
+      bubble.textContent = text;
+    }
+
+    const time  = document.createElement('div');
+    time.className = 'vb-time';
+    time.textContent = _time();
+
+    div.appendChild(bubble);
+    div.appendChild(time);
+    msgArea().appendChild(div);
+    _scrollBottom();
+    return div;
+  }
+
+  function _scrollBottom() {
+    const el = msgArea();
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  /* ── Loading state ───────────────────────── */
+  function _setLoading(on) {
+    _isLoading = on;
+    const sb = sendBtn();
+    if (sb) sb.disabled = on;
+    const inp = inputEl();
+    if (inp) inp.disabled = on;
+    const t = typingEl();
+    if (t) {
+      t.classList.toggle('visible', on);
+      if (on) _scrollBottom();
+    }
+  }
+
+  /* ── Llamada al Webhook ──────────────────── */
+  async function _callWebhook(userMsg) {
+    const payload = {
+      mensaje_usuario: userMsg,
+      email_usuario:   _getEmail(),
+      pantalla_actual: _getScreen()
+    };
+
+    const resp = await fetch(VOSBOT_WEBHOOK_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    });
+
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+    const data = await resp.json();
+
+    /* Make.com devuelve { "respuesta": "texto" } */
+    if (data && typeof data.respuesta === 'string') return data.respuesta;
+
+    /* Fallbacks por si la estructura cambia */
+    if (data && typeof data.message === 'string')   return data.message;
+    if (data && typeof data.text === 'string')      return data.text;
+    if (typeof data === 'string')                   return data;
+
+    throw new Error('Respuesta inesperada del servidor.');
+  }
+
+  /* ── Enviar mensaje ──────────────────────── */
+  async function _send(text) {
+    text = text.trim();
+    if (!text || _isLoading) return;
+
+    /* Ocultar sugerencias al primer envío */
+    if (suggestEl()) suggestEl().style.display = 'none';
+
+    _addMsg(text, 'user');
+    const inp = inputEl();
+    if (inp) { inp.value = ''; inp.style.height = 'auto'; }
+
+    _setLoading(true);
+
+    try {
+      const respuesta = await _callWebhook(text);
+      _setLoading(false);
+      _addMsg(respuesta, 'bot');
+    } catch (err) {
+      _setLoading(false);
+      _addMsg(
+        'Tuve un problema para conectarme al servidor. Por favor, intentá de nuevo en un momento. Si el error persiste, escribinos a **contacto@multigestiones.com**.',
+        'bot'
+      );
+      console.error('[VOSBot] Error webhook:', err);
+    }
+  }
+
+  /* ── API pública (expuesta en window) ────── */
+  window.vosBotToggle = function () {
+    _isOpen = !_isOpen;
+    const p = panel();
+    if (!p) return;
+
+    if (_isOpen) {
+      p.classList.add('open');
+      p.classList.remove('minimized');
+      _minimized = false;
+      if (badgeEl()) badgeEl().style.display = 'none';
+      /* Bienvenida (solo la primera vez) */
+      if (!_initialized) {
+        _initialized = true;
+        setTimeout(() => {
+          _addMsg(
+            '¡Hola! Soy **VOSBot**, tu asistente de soporte en SistemaVOS. 👋\n\n¿En qué puedo ayudarte hoy? Podés preguntarme sobre cualquier módulo o función de la plataforma.',
+            'bot'
+          );
+        }, 280);
+      }
+      setTimeout(() => { const i = inputEl(); if (i) i.focus(); }, 320);
+    } else {
+      p.classList.remove('open');
+    }
+  };
+
+  window.vosBotMinimize = function () {
+    const p = panel();
+    if (!p || !_isOpen) return;
+    _minimized = !_minimized;
+    p.classList.toggle('minimized', _minimized);
+  };
+
+  window.vosBotClear = function () {
+    const m = msgArea();
+    if (!m) return;
+    m.innerHTML = '';
+    _initialized = false;
+    if (suggestEl()) suggestEl().style.display = 'flex';
+    setTimeout(() => {
+      _addMsg('Chat reiniciado. ¿En qué puedo ayudarte?', 'bot');
+    }, 100);
+  };
+
+  window.vosBotSend = function () {
+    const inp = inputEl();
+    if (inp) _send(inp.value);
+  };
+
+  window.vosBotSendSuggestion = function (btn) {
+    if (btn && btn.textContent) _send(btn.textContent);
+  };
+
+  window.vosBotKeydown = function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      window.vosBotSend();
+    }
+  };
+
+  window.vosBotAutoResize = function (ta) {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 80) + 'px';
+  };
+
+  /* ── Mostrar badge de bienvenida tras 3s ── */
+  setTimeout(() => {
+    if (!_isOpen) {
+      const b = badgeEl();
+      if (b) b.style.display = 'flex';
+    }
+  }, 3000);
+
+})();
+</script>
+
 </body></html>`);
             win.document.close();
         }
@@ -17243,5 +17944,706 @@ Estado: ${p.estado}`);
             </div>
         </div>
     </div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VOSBot — Agente Interno Customer Success
+     Widget de chat flotante. Comunica con Make.com via webhook.
+     Para activar: reemplazar VOSBOT_WEBHOOK_URL con la URL real.
+════════════════════════════════════════════════════════════════ -->
+
+<style id="vosbot-styles">
+/* ── Variables VOSBot ─────────────────────────────── */
+:root {
+  --vb-primary:     #8B5CF6;
+  --vb-primary-d:   #7C3AED;
+  --vb-primary-l:   #EDE9FE;
+  --vb-bg:          #ffffff;
+  --vb-bg-chat:     #F8F7FF;
+  --vb-border:      #E5E7EB;
+  --vb-text:        #1F2937;
+  --vb-text-muted:  #6B7280;
+  --vb-bot-bubble:  #F3F0FF;
+  --vb-user-bubble: #8B5CF6;
+  --vb-shadow:      0 8px 32px rgba(139,92,246,.22), 0 2px 8px rgba(0,0,0,.08);
+  --vb-radius:      16px;
+  --vb-radius-sm:   10px;
+}
+
+/* ── Botón launcher ───────────────────────────────── */
+#vosbot-launcher {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9998;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--vb-primary), var(--vb-primary-d));
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(139,92,246,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .2s ease, box-shadow .2s ease;
+  outline: none;
+}
+#vosbot-launcher:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(139,92,246,.55);
+}
+#vosbot-launcher svg { pointer-events: none; }
+
+/* Badge de notificación */
+#vosbot-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #EF4444;
+  border: 2px solid #fff;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: none;
+}
+
+/* ── Panel principal ──────────────────────────────── */
+#vosbot-panel {
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  z-index: 9999;
+  width: 360px;
+  max-height: 560px;
+  border-radius: var(--vb-radius);
+  background: var(--vb-bg);
+  box-shadow: var(--vb-shadow);
+  border: 1px solid var(--vb-border);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  animation: vb-appear .22s cubic-bezier(.34,1.56,.64,1);
+}
+#vosbot-panel.open { display: flex; }
+
+@keyframes vb-appear {
+  from { opacity: 0; transform: translateY(16px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ───────────────────────────────────────── */
+#vosbot-header {
+  background: linear-gradient(135deg, var(--vb-primary) 0%, var(--vb-primary-d) 100%);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+}
+#vosbot-header:hover { filter: brightness(1.06); }
+.vb-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  border: 2px solid rgba(255,255,255,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.vb-header-info { flex: 1; }
+.vb-header-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.vb-header-status {
+  font-size: 11px;
+  color: rgba(255,255,255,.8);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+.vb-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ADE80;
+  animation: vb-pulse 2s infinite;
+}
+@keyframes vb-pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .4; }
+}
+.vb-header-actions { display: flex; gap: 6px; }
+.vb-header-btn {
+  background: rgba(255,255,255,.15);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+}
+.vb-header-btn:hover { background: rgba(255,255,255,.28); }
+
+/* ── Área de mensajes ─────────────────────────────── */
+#vosbot-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--vb-bg-chat);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+  min-height: 0;
+}
+#vosbot-messages::-webkit-scrollbar { width: 4px; }
+#vosbot-messages::-webkit-scrollbar-thumb {
+  background: var(--vb-border);
+  border-radius: 4px;
+}
+
+/* Burbujas */
+.vb-msg {
+  max-width: 86%;
+  word-break: break-word;
+  animation: vb-msg-in .18s ease;
+}
+@keyframes vb-msg-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.vb-msg.bot  { align-self: flex-start; }
+.vb-msg.user { align-self: flex-end; }
+
+.vb-bubble {
+  padding: 10px 14px;
+  border-radius: var(--vb-radius-sm);
+  font-size: 13px;
+  line-height: 1.55;
+  position: relative;
+}
+.vb-msg.bot  .vb-bubble {
+  background: var(--vb-bot-bubble);
+  color: var(--vb-text);
+  border-bottom-left-radius: 3px;
+  border: 1px solid #E9E3FF;
+}
+.vb-msg.user .vb-bubble {
+  background: var(--vb-user-bubble);
+  color: #fff;
+  border-bottom-right-radius: 3px;
+}
+.vb-time {
+  font-size: 10px;
+  color: var(--vb-text-muted);
+  margin-top: 3px;
+  padding: 0 2px;
+}
+.vb-msg.user .vb-time { text-align: right; }
+
+/* Markdown renderizado en burbuja bot */
+.vb-bubble strong { font-weight: 700; color: #5B21B6; }
+.vb-msg.user .vb-bubble strong { color: #EDE9FE; }
+.vb-bubble ol { margin: 6px 0 4px 18px; padding: 0; }
+.vb-bubble ol li { margin-bottom: 4px; }
+.vb-bubble em { font-style: italic; }
+.vb-bubble a { color: var(--vb-primary); text-decoration: underline; }
+
+/* Typing indicator */
+#vosbot-typing {
+  align-self: flex-start;
+  display: none;
+  animation: vb-msg-in .18s ease;
+}
+#vosbot-typing.visible { display: block; }
+.vb-typing-bubble {
+  background: var(--vb-bot-bubble);
+  border: 1px solid #E9E3FF;
+  border-radius: var(--vb-radius-sm);
+  border-bottom-left-radius: 3px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.vb-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--vb-primary);
+  animation: vb-dots .9s infinite;
+}
+.vb-dot:nth-child(2) { animation-delay: .15s; }
+.vb-dot:nth-child(3) { animation-delay: .30s; }
+@keyframes vb-dots {
+  0%,60%,100% { transform: translateY(0);   opacity: .4; }
+  30%          { transform: translateY(-5px); opacity: 1; }
+}
+.vb-typing-label {
+  font-size: 11px;
+  color: var(--vb-text-muted);
+  margin-left: 6px;
+  font-style: italic;
+}
+
+/* ── Sugerencias rápidas ──────────────────────────── */
+#vosbot-suggestions {
+  padding: 8px 16px 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: var(--vb-bg-chat);
+  flex-shrink: 0;
+}
+.vb-suggestion-btn {
+  background: var(--vb-bg);
+  border: 1px solid var(--vb-primary);
+  color: var(--vb-primary);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.vb-suggestion-btn:hover {
+  background: var(--vb-primary);
+  color: #fff;
+}
+
+/* ── Input ────────────────────────────────────────── */
+#vosbot-input-area {
+  padding: 12px 14px;
+  border-top: 1px solid var(--vb-border);
+  background: var(--vb-bg);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+#vosbot-input {
+  flex: 1;
+  border: 1.5px solid var(--vb-border);
+  border-radius: 22px;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--vb-text);
+  background: var(--vb-bg-chat);
+  outline: none;
+  resize: none;
+  max-height: 80px;
+  transition: border-color .15s;
+  font-family: inherit;
+  line-height: 1.4;
+}
+#vosbot-input:focus { border-color: var(--vb-primary); }
+#vosbot-input::placeholder { color: #B0B7C3; }
+#vosbot-send {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--vb-primary);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, transform .15s;
+}
+#vosbot-send:hover { background: var(--vb-primary-d); transform: scale(1.06); }
+#vosbot-send:disabled { background: #D1D5DB; cursor: not-allowed; transform: none; }
+#vosbot-send svg { pointer-events: none; }
+
+/* ── Footer branding ──────────────────────────────── */
+#vosbot-footer {
+  padding: 5px 14px 8px;
+  text-align: center;
+  font-size: 10px;
+  color: #C4C9D4;
+  background: var(--vb-bg);
+  flex-shrink: 0;
+}
+
+/* ── Minimizado ───────────────────────────────────── */
+#vosbot-panel.minimized { max-height: 56px; overflow: hidden; }
+#vosbot-panel.minimized #vosbot-messages,
+#vosbot-panel.minimized #vosbot-input-area,
+#vosbot-panel.minimized #vosbot-suggestions,
+#vosbot-panel.minimized #vosbot-footer { display: none; }
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 420px) {
+  #vosbot-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; }
+  #vosbot-launcher { right: 14px; bottom: 14px; }
+}
+</style>
+
+<!-- ── HTML del Widget ───────────────────────────────────── -->
+<div id="vosbot-launcher" title="VOSBot — Soporte SistemaVOS" onclick="vosBotToggle()">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill="rgba(255,255,255,0.15)"/>
+    <path d="M8 9h8M8 12h5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M7 15l-3 3V5a1 1 0 011-1h14a1 1 0 011 1v9a1 1 0 01-1 1H7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/>
+  </svg>
+  <div id="vosbot-badge">1</div>
+</div>
+
+<div id="vosbot-panel">
+  <div id="vosbot-header" onclick="vosBotMinimize()">
+    <div class="vb-avatar">🤖</div>
+    <div class="vb-header-info">
+      <div class="vb-header-name">VOSBot</div>
+      <div class="vb-header-status">
+        <div class="vb-status-dot"></div>
+        Soporte SistemaVOS
+      </div>
+    </div>
+    <div class="vb-header-actions" onclick="event.stopPropagation()">
+      <button class="vb-header-btn" title="Limpiar chat" onclick="vosBotClear()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+        </svg>
+      </button>
+      <button class="vb-header-btn" title="Cerrar" onclick="vosBotToggle()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="vosbot-messages">
+    <!-- Mensaje de bienvenida (se inyecta via JS) -->
+  </div>
+
+  <div id="vosbot-typing">
+    <div class="vb-typing-bubble">
+      <div class="vb-dot"></div>
+      <div class="vb-dot"></div>
+      <div class="vb-dot"></div>
+      <span class="vb-typing-label">VOSBot está escribiendo...</span>
+    </div>
+  </div>
+
+  <div id="vosbot-suggestions">
+    <button class="vb-suggestion-btn" onclick="vosBotSendSuggestion(this)">¿Cómo registro una venta?</button>
+    <button class="vb-suggestion-btn" onclick="vosBotSendSuggestion(this)">¿Cómo emito una factura?</button>
+    <button class="vb-suggestion-btn" onclick="vosBotSendSuggestion(this)">Cargué mal un producto</button>
+  </div>
+
+  <div id="vosbot-input-area">
+    <textarea id="vosbot-input"
+      placeholder="Escribí tu consulta..."
+      rows="1"
+      maxlength="600"
+      onkeydown="vosBotKeydown(event)"
+      oninput="vosBotAutoResize(this)"></textarea>
+    <button id="vosbot-send" onclick="vosBotSend()" title="Enviar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+        <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="vosbot-footer">Powered by SistemaVOS IA</div>
+</div>
+
+<!-- ── JavaScript VOSBot ─────────────────────────────────── -->
+<script id="vosbot-script">
+(function () {
+  'use strict';
+
+  /* ────────────────────────────────────────────
+     CONFIGURACIÓN
+     Reemplazar VOSBOT_WEBHOOK_URL con la URL real
+     del Custom Webhook de Make.com antes del deploy.
+  ──────────────────────────────────────────── */
+  const VOSBOT_WEBHOOK_URL = 'https://hook.eu1.make.com/n1bqa1pile6wek1zufsdud2xrair9x3f';
+
+  /* ── Estado ──────────────────────────────── */
+  let _isOpen      = false;
+  let _minimized   = false;
+  let _isLoading   = false;
+  let _initialized = false;
+
+  /* ── Utilidades DOM ──────────────────────── */
+  const $  = id => document.getElementById(id);
+  const panel      = () => $('vosbot-panel');
+  const msgArea    = () => $('vosbot-messages');
+  const inputEl    = () => $('vosbot-input');
+  const sendBtn    = () => $('vosbot-send');
+  const typingEl   = () => $('vosbot-typing');
+  const suggestEl  = () => $('vosbot-suggestions');
+  const badgeEl    = () => $('vosbot-badge');
+
+  /* ── Captura de contexto del usuario ────── */
+  function _getEmail() {
+    try {
+      /* currentUser es el global de Supabase auth en app.html */
+      if (window.currentUser && window.currentUser.email) return window.currentUser.email;
+    } catch (e) {}
+    return 'anonimo@sistemavos.com';
+  }
+
+  function _getScreen() {
+    try {
+      /* Busca qué .page está activa en el contenido principal */
+      const activePage = document.querySelector('.main-content .content .page.active');
+      if (activePage && activePage.id) return activePage.id;
+      /* Fallback: lastPage guardado en sesión localStorage */
+      const keys = Object.keys(localStorage);
+      for (const k of keys) {
+        try {
+          const raw = localStorage.getItem(k);
+          if (!raw) continue;
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.lastPage) return parsed.lastPage;
+        } catch (_) {}
+      }
+    } catch (e) {}
+    return 'desconocida';
+  }
+
+  /* ── Parseo Markdown simple ──────────────
+     Soporta: **bold**, *italic*, listas 1. 2. 3.
+  ────────────────────────────────────────── */
+  function _parseMd(text) {
+    if (!text) return '';
+    let html = text
+      /* Escapar HTML del servidor (por seguridad) */
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      /* Bold **texto** */
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      /* Italic *texto* (no doble) */
+      .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+
+    /* Listas numeradas: detectar líneas "1. texto" */
+    const lines = html.split('\n');
+    const out   = [];
+    let inList  = false;
+
+    for (const line of lines) {
+      const listMatch = line.match(/^(\d+)\. (.+)/);
+      if (listMatch) {
+        if (!inList) { out.push('<ol>'); inList = true; }
+        out.push(`<li>${listMatch[2]}</li>`);
+      } else {
+        if (inList) { out.push('</ol>'); inList = false; }
+        out.push(line);
+      }
+    }
+    if (inList) out.push('</ol>');
+
+    return out.join('<br>').replace(/<br>(<ol>)/g, '$1').replace(/<\/ol><br>/g, '</ol>');
+  }
+
+  /* ── Hora formateada ─────────────────────── */
+  function _time() {
+    return new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  /* ── Agregar burbuja ─────────────────────── */
+  function _addMsg(text, role /* 'bot' | 'user' */) {
+    const div   = document.createElement('div');
+    div.className = `vb-msg ${role}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'vb-bubble';
+
+    if (role === 'bot') {
+      bubble.innerHTML = _parseMd(text);
+    } else {
+      /* Mensaje del usuario: solo escapar HTML */
+      bubble.textContent = text;
+    }
+
+    const time  = document.createElement('div');
+    time.className = 'vb-time';
+    time.textContent = _time();
+
+    div.appendChild(bubble);
+    div.appendChild(time);
+    msgArea().appendChild(div);
+    _scrollBottom();
+    return div;
+  }
+
+  function _scrollBottom() {
+    const el = msgArea();
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  /* ── Loading state ───────────────────────── */
+  function _setLoading(on) {
+    _isLoading = on;
+    const sb = sendBtn();
+    if (sb) sb.disabled = on;
+    const inp = inputEl();
+    if (inp) inp.disabled = on;
+    const t = typingEl();
+    if (t) {
+      t.classList.toggle('visible', on);
+      if (on) _scrollBottom();
+    }
+  }
+
+  /* ── Llamada al Webhook ──────────────────── */
+  async function _callWebhook(userMsg) {
+    const payload = {
+      mensaje_usuario: userMsg,
+      email_usuario:   _getEmail(),
+      pantalla_actual: _getScreen()
+    };
+
+    const resp = await fetch(VOSBOT_WEBHOOK_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    });
+
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+    const data = await resp.json();
+
+    /* Make.com devuelve { "respuesta": "texto" } */
+    if (data && typeof data.respuesta === 'string') return data.respuesta;
+
+    /* Fallbacks por si la estructura cambia */
+    if (data && typeof data.message === 'string')   return data.message;
+    if (data && typeof data.text === 'string')      return data.text;
+    if (typeof data === 'string')                   return data;
+
+    throw new Error('Respuesta inesperada del servidor.');
+  }
+
+  /* ── Enviar mensaje ──────────────────────── */
+  async function _send(text) {
+    text = text.trim();
+    if (!text || _isLoading) return;
+
+    /* Ocultar sugerencias al primer envío */
+    if (suggestEl()) suggestEl().style.display = 'none';
+
+    _addMsg(text, 'user');
+    const inp = inputEl();
+    if (inp) { inp.value = ''; inp.style.height = 'auto'; }
+
+    _setLoading(true);
+
+    try {
+      const respuesta = await _callWebhook(text);
+      _setLoading(false);
+      _addMsg(respuesta, 'bot');
+    } catch (err) {
+      _setLoading(false);
+      _addMsg(
+        'Tuve un problema para conectarme al servidor. Por favor, intentá de nuevo en un momento. Si el error persiste, escribinos a **contacto@multigestiones.com**.',
+        'bot'
+      );
+      console.error('[VOSBot] Error webhook:', err);
+    }
+  }
+
+  /* ── API pública (expuesta en window) ────── */
+  window.vosBotToggle = function () {
+    _isOpen = !_isOpen;
+    const p = panel();
+    if (!p) return;
+
+    if (_isOpen) {
+      p.classList.add('open');
+      p.classList.remove('minimized');
+      _minimized = false;
+      if (badgeEl()) badgeEl().style.display = 'none';
+      /* Bienvenida (solo la primera vez) */
+      if (!_initialized) {
+        _initialized = true;
+        setTimeout(() => {
+          _addMsg(
+            '¡Hola! Soy **VOSBot**, tu asistente de soporte en SistemaVOS. 👋\n\n¿En qué puedo ayudarte hoy? Podés preguntarme sobre cualquier módulo o función de la plataforma.',
+            'bot'
+          );
+        }, 280);
+      }
+      setTimeout(() => { const i = inputEl(); if (i) i.focus(); }, 320);
+    } else {
+      p.classList.remove('open');
+    }
+  };
+
+  window.vosBotMinimize = function () {
+    const p = panel();
+    if (!p || !_isOpen) return;
+    _minimized = !_minimized;
+    p.classList.toggle('minimized', _minimized);
+  };
+
+  window.vosBotClear = function () {
+    const m = msgArea();
+    if (!m) return;
+    m.innerHTML = '';
+    _initialized = false;
+    if (suggestEl()) suggestEl().style.display = 'flex';
+    setTimeout(() => {
+      _addMsg('Chat reiniciado. ¿En qué puedo ayudarte?', 'bot');
+    }, 100);
+  };
+
+  window.vosBotSend = function () {
+    const inp = inputEl();
+    if (inp) _send(inp.value);
+  };
+
+  window.vosBotSendSuggestion = function (btn) {
+    if (btn && btn.textContent) _send(btn.textContent);
+  };
+
+  window.vosBotKeydown = function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      window.vosBotSend();
+    }
+  };
+
+  window.vosBotAutoResize = function (ta) {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 80) + 'px';
+  };
+
+  /* ── Mostrar badge de bienvenida tras 3s ── */
+  setTimeout(() => {
+    if (!_isOpen) {
+      const b = badgeEl();
+      if (b) b.style.display = 'flex';
+    }
+  }, 3000);
+
+})();
+</script>
 
 </body></html>
