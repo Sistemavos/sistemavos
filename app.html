@@ -17889,15 +17889,10 @@ Estado: ${p.estado}`);
 
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
-    const data = await resp.json();
+    // Make.com devuelve texto plano — sin JSON parsing
+    const respText = (await resp.text()).trim();
 
-    const respText = typeof data.respuesta === 'string' ? data.respuesta
-                   : typeof data.message   === 'string' ? data.message
-                   : typeof data.text      === 'string' ? data.text
-                   : typeof data           === 'string' ? data
-                   : null;
-
-    if (!respText) throw new Error('Respuesta inesperada del servidor.');
+    if (!respText) throw new Error('Respuesta vacía del servidor.');
 
     // Guardar respuesta en historial
     _history.push({ role: 'model', text: respText });
