@@ -6403,6 +6403,12 @@
             if (loginNotice) {
                 loginNotice.style.display = hasAccount ? 'none' : 'block';
             }
+
+            // Ocultar FABs en pantalla de login
+            const _vosLauncher = document.getElementById('vosbot-launcher');
+            const _bugFab = document.getElementById('bug-fab');
+            if (_vosLauncher) _vosLauncher.style.display = 'none';
+            if (_bugFab) _bugFab.style.display = 'none';
         }
 
         function _ensureDBStructure() {
@@ -6460,6 +6466,10 @@
 
             // Escuchar activaciones de pago (polling)
             escucharCambiosDePlan();
+
+            // Mostrar FABs al entrar a la app
+            const _vosLauncher2 = document.getElementById('vosbot-launcher');
+            if (_vosLauncher2) _vosLauncher2.style.display = 'flex';
         }
 
         function registrationStep(step) {
@@ -17271,11 +17281,37 @@ Estado: ${p.estado}`);
   --vb-radius-sm:   10px;
 }
 
+/* ── Bug FAB (beta testers) ───────────────────────────── */
+#bug-fab {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9998;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(239,68,68,.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: transform .2s ease, box-shadow .2s ease;
+  outline: none;
+  color: #fff;
+  font-size: 20px;
+}
+#bug-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(239,68,68,.55);
+}
+
 /* ── Botón launcher ───────────────────────────────── */
 #vosbot-launcher {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 20px;
+  right: 20px;
   z-index: 9998;
   width: 56px;
   height: 56px;
@@ -17603,6 +17639,14 @@ Estado: ${p.estado}`);
 </style>
 
 <!-- ── HTML del Widget ───────────────────────────────────── -->
+<!-- ── Bug Report FAB (solo beta testers) ───────────── -->
+<button id="bug-fab" title="Reportar un Bug" onclick="abrirModalBug()" style="display:none;">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 2l1.5 1.5M15.5 2 14 3.5M12 4a5 5 0 0 0-5 5v1H5l-2 3h18l-2-3h-2V9a5 5 0 0 0-5-5zM9 17v1a3 3 0 0 0 6 0v-1"/>
+    <line x1="9" y1="9" x2="15" y2="9"/>
+  </svg>
+</button>
+
 <div id="vosbot-launcher" title="VOSBot — Soporte SistemaVOS" onclick="vosBotToggle()">
   <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="12" r="10" fill="rgba(255,255,255,0.15)"/>
@@ -17682,7 +17726,8 @@ Estado: ${p.estado}`);
      Reemplazar VOSBOT_WEBHOOK_URL con la URL real
      del Custom Webhook de Make.com antes del deploy.
   ──────────────────────────────────────────── */
-  const VOSBOT_WEBHOOK_URL = 'https://hook.eu1.make.com/n1bqa1pile6wek1zufsdud2xrair9x3f';
+  const MAKE_WEBHOOK_URL_VOSBOT = 'https://hook.eu1.make.com/n1bqa1pile6wek1zufsdud2xrair9x3f';
+  const VOSBOT_WEBHOOK_URL = MAKE_WEBHOOK_URL_VOSBOT;
 
   /* ── Estado ──────────────────────────────── */
   let _isOpen      = false;
