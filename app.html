@@ -17862,15 +17862,23 @@ Estado: ${p.estado}`);
 
   /* ── Llamada al Webhook ──────────────────── */
   async function _callWebhook(userMsg) {
-    // Agregar mensaje actual al historial antes de enviar
-    _history.push({ role: 'user', parts: [{ text: userMsg }] });
-    if (_history.length > MAX_HISTORY) _history.splice(0, 2); // eliminar el par más viejo
+    // Construir historial como texto plano para el system prompt
+    let historialTexto = '';
+    if (_history.length > 0) {
+      historialTexto = _history.map(h =>
+        (h.role === 'user' ? 'Usuario: ' : 'VOSBot: ') + h.text
+      ).join('\n');
+    }
+
+    // Registrar turno actual antes de enviar
+    _history.push({ role: 'user', text: userMsg });
+    if (_history.length > MAX_HISTORY) _history.splice(0, 1);
 
     const payload = {
-      mensaje_usuario: userMsg,
-      historial:       JSON.stringify(_history),
-      email_usuario:   _getEmail(),
-      pantalla_actual: _getScreen()
+      mensaje_usuario:  userMsg,
+      historial_texto:  historialTexto,
+      email_usuario:    _getEmail(),
+      pantalla_actual:  _getScreen()
     };
 
     const resp = await fetch(VOSBOT_WEBHOOK_URL, {
@@ -17883,7 +17891,6 @@ Estado: ${p.estado}`);
 
     const data = await resp.json();
 
-    /* Make.com devuelve { "respuesta": "texto" } */
     const respText = typeof data.respuesta === 'string' ? data.respuesta
                    : typeof data.message   === 'string' ? data.message
                    : typeof data.text      === 'string' ? data.text
@@ -17892,9 +17899,9 @@ Estado: ${p.estado}`);
 
     if (!respText) throw new Error('Respuesta inesperada del servidor.');
 
-    // Agregar respuesta del modelo al historial
-    _history.push({ role: 'model', parts: [{ text: respText }] });
-    if (_history.length > MAX_HISTORY) _history.splice(0, 2);
+    // Guardar respuesta en historial
+    _history.push({ role: 'model', text: respText });
+    if (_history.length > MAX_HISTORY) _history.splice(0, 1);
 
     return respText;
   }
