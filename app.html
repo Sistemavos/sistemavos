@@ -17734,6 +17734,8 @@ Estado: ${p.estado}`);
   let _minimized   = false;
   let _isLoading   = false;
   let _initialized = false;
+  let _history     = [];          // historial multi-turno [{role,parts}]
+  const MAX_HISTORY = 10;         // máx 5 intercambios (user+model)
 
   /* ── Utilidades DOM ──────────────────────── */
   const $  = id => document.getElementById(id);
@@ -17860,8 +17862,13 @@ Estado: ${p.estado}`);
 
   /* ── Llamada al Webhook ──────────────────── */
   async function _callWebhook(userMsg) {
+    // Agregar mensaje actual al historial antes de enviar
+    _history.push({ role: 'user', parts: [{ text: userMsg }] });
+    if (_history.length > MAX_HISTORY) _history.splice(0, 2); // eliminar el par más viejo
+
     const payload = {
       mensaje_usuario: userMsg,
+      historial:       JSON.stringify(_history),
       email_usuario:   _getEmail(),
       pantalla_actual: _getScreen()
     };
@@ -17877,14 +17884,19 @@ Estado: ${p.estado}`);
     const data = await resp.json();
 
     /* Make.com devuelve { "respuesta": "texto" } */
-    if (data && typeof data.respuesta === 'string') return data.respuesta;
+    const respText = typeof data.respuesta === 'string' ? data.respuesta
+                   : typeof data.message   === 'string' ? data.message
+                   : typeof data.text      === 'string' ? data.text
+                   : typeof data           === 'string' ? data
+                   : null;
 
-    /* Fallbacks por si la estructura cambia */
-    if (data && typeof data.message === 'string')   return data.message;
-    if (data && typeof data.text === 'string')      return data.text;
-    if (typeof data === 'string')                   return data;
+    if (!respText) throw new Error('Respuesta inesperada del servidor.');
 
-    throw new Error('Respuesta inesperada del servidor.');
+    // Agregar respuesta del modelo al historial
+    _history.push({ role: 'model', parts: [{ text: respText }] });
+    if (_history.length > MAX_HISTORY) _history.splice(0, 2);
+
+    return respText;
   }
 
   /* ── Enviar mensaje ──────────────────────── */
